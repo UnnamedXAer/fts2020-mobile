@@ -1,0 +1,17 @@
+{
+  "name": "fts2020mobile",
+  "displayName": "fts2020mobile",
+  "expo": {
+    "name": "fts2020mobile",
+    "slug": "fts2020mobile",
+    "version": "1.0.0",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}

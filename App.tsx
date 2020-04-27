@@ -12,9 +12,10 @@ export default function App() {
 					...DefaultTheme,
 					colors: {
 						...DefaultTheme.colors,
-						primary: Colors.teal100,
-						accent: Colors.orange100
+						primary: Colors.teal500,
+						accent: Colors.orange500
 					},
+					
 				}}
 			>
 				<AppNavitaionContainer />

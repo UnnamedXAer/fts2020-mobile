@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, TouchableOpacity, TouchableHighlight } from 'react-native';
-import { HelperText, Theme, withTheme, TouchableRipple, Text } from 'react-native-paper';
+import React, { useState, useRef, RefObject, MutableRefObject } from 'react';
+import { StyleSheet, View, TextInput } from 'react-native';
+import { HelperText, Theme, withTheme } from 'react-native-paper';
 import Header from '../components/UI/Header';
 import { checkEmailAddress } from '../utils/validation';
 import Input from '../components/UI/Input';
@@ -17,6 +17,9 @@ const AuthScreen: React.FC<Props> = ({ theme }) => {
 	const [isEmailAddressValid, setIsEmailAddressValid] = useState(true);
 	const [password, setPassword] = useState('');
 	const [passwordTouched, setPasswordTouched] = useState(false);
+	const [isPasswordValid, setIsPasswordValid] = useState(true);
+
+	const passwordInpRef: MutableRefObject<TextInput | undefined> = useRef();
 
 	const emailAddressTextChangeHandler = (txt: string) => {
 		setEmailAddress(txt);
@@ -24,21 +27,30 @@ const AuthScreen: React.FC<Props> = ({ theme }) => {
 		setIsEmailAddressValid(isValid);
 	};
 
-	const emailAddressBlurHandler = () => {
-		setEmailAddressTouched(true);
+	const inputBlurHandler = (name: 'password' | 'emailAddress') => {
+		if (name === 'emailAddress') setEmailAddressTouched(true);
+		else setPasswordTouched(true);
 	};
 
 	const passwordChangeHandler = (txt: string) => {
+		setIsPasswordValid(txt.length > 0);
 		setPassword(txt);
 	};
 
 	const submitHandler = () => {
 		const email = emailAddress.trim();
-		const isValid = checkEmailAddress(email);
-		// if (!isValid) {
-		// 	setIsEmailAddressValid(isValid);
-		// 	return;
-		// }
+		const isEmailValid = checkEmailAddress(email);
+		const isPwdValid = password.length > 0;
+
+		setIsPasswordValid(isPwdValid);
+		setPasswordTouched(true);
+		setIsEmailAddressValid(isEmailValid);
+		setEmailAddressTouched(true);
+
+		if (!isEmailValid || !isPwdValid) {
+			return;
+		}
+
 		setLoading(true);
 		setTimeout(() => {
 			setLoading(false);
@@ -46,17 +58,21 @@ const AuthScreen: React.FC<Props> = ({ theme }) => {
 	};
 
 	return (
-		<View style={[styles.screen, {}, { backgroundColor: theme.colors.surface }]}>
+		<View style={[styles.screen, { backgroundColor: theme.colors.surface }]}>
 			<Header style={styles.header}>Sign In</Header>
 			<View style={styles.inputContainer}>
 				<Input
 					style={styles.input}
 					label="Email Address"
+					keyboardType="email-address"
+					returnKeyType="next"
+					returnKeyLabel="next"
+					onSubmitEditing={() => passwordInpRef!.current!.focus()}
 					value={emailAddress}
 					error={emailAddressTouched && !isEmailAddressValid}
 					disabled={loading}
 					onChangeText={emailAddressTextChangeHandler}
-					onBlur={() => emailAddressBlurHandler()}
+					onBlur={() => inputBlurHandler()}
 				/>
 				<HelperText
 					type="error"
@@ -73,14 +89,16 @@ const AuthScreen: React.FC<Props> = ({ theme }) => {
 					style={styles.input}
 					label="Password"
 					secureTextEntry
+					returnKeyType="done"
+					returnKeyLabel="Submit"
+					onSubmitEditing={submitHandler}
+					ref={passwordInpRef as MutableRefObject<TextInput>}
 					value={password}
+					error={!isPasswordValid}
 					disabled={loading}
 					onChangeText={passwordChangeHandler}
 				/>
-				<HelperText
-					type="error"
-					visible={emailAddressTouched && !isEmailAddressValid}
-				>
+				<HelperText type="error" visible={passwordTouched && !isPasswordValid}>
 					Please enter Password.
 				</HelperText>
 			</View>
@@ -99,6 +117,7 @@ const AuthScreen: React.FC<Props> = ({ theme }) => {
 
 const styles = StyleSheet.create({
 	screen: {
+		paddingTop: 100,
 		flex: 1,
 		flexDirection: 'column',
 		alignItems: 'center',

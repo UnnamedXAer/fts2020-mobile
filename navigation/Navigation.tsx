@@ -15,21 +15,12 @@ const FlatsStackNavigator = () => (
 	</FlatsStack.Navigator>
 );
 
-const AuthStack = createStackNavigator();
-const AuthStackNavigator = () => {
-	return (
-		<AuthStack.Navigator>
-			<AuthStack.Screen name="SignIn" component={AuthScreen} />
-		</AuthStack.Navigator>
-	);
-};
-
 const AppNavitaionContainer = () => {
 	const loggedUser = useSelector<RootState, User | null>((state) => state.auth.user);
 
 	return (
 		<NavigationContainer>
-			{loggedUser ? <FlatsStackNavigator /> : <AuthStackNavigator />}
+			{loggedUser ? <FlatsStackNavigator /> : <AuthScreen />}
 		</NavigationContainer>
 	);
 };

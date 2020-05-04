@@ -5,6 +5,8 @@ import Header from '../components/UI/Header';
 import { checkEmailAddress } from '../utils/validation';
 import Input from '../components/UI/Input';
 import CustomButton from '../components/UI/CustomButton';
+import { StateError } from '../store/ReactTypes/customReactTypes';
+import NotificationCard from '../components/UI/NotificationCard';
 
 interface Props {
 	theme: Theme;
@@ -14,10 +16,11 @@ const AuthScreen: React.FC<Props> = ({ theme }) => {
 	const [loading, setLoading] = useState(false);
 	const [emailAddress, setEmailAddress] = useState('');
 	const [emailAddressTouched, setEmailAddressTouched] = useState(false);
-	const [isEmailAddressValid, setIsEmailAddressValid] = useState(true);
+	const [isEmailAddressValid, setIsEmailAddressValid] = useState(false);
 	const [password, setPassword] = useState('');
 	const [passwordTouched, setPasswordTouched] = useState(false);
-	const [isPasswordValid, setIsPasswordValid] = useState(true);
+	const [isPasswordValid, setIsPasswordValid] = useState(false);
+	const [error, setError] = useState<StateError>('Network Error');
 
 	const passwordInpRef: MutableRefObject<TextInput | undefined> = useRef();
 
@@ -38,6 +41,7 @@ const AuthScreen: React.FC<Props> = ({ theme }) => {
 	};
 
 	const submitHandler = () => {
+		setError(null);
 		const email = emailAddress.trim();
 		const isEmailValid = checkEmailAddress(email);
 		const isPwdValid = password.length > 0;
@@ -48,11 +52,13 @@ const AuthScreen: React.FC<Props> = ({ theme }) => {
 		setEmailAddressTouched(true);
 
 		if (!isEmailValid || !isPwdValid) {
+			setError('Correct the form.');
 			return;
 		}
 
 		setLoading(true);
 		setTimeout(() => {
+			setError('Fail to authorize.');
 			setLoading(false);
 		}, 1300);
 	};
@@ -72,7 +78,7 @@ const AuthScreen: React.FC<Props> = ({ theme }) => {
 					error={emailAddressTouched && !isEmailAddressValid}
 					disabled={loading}
 					onChangeText={emailAddressTextChangeHandler}
-					onBlur={() => inputBlurHandler()}
+					onBlur={() => inputBlurHandler('emailAddress')}
 				/>
 				<HelperText
 					type="error"
@@ -94,13 +100,17 @@ const AuthScreen: React.FC<Props> = ({ theme }) => {
 					onSubmitEditing={submitHandler}
 					ref={passwordInpRef as MutableRefObject<TextInput>}
 					value={password}
-					error={!isPasswordValid}
+					error={passwordTouched && !isPasswordValid}
 					disabled={loading}
 					onChangeText={passwordChangeHandler}
+					onBlur={() => inputBlurHandler('password')}
 				/>
 				<HelperText type="error" visible={passwordTouched && !isPasswordValid}>
 					Please enter Password.
 				</HelperText>
+			</View>
+			<View style={styles.inputContainer}>
+				{error !== null && <NotificationCard serverity="error">{error}</NotificationCard>}
 			</View>
 			<View>
 				<CustomButton

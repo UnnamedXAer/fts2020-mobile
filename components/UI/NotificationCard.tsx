@@ -3,12 +3,11 @@ import {
 	StyleSheet,
 	View,
 	GestureResponderEvent,
-	StyleProp,
 	ViewStyle,
 	TextStyle,
 } from 'react-native';
 import { Paragraph, Card, withTheme } from 'react-native-paper';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons, MaterialCommunityIcons, AntDesign } from '@expo/vector-icons';
 import { Theme } from 'react-native-paper/lib/typescript/src/types';
 
 interface Props {
@@ -21,41 +20,71 @@ interface Props {
 const NotificationCard: React.FC<Props> = (props) => {
 	let serverityTextStyle: TextStyle;
 	let serverityCardStyle: ViewStyle;
-	let inconColor: string;
+	let NotificationIcon: React.ReactElement;
 
 	switch (props.serverity) {
 		case 'error':
 			serverityCardStyle = {
-				borderColor: '',
 				backgroundColor: 'rgb(253, 236, 234)',
 			};
 			serverityTextStyle = {
 				color: 'rgb(97, 26, 21)',
 			};
-			inconColor = '#f44336';
+			NotificationIcon = (
+				<MaterialIcons
+					name="error-outline"
+					size={26}
+					style={{ color: '#f44336' }}
+				/>
+			);
 			break;
-
+		case 'warning':
+			serverityCardStyle = {
+				backgroundColor: 'rgb(255, 244, 229)',
+			};
+			serverityTextStyle = {
+				color: 'rgb(102, 60, 0)',
+			};
+			NotificationIcon = (
+				<AntDesign name="warning" size={24} style={{ color: '#ff9800' }} />
+			);
+			break;
+		case 'success':
+			serverityCardStyle = {
+				backgroundColor: 'rgb(237, 247, 237)',
+			};
+			serverityTextStyle = {
+				color: 'rgb(30, 70, 32)',
+			};
+			NotificationIcon = (
+				<MaterialCommunityIcons
+					name="checkbox-marked-circle-outline"
+					size={26}
+					style={{ color: '#4caf50' }}
+				/>
+			);
+			break;
 		default:
 			serverityCardStyle = {
-				borderColor: 'rgb(166, 213, 250)',
 				backgroundColor: 'rgb(232, 244, 253)',
 			};
 			serverityTextStyle = {
 				color: 'rgb(13, 60, 97)',
 			};
-			inconColor = '#2196f3';
-
+			NotificationIcon = (
+				<MaterialIcons
+					name="info-outline"
+					size={26}
+					style={{ color: '#2196f3' }}
+				/>
+			);
 			break;
 	}
 
 	return (
 		<Card style={[styles.card, serverityCardStyle]}>
 			<View style={styles.container}>
-				<MaterialIcons
-					name="error-outline"
-					size={26}
-					style={{ color: inconColor }}
-				/>
+				{NotificationIcon}
 				<Paragraph style={[styles.text, serverityTextStyle]}>
 					{props.children}
 				</Paragraph>
@@ -71,7 +100,6 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 10,
 		paddingVertical: 10,
 		marginVertical: 5,
-		// borderWidth: 1,
 	},
 	container: {
 		flexDirection: 'row',

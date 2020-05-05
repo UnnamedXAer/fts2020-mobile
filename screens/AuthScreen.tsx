@@ -1,4 +1,4 @@
-import React, { useState, useRef, RefObject, MutableRefObject } from 'react';
+import React, { useState, useRef, MutableRefObject } from 'react';
 import { StyleSheet, View, TextInput } from 'react-native';
 import { HelperText, Theme, withTheme } from 'react-native-paper';
 import Header from '../components/UI/Header';
@@ -7,6 +7,9 @@ import Input from '../components/UI/Input';
 import CustomButton from '../components/UI/CustomButton';
 import { StateError } from '../store/ReactTypes/customReactTypes';
 import NotificationCard from '../components/UI/NotificationCard';
+import { useDispatch } from 'react-redux';
+import { authorize } from '../store/actions/auth';
+import { Credentials } from '../models/auth';
 
 interface Props {
 	theme: Theme;
@@ -20,7 +23,9 @@ const AuthScreen: React.FC<Props> = ({ theme }) => {
 	const [password, setPassword] = useState('');
 	const [passwordTouched, setPasswordTouched] = useState(false);
 	const [isPasswordValid, setIsPasswordValid] = useState(false);
-	const [error, setError] = useState<StateError>('Network Error');
+	const [error, setError] = useState<StateError>(null);
+
+	const dispatch = useDispatch();
 
 	const passwordInpRef: MutableRefObject<TextInput | undefined> = useRef();
 
@@ -55,10 +60,20 @@ const AuthScreen: React.FC<Props> = ({ theme }) => {
 			setError('Correct the form.');
 			return;
 		}
-
 		setLoading(true);
-		setTimeout(() => {
-			setError('Fail to authorize.');
+
+		const credentianls = new Credentials({
+			emailAddress: emailAddress,
+			password: password
+		});
+
+		setTimeout(async () => {
+			try {
+				await dispatch(authorize(credentianls, true));
+			}
+			catch (err) {
+				setError(err.message);
+			}
 			setLoading(false);
 		}, 1300);
 	};
@@ -109,7 +124,7 @@ const AuthScreen: React.FC<Props> = ({ theme }) => {
 					Please enter Password.
 				</HelperText>
 			</View>
-			<View style={styles.inputContainer}>
+			<View style={styles.errorContainer}>
 				{error !== null && <NotificationCard serverity="error">{error}</NotificationCard>}
 			</View>
 			<View>
@@ -133,7 +148,7 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 	},
 	header: {
-		paddingTop: 20,
+		paddingTop: 16,
 		fontSize: 44,
 	},
 	inputContainer: {
@@ -144,6 +159,10 @@ const styles = StyleSheet.create({
 	input: {
 		fontSize: 24,
 	},
+	errorContainer: {
+		width: '90%',
+		maxWidth: 400
+	}
 });
 
 export default withTheme(AuthScreen);

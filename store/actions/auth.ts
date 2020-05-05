@@ -58,7 +58,6 @@ export const authorize = (
 			localStorage.setItem('loggedUser', JSON.stringify(user));
 			localStorage.setItem('expirationTime', '' + expirationTime);
 		} catch (err) {
-			console.log(err);
 			throw err;
 		}
 	};

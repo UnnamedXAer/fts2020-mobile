@@ -10,6 +10,7 @@ import NotificationCard from '../components/UI/NotificationCard';
 import { useDispatch } from 'react-redux';
 import { authorize } from '../store/actions/auth';
 import { Credentials } from '../models/auth';
+import HttpErrorParser from '../utils/parseError';
 
 interface Props {
 	theme: Theme;
@@ -45,7 +46,7 @@ const AuthScreen: React.FC<Props> = ({ theme }) => {
 		setPassword(txt);
 	};
 
-	const submitHandler = () => {
+	const submitHandler = async () => {
 		setError(null);
 		const email = emailAddress.trim();
 		const isEmailValid = checkEmailAddress(email);
@@ -64,18 +65,17 @@ const AuthScreen: React.FC<Props> = ({ theme }) => {
 
 		const credentianls = new Credentials({
 			emailAddress: emailAddress,
-			password: password
+			password: password,
 		});
 
-		setTimeout(async () => {
-			try {
-				await dispatch(authorize(credentianls, true));
-			}
-			catch (err) {
-				setError(err.message);
-			}
+		try {
+			await dispatch(authorize(credentianls, true));
+		} catch (err) {
+			const error = new HttpErrorParser(err);
+			const msg = error.getMessage();
+			setError(msg);
 			setLoading(false);
-		}, 1300);
+		}
 	};
 
 	return (
@@ -125,7 +125,9 @@ const AuthScreen: React.FC<Props> = ({ theme }) => {
 				</HelperText>
 			</View>
 			<View style={styles.errorContainer}>
-				{error !== null && <NotificationCard serverity="error">{error}</NotificationCard>}
+				{error !== null && (
+					<NotificationCard serverity="error">{error}</NotificationCard>
+				)}
 			</View>
 			<View>
 				<CustomButton
@@ -161,8 +163,8 @@ const styles = StyleSheet.create({
 	},
 	errorContainer: {
 		width: '90%',
-		maxWidth: 400
-	}
+		maxWidth: 400,
+	},
 });
 
 export default withTheme(AuthScreen);

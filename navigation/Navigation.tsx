@@ -1,12 +1,14 @@
 import 'react-native-gesture-handler';
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect, useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import FlatsScreen from '../screens/FlatsScreen';
 import AuthScreen from '../screens/AuthScreen';
 import RootState from '../store/storeTypes';
 import User from '../models/user';
+import { tryAuthorize } from '../store/actions/auth';
+import LoadingScreen from '../screens/LoadingScreen';
 
 const FlatsStack = createStackNavigator();
 const FlatsStackNavigator = () => (
@@ -16,11 +18,33 @@ const FlatsStackNavigator = () => (
 );
 
 const AppNavitaionContainer = () => {
+	const [loading, setLoading] = useState(true);
 	const loggedUser = useSelector<RootState, User | null>((state) => state.auth.user);
+	const dispatch = useDispatch();
+
+	useEffect(() => {
+		if (!loggedUser) {
+			const tryRestoreSession = async () => {
+				try {
+					await dispatch(tryAuthorize());
+				} catch (err) {}
+				setLoading(false);
+			};
+			tryRestoreSession();
+		} else {
+			setLoading(false);
+		}
+	}, [loggedUser]);
 
 	return (
 		<NavigationContainer>
-			{loggedUser ? <FlatsStackNavigator /> : <AuthScreen />}
+			{loading ? (
+				<LoadingScreen />
+			) : loggedUser ? (
+				<FlatsStackNavigator />
+			) : (
+				<AuthScreen />
+			)}
 		</NavigationContainer>
 	);
 };

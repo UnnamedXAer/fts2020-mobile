@@ -1,3 +1,4 @@
+import { AsyncStorage } from 'react-native';
 import { ThunkAction } from 'redux-thunk';
 import { Credentials } from '../../models/auth';
 import axios from '../../axios/axios';
@@ -29,7 +30,6 @@ export const authorize = (
 		const url = `/auth/${isLogIn ? 'login' : 'register'}`;
 		try {
 			const { data } = await axios.post(url, credentials);
-			console.log('auth data: ', data);
 
 			const user = new User(
 				data.user.id,
@@ -55,31 +55,35 @@ export const authorize = (
 				dispatch(logOut());
 			}, data.expiresIn);
 
-			localStorage.setItem('loggedUser', JSON.stringify(user));
-			localStorage.setItem('expirationTime', '' + expirationTime);
+			await AsyncStorage.multiSet([['loggedUser', JSON.stringify(user)], ['expirationTime', '' + expirationTime]]);
 		} catch (err) {
 			throw err;
 		}
 	};
 };
 
-export const tryAuthorize = (): StoreAction<AuthorizeActionPayload> => {
-	const savedUser = localStorage.getItem('loggedUser');
-	const expirationTime = localStorage.getItem('expirationTime');
-	if (
-		savedUser &&
-		expirationTime &&
-		new Date(+expirationTime).getTime() > Date.now()
-	) {
-		return {
-			type: AUTHORIZE,
-			payload: {
-				user: JSON.parse(savedUser),
-				expirationTime: +expirationTime,
-			},
-		};
-	} else {
-		throw new Error('Auto-authorization was not possible.');
+export const tryAuthorize = (): ThunkAction<Promise<void>, RootState, any, AuthorizeAction> => {
+	return async (dispatch) => {
+		const [[_, savedUser], [_2, expirationTime]] = await AsyncStorage.multiGet(['loggedUser', 'expirationTime']);
+		if (
+			savedUser &&
+			expirationTime &&
+			new Date(+expirationTime).getTime() > Date.now()
+		) {
+			dispatch({
+				type: AUTHORIZE,
+				payload: {
+					user: JSON.parse(savedUser),
+					expirationTime: +expirationTime,
+				},
+			});
+
+			setTimeout(() => {
+				dispatch(logOut());
+			}, +expirationTime - Date.now());
+		} else {
+			throw new Error('Auto-authorization was not possible.');
+		}
 	}
 };
 
@@ -104,11 +108,9 @@ export const logOut = (): ThunkAction<
 
 		try {
 			await axios.post('/auth/logout');
-			setTimeout(() => {
-				clearState();
-			}, 0);
+			clearState();
 		} catch (err) {
-			if (localStorage.getItem('loggedUser')) {
+			if (await AsyncStorage.getItem('loggedUser')) {
 				setTimeout(() => {
 					dispatch(logOut());
 				}, 500);
@@ -116,8 +118,7 @@ export const logOut = (): ThunkAction<
 				clearState();
 			}
 		}
-		localStorage.removeItem('loggedUser');
-		localStorage.removeItem('expirationTime');
+		await AsyncStorage.multiRemove(['loggedUser', 'expirationTime']);
 	};
 };
 
@@ -145,7 +146,6 @@ export const updatePassword = (
 				payload: void 0,
 			});
 		} catch (err) {
-			console.log(err);
 			throw err;
 		}
 	};

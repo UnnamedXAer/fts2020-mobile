@@ -23,7 +23,7 @@ interface Props {
 	textStyle?: TextStyle;
 	loading?: boolean;
 	disabled?: boolean;
-	onPress: ((event: GestureResponderEvent) => void) & (() => void | null);
+	onPress: ((event: GestureResponderEvent) => void) & (() => void | null | Promise<void>);
 	accent?: boolean;
 }
 

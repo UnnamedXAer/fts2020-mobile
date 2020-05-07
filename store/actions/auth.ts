@@ -9,7 +9,7 @@ import {
 	FlatsActionTypes,
 	AuthActionTypes,
 } from './actionTypes';
-import RootState, { StoreAction } from '../storeTypes';
+import RootState from '../storeTypes';
 import User from '../../models/user';
 
 type AuthorizeActionPayload = {

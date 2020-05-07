@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import FlatsScreen from '../screens/FlatsScreen';
-import AuthScreen from '../screens/AuthScreen';
+import LogInScreen from '../screens/LogInScreen';
 import RootState from '../store/storeTypes';
 import User from '../models/user';
 import { tryAuthorize } from '../store/actions/auth';
@@ -43,7 +43,7 @@ const AppNavitaionContainer = () => {
 			) : loggedUser ? (
 				<FlatsStackNavigator />
 			) : (
-				<AuthScreen />
+				<LogInScreen />
 			)}
 		</NavigationContainer>
 	);

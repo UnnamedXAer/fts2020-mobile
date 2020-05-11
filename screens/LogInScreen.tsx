@@ -11,11 +11,14 @@ import { useDispatch } from 'react-redux';
 import { authorize } from '../store/actions/auth';
 import { Credentials } from '../models/auth';
 import HttpErrorParser from '../utils/parseError';
+import useForm, { FormActionTypes } from '../hooks/useForm';
 
 interface Props {
 	theme: Theme;
 	toggleAuthScreen: () => void;
 }
+
+const formFields = ['emailAddress', 'password'];
 
 const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 	const [loading, setLoading] = useState(false);
@@ -27,9 +30,25 @@ const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 	const [isPasswordValid, setIsPasswordValid] = useState(false);
 	const [error, setError] = useState<StateError>(null);
 
+	const [formState, dispatchForm] = useForm(formFields);
+
 	const dispatch = useDispatch();
 
 	const passwordInpRef: MutableRefObject<TextInput | undefined> = useRef();
+
+	const fieldTextChangeHandler = (fieldName: string, txt: string) => {
+		dispatchForm({
+			fieldId: fieldName,
+			value: txt,
+			type: FormActionTypes.UpdateValue
+		});
+
+		const error = validateFormField(fieldName, txt);
+		dispatchForm({
+			type: FormActionTypes.SetError,
+			error: error
+		});
+	};
 
 	const emailAddressTextChangeHandler = (txt: string) => {
 		setEmailAddress(txt);
@@ -160,7 +179,7 @@ const styles = StyleSheet.create({
 	inputContainer: {
 		width: '90%',
 		maxWidth: 400,
-		marginVertical: 16,
+		marginVertical: 8,
 	},
 	input: {
 		fontSize: 24,

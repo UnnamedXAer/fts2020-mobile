@@ -1,8 +1,8 @@
 import React, { useState, useRef, MutableRefObject } from 'react';
 import { StyleSheet, View, TextInput, ScrollView } from 'react-native';
-import { HelperText, Theme, withTheme } from 'react-native-paper';
+import { HelperText, Theme, withTheme, Button } from 'react-native-paper';
 import Header from '../components/UI/Header';
-import { checkEmailAddress } from '../utils/validation';
+import { checkEmailAddress, checkUserName } from '../utils/validation';
 import Input from '../components/UI/Input';
 import CustomButton from '../components/UI/CustomButton';
 import { StateError } from '../store/ReactTypes/customReactTypes';
@@ -28,6 +28,9 @@ const RegistrationScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 	const [confirmPassword, setConfirmPassword] = useState('');
 	const [confirmPasswordTouched, setConfirmPasswordTouched] = useState(false);
 	const [isConfirmPasswordValid, setIsConfirmPasswordValid] = useState(false);
+	const [userName, setUserName] = useState('');
+	const [userNameTouched, setUserNameTouched] = useState(false);
+	const [isUserNameValid, setIsUserNameValid] = useState(false);
 
 	const [error, setError] = useState<StateError>(null);
 
@@ -35,6 +38,7 @@ const RegistrationScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 
 	const passwordInpRef: MutableRefObject<TextInput | undefined> = useRef();
 	const confirmPasswordInpRef: MutableRefObject<TextInput | undefined> = useRef();
+	const userNameInpRef: MutableRefObject<TextInput | undefined> = useRef();
 
 	const emailAddressTextChangeHandler = (txt: string) => {
 		setEmailAddress(txt);
@@ -42,21 +46,30 @@ const RegistrationScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 		setIsEmailAddressValid(isValid);
 	};
 
-	const inputBlurHandler = (name: 'password' | 'emailAddress' | 'confirmPassword') => {
+	const inputBlurHandler = (
+		name: 'password' | 'emailAddress' | 'confirmPassword' | 'userName'
+	) => {
 		if (name === 'emailAddress') setEmailAddressTouched(true);
 		else if (name === 'confirmPassword') setConfirmPasswordTouched(true);
+		else if (name === 'userName') setUserNameTouched(true);
 		else setPasswordTouched(true);
 	};
 
+	const userNameTextChangeHandler = (txt: string) => {
+		const isValid = checkUserName(txt);
+		setIsUserNameValid(isValid);
+		setUserName(txt);
+	}
+
 	const passwordChangeHandler = (txt: string) => {
 		setIsPasswordValid(txt.length > 0);
-        setPassword(txt);
-        if (confirmPasswordTouched) {
-            setIsConfirmPasswordValid(txt === confirmPassword);
-        }
-    };
-    
-    const confirmPasswordChangeHandler = (txt: string) => {
+		setPassword(txt);
+		if (confirmPasswordTouched) {
+			setIsConfirmPasswordValid(txt === confirmPassword);
+		}
+	};
+
+	const confirmPasswordChangeHandler = (txt: string) => {
 		setIsConfirmPasswordValid(txt === password);
 		setConfirmPassword(txt);
 	};
@@ -64,18 +77,22 @@ const RegistrationScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 	const submitHandler = async () => {
 		setError(null);
 		const email = emailAddress.trim();
+		const name = userName.trim();
 		const isEmailValid = checkEmailAddress(email);
-        const isPwdValid = password.length > 0;
-        const isConfirmPwdValid = password === confirmPassword;
+		const isPwdValid = password.length > 0;
+		const isConfirmPwdValid = password === confirmPassword;
+		const isNameValid = checkUserName(name);
 
+		setIsUserNameValid(isNameValid);
+		setUserNameTouched(true);
 		setIsPasswordValid(isPwdValid);
-        setPasswordTouched(true);
-        setIsConfirmPasswordValid(isConfirmPwdValid);
-        setConfirmPasswordTouched(true);
+		setPasswordTouched(true);
+		setIsConfirmPasswordValid(isConfirmPwdValid);
+		setConfirmPasswordTouched(true);
 		setIsEmailAddressValid(isEmailValid);
 		setEmailAddressTouched(true);
 
-		if (!isEmailValid || !isPwdValid || !isConfirmPwdValid) {
+		if (!isEmailValid || !isPwdValid || !isConfirmPwdValid || !isNameValid) {
 			setError('Correct the form.');
 			return;
 		}
@@ -83,22 +100,34 @@ const RegistrationScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 
 		const credentianls = new Credentials({
 			emailAddress: emailAddress,
-            password: password,
-            confirmPassword: confirmPassword
+			password: password,
+			confirmPassword: confirmPassword,
+			userName: name,
 		});
 
 		try {
 			await dispatch(authorize(credentianls, false));
 		} catch (err) {
 			const error = new HttpErrorParser(err);
-			const msg = error.getMessage();
+			let msg: string = '';
+			const errArray = error.getFieldsErrors();
+			if (errArray.length > 0) {
+				msg = errArray.map((x) => '- ' + x.msg).join('\n');
+			} else {
+				msg = error.getMessage();
+			}
 			setError(msg);
 			setLoading(false);
 		}
 	};
 
 	return (
-		<ScrollView contentContainerStyle={[styles.screen, { backgroundColor: theme.colors.surface }]}>
+		<ScrollView
+			contentContainerStyle={[
+				styles.screen,
+				{ backgroundColor: theme.colors.surface },
+			]}
+		>
 			<Header style={styles.header}>Sign Up</Header>
 			<View style={styles.inputContainer}>
 				<Input
@@ -107,7 +136,7 @@ const RegistrationScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 					keyboardType="email-address"
 					returnKeyType="next"
 					returnKeyLabel="next"
-					onSubmitEditing={() => passwordInpRef!.current!.focus()}
+					onSubmitEditing={() => userNameInpRef!.current!.focus()}
 					value={emailAddress}
 					error={emailAddressTouched && !isEmailAddressValid}
 					disabled={loading}
@@ -121,6 +150,28 @@ const RegistrationScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 					{emailAddress === ''
 						? 'Please enter Email Address'
 						: 'Email Address is invalid'}
+					.
+				</HelperText>
+			</View>
+			<View style={styles.inputContainer}>
+				<Input
+					style={styles.input}
+					label="User Name"
+					keyboardType="default"
+					returnKeyType="next"
+					returnKeyLabel="next"
+					onSubmitEditing={() => passwordInpRef!.current!.focus()}
+					ref={userNameInpRef as MutableRefObject<TextInput>}
+					value={userName}
+					error={userNameTouched && !isUserNameValid}
+					disabled={loading}
+					onChangeText={userNameTextChangeHandler}
+					onBlur={() => inputBlurHandler('userName')}
+				/>
+				<HelperText type="error" visible={userNameTouched && !isUserNameValid}>
+					{emailAddress === ''
+						? 'Please enter User Name.'
+						: 'User Name is invalid.'}
 					.
 				</HelperText>
 			</View>
@@ -158,7 +209,10 @@ const RegistrationScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 					onChangeText={confirmPasswordChangeHandler}
 					onBlur={() => inputBlurHandler('confirmPassword')}
 				/>
-				<HelperText type="error" visible={confirmPasswordTouched && !isConfirmPasswordValid}>
+				<HelperText
+					type="error"
+					visible={confirmPasswordTouched && !isConfirmPasswordValid}
+				>
 					Passwords do not match.
 				</HelperText>
 			</View>
@@ -167,9 +221,17 @@ const RegistrationScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 					<NotificationCard serverity="error">{error}</NotificationCard>
 				)}
 			</View>
+			<View style={styles.linkContainer}>
+				<Button onPress={toggleAuthScreen}>Switch to SIGN IN</Button>
+			</View>
 			<View>
 				<CustomButton
-					disabled={loading || !isEmailAddressValid || !isPasswordValid || !isConfirmPasswordValid}
+					disabled={
+						loading ||
+						!isEmailAddressValid ||
+						!isPasswordValid ||
+						!isConfirmPasswordValid
+					}
 					onPress={submitHandler}
 					loading={loading}
 				>
@@ -202,6 +264,10 @@ const styles = StyleSheet.create({
 	errorContainer: {
 		width: '90%',
 		maxWidth: 400,
+	},
+	linkContainer: {
+		alignItems: 'flex-start',
+		width: '90%',
 	},
 });
 

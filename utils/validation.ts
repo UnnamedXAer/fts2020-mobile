@@ -1,3 +1,5 @@
+import { StateError } from "../store/ReactTypes/customReactTypes";
+
 export const checkEmailAddress = (emial: string) => /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
     .test(emial);
 
@@ -8,11 +10,11 @@ export const checkUserName = (userName: string) => {
     return true;
 }
 
-export default async function validateAuthFormField(
+export default function validateAuthFormField(
     fieldId: string,
     formValues: { [key: string]: string },
-    isSignIn: boolean
-): Promise<string | null> {
+): StateError {
+    const isSignIn = !formValues.hasOwnProperty('confirmPassword');
     let error = null;
     switch (fieldId) {
         case 'userName':
@@ -43,7 +45,7 @@ export default async function validateAuthFormField(
             if (!formValues[fieldId]) {
                 error = 'Please enter Email Address.';
             } else if (!emailAddressRegExp.test(formValues[fieldId])) {
-                error = 'Please enter a valid Email Address.';
+                error = 'Email Address is invalid.';
             }
             break;
         case 'password':
@@ -78,14 +80,14 @@ export default async function validateAuthFormField(
             // 	) {
             // 		error = 'Please enter correct avatar url.';
             // 	}
-            if (!isSignIn && formValues[fieldId] !== '') {
-                try {
-                    await testImage(formValues[fieldId]);
-                }
-                catch (err) {
-                    error = 'That is not correct image url.'
-                }
-            }
+            // if (!isSignIn && formValues[fieldId] !== '') {
+            //     try {
+            //         await testImage(formValues[fieldId]);
+            //     }
+            //     catch (err) {
+            //         error = 'That is not correct image url.'
+            //     }
+            // }
             break;
         default:
             break;

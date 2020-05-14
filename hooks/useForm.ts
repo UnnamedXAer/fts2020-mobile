@@ -1,5 +1,6 @@
 import { useReducer, Dispatch, Reducer } from 'react';
 import { StateError } from '../store/ReactTypes/customReactTypes';
+import validateAuthFormField from '../utils/validation';
 
 export enum FormActionTypes {
 	UpdateValue = 'UPDATE',
@@ -8,7 +9,7 @@ export enum FormActionTypes {
 	SetFormError = 'SET_FORM_ERROR'
 }
 
-export type FormAction<T = any> = SetValueAction<T> | SetErrorAction<T>;
+export type FormAction = SetValueAction | SetErrorAction | MarkAsTouchedAction | SetErrorAction;
 
 interface SetValueAction<T = any> {
 	type: FormActionTypes.UpdateValue;
@@ -32,25 +33,21 @@ interface MarkAsTouchedAction {
 	fieldId: string;
 }
 
-interface DefaultFormStateValues {
-	[fieldId: string]: any;
-}
-
-export interface FormState<T = DefaultFormStateValues> {
+export interface FormState<T extends string = string> {
 	formError: StateError;
-	values: T;
+	values: { [U in T]: any };
 	errors: {
-		[fieldId: string]: StateError;
+		[U in T]: StateError;
 	};
 	touches: {
-		[fieldId: string]: boolean;
+		[U in T]: boolean;
 	}
 }
 
-const formReducer = <T = DefaultFormStateValues>(
-	state: FormState<T>,
+const formReducer = (
+	state: FormState,
 	action: SetValueAction | SetErrorAction | MarkAsTouchedAction | SetFormErrorAction
-): FormState<T> => {
+): FormState => {
 	switch (action.type) {
 		case FormActionTypes.UpdateValue:
 			const updatedValues = {
@@ -58,9 +55,15 @@ const formReducer = <T = DefaultFormStateValues>(
 				[action.fieldId]: action.value!
 			};
 
+			const updatedErrorsOnValueChange = {
+				...state.errors,
+				[action.fieldId]: validateAuthFormField(action.fieldId, updatedValues),
+			};
+
 			return {
 				...state,
-				values: updatedValues
+				values: updatedValues,
+				errors: updatedErrorsOnValueChange
 			};
 
 		case FormActionTypes.SetError:
@@ -92,27 +95,34 @@ const formReducer = <T = DefaultFormStateValues>(
 	}
 };
 
-const useForm = <U = any>(fields: string[]
-): [FormState, Dispatch<FormAction<U>>] => {
-
-	if (!Array.isArray(fields) || fields.length === 0) {
-		throw new Error('Parameter "fields" suppose to be not empty array of fields names.');
-	}
-
-	const initialState: FormState = { errors: {}, formError: null, touches: {}, values: {} }
-
-	fields.forEach(fieldName => {
-		initialState.errors[fieldName] = null;
-		initialState.touches[fieldName] = false;
-		initialState.values[fieldName] = ''
-	});
-
-	const [state, dispatch] = useReducer<Reducer<FormState, FormAction>>(
+const useForm = <T extends string>(initialState: FormState<T>): [FormState<T>, Dispatch<FormAction>] => {
+	const [state, dispatch] = useReducer<Reducer<FormState<T>, FormAction>>(
 		formReducer,
 		initialState
 	);
 
 	return [state, dispatch];
 };
+
+export function createInitialState<T extends string>(
+	initialValues: { [U in T]: any }
+): FormState<T> {
+	const errors = {} as { [U in T]: StateError };
+	const touches = {} as { [U in T]: boolean };
+
+	const fields = Object.keys(initialValues) as T[];
+
+	fields.forEach((f) => {
+		errors[f] = null;
+		touches[f] = false;
+	});
+
+	return {
+		errors,
+		values: initialValues,
+		touches,
+		formError: null,
+	};
+}
 
 export default useForm;

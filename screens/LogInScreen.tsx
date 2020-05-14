@@ -11,18 +11,25 @@ import { useDispatch } from 'react-redux';
 import { authorize } from '../store/actions/auth';
 import { Credentials } from '../models/auth';
 import HttpErrorParser from '../utils/parseError';
-import useForm, { FormActionTypes } from '../hooks/useForm';
+import useForm, {
+	FormActionTypes,
+	createInitialState,
+} from '../hooks/useForm';
 
 interface Props {
 	theme: Theme;
 	toggleAuthScreen: () => void;
 }
 
-const formFields = ['emailAddress', 'password'];
+type FormFields = 'emailAddress' | 'password';
+
+const initialState = createInitialState<FormFields>({
+	emailAddress: '',
+	password: '',
+});
 
 const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 	const [loading, setLoading] = useState(false);
-	const [emailAddress, setEmailAddress] = useState('');
 	const [emailAddressTouched, setEmailAddressTouched] = useState(false);
 	const [isEmailAddressValid, setIsEmailAddressValid] = useState(false);
 	const [password, setPassword] = useState('');
@@ -30,7 +37,7 @@ const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 	const [isPasswordValid, setIsPasswordValid] = useState(false);
 	const [error, setError] = useState<StateError>(null);
 
-	const [formState, dispatchForm] = useForm(formFields);
+	const [formState, dispatchForm] = useForm<FormFields>(initialState);
 
 	const dispatch = useDispatch();
 
@@ -40,25 +47,17 @@ const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 		dispatchForm({
 			fieldId: fieldName,
 			value: txt,
-			type: FormActionTypes.UpdateValue
+			type: FormActionTypes.UpdateValue,
 		});
 
-		const error = validateFormField(fieldName, txt);
+		formState.errors.emailAddress;
+	};
+
+	const inputBlurHandler = (name: FormFields) => {
 		dispatchForm({
-			type: FormActionTypes.SetError,
-			error: error
+			fieldId: name,
+			type: FormActionTypes.MarkAsTouched,
 		});
-	};
-
-	const emailAddressTextChangeHandler = (txt: string) => {
-		setEmailAddress(txt);
-		const isValid = checkEmailAddress(txt.trim());
-		setIsEmailAddressValid(isValid);
-	};
-
-	const inputBlurHandler = (name: 'password' | 'emailAddress') => {
-		if (name === 'emailAddress') setEmailAddressTouched(true);
-		else setPasswordTouched(true);
 	};
 
 	const passwordChangeHandler = (txt: string) => {
@@ -68,7 +67,7 @@ const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 
 	const submitHandler = async () => {
 		setError(null);
-		const email = emailAddress.trim();
+		const email = formState.values.emailAddress.trim();
 		const isEmailValid = checkEmailAddress(email);
 		const isPwdValid = password.length > 0;
 
@@ -84,7 +83,7 @@ const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 		setLoading(true);
 
 		const credentianls = new Credentials({
-			emailAddress: emailAddress,
+			emailAddress: email,
 			password: password,
 		});
 
@@ -109,20 +108,22 @@ const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 					returnKeyType="next"
 					returnKeyLabel="next"
 					onSubmitEditing={() => passwordInpRef!.current!.focus()}
-					value={emailAddress}
-					error={emailAddressTouched && !isEmailAddressValid}
+					value={formState.values.emailAddress}
+					error={
+						(formState.touches.emailAddress &&
+							formState.errors.emailAddress) as boolean
+					}
 					disabled={loading}
-					onChangeText={emailAddressTextChangeHandler}
+					onChangeText={(txt) => fieldTextChangeHandler('emailAddress', txt)}
 					onBlur={() => inputBlurHandler('emailAddress')}
 				/>
 				<HelperText
 					type="error"
-					visible={emailAddressTouched && !isEmailAddressValid}
+					visible={
+						formState.touches.emailAddress && formState.errors.emailAddress
+					}
 				>
-					{emailAddress === ''
-						? 'Please enter Email Address'
-						: 'Email Address is invalid'}
-					.
+					{formState.errors.emailAddress}
 				</HelperText>
 			</View>
 			<View style={styles.inputContainer}>

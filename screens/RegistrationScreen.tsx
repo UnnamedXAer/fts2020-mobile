@@ -1,8 +1,8 @@
 import React, { useState, useRef, MutableRefObject } from 'react';
 import { StyleSheet, View, TextInput, ScrollView } from 'react-native';
-import { HelperText, Theme, withTheme, Button } from 'react-native-paper';
+import { Theme, withTheme, Button } from 'react-native-paper';
 import Header from '../components/UI/Header';
-import { checkEmailAddress, checkUserName } from '../utils/validation';
+import validateAuthFormField from '../utils/validation';
 import Input from '../components/UI/Input';
 import CustomButton from '../components/UI/CustomButton';
 import { StateError } from '../store/ReactTypes/customReactTypes';
@@ -11,28 +11,27 @@ import { useDispatch } from 'react-redux';
 import { authorize } from '../store/actions/auth';
 import { Credentials } from '../models/auth';
 import HttpErrorParser from '../utils/parseError';
+import useForm, { createInitialState, FormActionTypes } from '../hooks/useForm';
 
 interface Props {
 	theme: Theme;
 	toggleAuthScreen: () => void;
 }
 
+const formFields = ['emailAddress', 'password', 'confirmPassword', 'userName'] as const;
+type FormFields = typeof formFields[number];
+
+const initialState = createInitialState<FormFields>({
+	confirmPassword: '',
+	emailAddress: '',
+	password: '',
+	userName: '',
+});
+
 const RegistrationScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 	const [loading, setLoading] = useState(false);
-	const [emailAddress, setEmailAddress] = useState('');
-	const [emailAddressTouched, setEmailAddressTouched] = useState(false);
-	const [isEmailAddressValid, setIsEmailAddressValid] = useState(false);
-	const [password, setPassword] = useState('');
-	const [passwordTouched, setPasswordTouched] = useState(false);
-	const [isPasswordValid, setIsPasswordValid] = useState(false);
-	const [confirmPassword, setConfirmPassword] = useState('');
-	const [confirmPasswordTouched, setConfirmPasswordTouched] = useState(false);
-	const [isConfirmPasswordValid, setIsConfirmPasswordValid] = useState(false);
-	const [userName, setUserName] = useState('');
-	const [userNameTouched, setUserNameTouched] = useState(false);
-	const [isUserNameValid, setIsUserNameValid] = useState(false);
-
 	const [error, setError] = useState<StateError>(null);
+	const [formState, dispatchForm] = useForm<FormFields>(initialState);
 
 	const dispatch = useDispatch();
 
@@ -40,82 +39,70 @@ const RegistrationScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 	const confirmPasswordInpRef: MutableRefObject<TextInput | undefined> = useRef();
 	const userNameInpRef: MutableRefObject<TextInput | undefined> = useRef();
 
-	const emailAddressTextChangeHandler = (txt: string) => {
-		setEmailAddress(txt);
-		const isValid = checkEmailAddress(txt.trim());
-		setIsEmailAddressValid(isValid);
+	const fieldTextChangeHandler = (fieldName: FormFields, txt: string) => {
+		dispatchForm({
+			fieldId: fieldName,
+			value: txt,
+			type: FormActionTypes.UpdateValue,
+		});
 	};
 
-	const inputBlurHandler = (
-		name: 'password' | 'emailAddress' | 'confirmPassword' | 'userName'
-	) => {
-		if (name === 'emailAddress') setEmailAddressTouched(true);
-		else if (name === 'confirmPassword') setConfirmPasswordTouched(true);
-		else if (name === 'userName') setUserNameTouched(true);
-		else setPasswordTouched(true);
-	};
-
-	const userNameTextChangeHandler = (txt: string) => {
-		const isValid = checkUserName(txt);
-		setIsUserNameValid(isValid);
-		setUserName(txt);
-	}
-
-	const passwordChangeHandler = (txt: string) => {
-		setIsPasswordValid(txt.length > 0);
-		setPassword(txt);
-		if (confirmPasswordTouched) {
-			setIsConfirmPasswordValid(txt === confirmPassword);
-		}
-	};
-
-	const confirmPasswordChangeHandler = (txt: string) => {
-		setIsConfirmPasswordValid(txt === password);
-		setConfirmPassword(txt);
+	const inputBlurHandler = (name: FormFields) => {
+		dispatchForm({
+			fieldId: name,
+			type: FormActionTypes.MarkAsTouched,
+		});
+		const fieldError = validateAuthFormField(name, formState.values);
+		dispatchForm({
+			type: FormActionTypes.SetError,
+			error: fieldError,
+			fieldId: name,
+		});
 	};
 
 	const submitHandler = async () => {
 		setError(null);
-		const email = emailAddress.trim();
-		const name = userName.trim();
-		const isEmailValid = checkEmailAddress(email);
-		const isPwdValid = password.length > 0;
-		const isConfirmPwdValid = password === confirmPassword;
-		const isNameValid = checkUserName(name);
+		let isFormValid = true;
+		formFields.forEach((fieldName) => {
+			const fieldError = validateAuthFormField(fieldName, formState.values);
+			isFormValid = isFormValid && fieldError === null;
 
-		setIsUserNameValid(isNameValid);
-		setUserNameTouched(true);
-		setIsPasswordValid(isPwdValid);
-		setPasswordTouched(true);
-		setIsConfirmPasswordValid(isConfirmPwdValid);
-		setConfirmPasswordTouched(true);
-		setIsEmailAddressValid(isEmailValid);
-		setEmailAddressTouched(true);
+			dispatchForm({
+				type: FormActionTypes.SetError,
+				error: fieldError,
+				fieldId: fieldName,
+			});
+		});
 
-		if (!isEmailValid || !isPwdValid || !isConfirmPwdValid || !isNameValid) {
+		dispatchForm({
+			type: FormActionTypes.SetAllTouched,
+		});
+
+		if (!isFormValid) {
 			setError('Correct the form.');
 			return;
 		}
 		setLoading(true);
 
 		const credentianls = new Credentials({
-			emailAddress: emailAddress,
-			password: password,
-			confirmPassword: confirmPassword,
-			userName: name,
+			...formState.values,
 		});
 
 		try {
 			await dispatch(authorize(credentianls, false));
 		} catch (err) {
 			const error = new HttpErrorParser(err);
-			let msg: string = '';
+			let msg: string = error.getMessage();
 			const errArray = error.getFieldsErrors();
-			if (errArray.length > 0) {
-				msg = errArray.map((x) => '- ' + x.msg).join('\n');
-			} else {
-				msg = error.getMessage();
-			}
+			errArray.forEach((x) => {
+				x.msg;
+				dispatchForm({
+					type: FormActionTypes.SetError,
+					error: x.msg,
+					fieldId: x.param,
+				});
+			});
+
 			setError(msg);
 			setLoading(false);
 		}
@@ -132,89 +119,65 @@ const RegistrationScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 			<View style={styles.inputContainer}>
 				<Input
 					style={styles.input}
+					name="emailAddress"
 					label="Email Address"
 					keyboardType="email-address"
 					returnKeyType="next"
 					returnKeyLabel="next"
 					onSubmitEditing={() => userNameInpRef!.current!.focus()}
-					value={emailAddress}
-					error={emailAddressTouched && !isEmailAddressValid}
 					disabled={loading}
-					onChangeText={emailAddressTextChangeHandler}
-					onBlur={() => inputBlurHandler('emailAddress')}
+					formState={formState}
+					textChanged={fieldTextChangeHandler}
+					blur={inputBlurHandler}
 				/>
-				<HelperText
-					type="error"
-					visible={emailAddressTouched && !isEmailAddressValid}
-				>
-					{emailAddress === ''
-						? 'Please enter Email Address'
-						: 'Email Address is invalid'}
-					.
-				</HelperText>
 			</View>
 			<View style={styles.inputContainer}>
 				<Input
 					style={styles.input}
 					label="User Name"
+					name="userName"
 					keyboardType="default"
 					returnKeyType="next"
 					returnKeyLabel="next"
 					onSubmitEditing={() => passwordInpRef!.current!.focus()}
 					ref={userNameInpRef as MutableRefObject<TextInput>}
-					value={userName}
-					error={userNameTouched && !isUserNameValid}
 					disabled={loading}
-					onChangeText={userNameTextChangeHandler}
-					onBlur={() => inputBlurHandler('userName')}
+					formState={formState}
+					textChanged={fieldTextChangeHandler}
+					blur={inputBlurHandler}
 				/>
-				<HelperText type="error" visible={userNameTouched && !isUserNameValid}>
-					{emailAddress === ''
-						? 'Please enter User Name.'
-						: 'User Name is invalid.'}
-					.
-				</HelperText>
 			</View>
 			<View style={styles.inputContainer}>
 				<Input
 					style={styles.input}
 					label="Password"
+					name="password"
 					secureTextEntry
 					returnKeyType="next"
 					returnKeyLabel="next"
 					onSubmitEditing={() => confirmPasswordInpRef!.current!.focus()}
 					ref={passwordInpRef as MutableRefObject<TextInput>}
-					value={password}
-					error={passwordTouched && !isPasswordValid}
 					disabled={loading}
-					onChangeText={passwordChangeHandler}
-					onBlur={() => inputBlurHandler('password')}
+					formState={formState}
+					textChanged={fieldTextChangeHandler}
+					blur={inputBlurHandler}
 				/>
-				<HelperText type="error" visible={passwordTouched && !isPasswordValid}>
-					Please enter Password.
-				</HelperText>
 			</View>
 			<View style={styles.inputContainer}>
 				<Input
 					style={styles.input}
 					label="Confirm Password"
+					name="confirmPassword"
 					secureTextEntry
 					returnKeyType="done"
 					returnKeyLabel="Submit"
 					onSubmitEditing={submitHandler}
 					ref={confirmPasswordInpRef as MutableRefObject<TextInput>}
-					value={confirmPassword}
-					error={confirmPasswordTouched && !isConfirmPasswordValid}
 					disabled={loading}
-					onChangeText={confirmPasswordChangeHandler}
-					onBlur={() => inputBlurHandler('confirmPassword')}
+					formState={formState}
+					textChanged={fieldTextChangeHandler}
+					blur={inputBlurHandler}
 				/>
-				<HelperText
-					type="error"
-					visible={confirmPasswordTouched && !isConfirmPasswordValid}
-				>
-					Passwords do not match.
-				</HelperText>
 			</View>
 			<View style={styles.errorContainer}>
 				{error !== null && (
@@ -226,12 +189,7 @@ const RegistrationScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 			</View>
 			<View>
 				<CustomButton
-					disabled={
-						loading ||
-						!isEmailAddressValid ||
-						!isPasswordValid ||
-						!isConfirmPasswordValid
-					}
+					disabled={loading}
 					onPress={submitHandler}
 					loading={loading}
 				>

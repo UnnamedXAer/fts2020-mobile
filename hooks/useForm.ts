@@ -6,10 +6,11 @@ export enum FormActionTypes {
 	UpdateValue = 'UPDATE',
 	SetError = 'SET_ERROR',
 	MarkAsTouched = 'MARK_AS_TOUCHED',
-	SetFormError = 'SET_FORM_ERROR'
+	SetFormError = 'SET_FORM_ERROR',
+	SetAllTouched = 'SET_ALL_TOUCHED'
 }
 
-export type FormAction = SetValueAction | SetErrorAction | MarkAsTouchedAction | SetErrorAction;
+export type FormAction = SetValueAction | SetErrorAction | MarkAsTouchedAction | SetErrorAction | MarkAllasTouched | SetFormErrorAction;
 
 interface SetValueAction<T = any> {
 	type: FormActionTypes.UpdateValue;
@@ -33,6 +34,10 @@ interface MarkAsTouchedAction {
 	fieldId: string;
 }
 
+interface MarkAllasTouched {
+	type: FormActionTypes.SetAllTouched;
+}
+
 export interface FormState<T extends string = string> {
 	formError: StateError;
 	values: { [U in T]: any };
@@ -46,7 +51,7 @@ export interface FormState<T extends string = string> {
 
 const formReducer = (
 	state: FormState,
-	action: SetValueAction | SetErrorAction | MarkAsTouchedAction | SetFormErrorAction
+	action: FormAction
 ): FormState => {
 	switch (action.type) {
 		case FormActionTypes.UpdateValue:
@@ -89,6 +94,17 @@ const formReducer = (
 			return {
 				...state,
 				formError: action.error
+			}
+		case FormActionTypes.SetAllTouched:
+			const updatedAllTouches: FormState['touches'] = {};
+
+			for (const key in state.touches) {
+				updatedAllTouches[key] = true;
+			}
+
+			return {
+				...state,
+				touches: updatedAllTouches
 			}
 		default:
 			return state;

@@ -1,8 +1,8 @@
 import React, { useState, useRef, MutableRefObject } from 'react';
 import { StyleSheet, View, TextInput } from 'react-native';
-import { HelperText, Theme, withTheme, Button } from 'react-native-paper';
+import { Theme, withTheme, Button } from 'react-native-paper';
 import Header from '../components/UI/Header';
-import { checkEmailAddress } from '../utils/validation';
+import validateAuthFormField from '../utils/validation';
 import Input from '../components/UI/Input';
 import CustomButton from '../components/UI/CustomButton';
 import { StateError } from '../store/ReactTypes/customReactTypes';
@@ -11,10 +11,7 @@ import { useDispatch } from 'react-redux';
 import { authorize } from '../store/actions/auth';
 import { Credentials } from '../models/auth';
 import HttpErrorParser from '../utils/parseError';
-import useForm, {
-	FormActionTypes,
-	createInitialState,
-} from '../hooks/useForm';
+import useForm, { FormActionTypes, createInitialState } from '../hooks/useForm';
 
 interface Props {
 	theme: Theme;
@@ -30,11 +27,6 @@ const initialState = createInitialState<FormFields>({
 
 const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 	const [loading, setLoading] = useState(false);
-	const [emailAddressTouched, setEmailAddressTouched] = useState(false);
-	const [isEmailAddressValid, setIsEmailAddressValid] = useState(false);
-	const [password, setPassword] = useState('');
-	const [passwordTouched, setPasswordTouched] = useState(false);
-	const [isPasswordValid, setIsPasswordValid] = useState(false);
 	const [error, setError] = useState<StateError>(null);
 
 	const [formState, dispatchForm] = useForm<FormFields>(initialState);
@@ -43,7 +35,7 @@ const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 
 	const passwordInpRef: MutableRefObject<TextInput | undefined> = useRef();
 
-	const fieldTextChangeHandler = (fieldName: string, txt: string) => {
+	const fieldTextChangeHandler = (fieldName: FormFields, txt: string) => {
 		dispatchForm({
 			fieldId: fieldName,
 			value: txt,
@@ -60,31 +52,36 @@ const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 		});
 	};
 
-	const passwordChangeHandler = (txt: string) => {
-		setIsPasswordValid(txt.length > 0);
-		setPassword(txt);
-	};
-
 	const submitHandler = async () => {
 		setError(null);
-		const email = formState.values.emailAddress.trim();
-		const isEmailValid = checkEmailAddress(email);
-		const isPwdValid = password.length > 0;
 
-		setIsPasswordValid(isPwdValid);
-		setPasswordTouched(true);
-		setIsEmailAddressValid(isEmailValid);
-		setEmailAddressTouched(true);
+		const emailError = validateAuthFormField('emailAddress', formState.values);
+		const passwordError = validateAuthFormField('password', formState.values);
 
-		if (!isEmailValid || !isPwdValid) {
+		dispatchForm({
+			type: FormActionTypes.SetError,
+			error: emailError,
+			fieldId: 'emailAddress',
+		});
+
+		dispatchForm({
+			type: FormActionTypes.SetError,
+			error: passwordError,
+			fieldId: 'password',
+		});
+
+		dispatchForm({
+			type: FormActionTypes.SetAllTouched,
+		});
+
+		if (emailError || passwordError) {
 			setError('Correct the form.');
 			return;
 		}
 		setLoading(true);
 
 		const credentianls = new Credentials({
-			emailAddress: email,
-			password: password,
+			...formState.values,
 		});
 
 		try {
@@ -103,47 +100,31 @@ const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 			<View style={styles.inputContainer}>
 				<Input
 					style={styles.input}
+					name="emailAddress"
 					label="Email Address"
 					keyboardType="email-address"
 					returnKeyType="next"
 					returnKeyLabel="next"
-					onSubmitEditing={() => passwordInpRef!.current!.focus()}
-					value={formState.values.emailAddress}
-					error={
-						(formState.touches.emailAddress &&
-							formState.errors.emailAddress) as boolean
-					}
-					disabled={loading}
-					onChangeText={(txt) => fieldTextChangeHandler('emailAddress', txt)}
-					onBlur={() => inputBlurHandler('emailAddress')}
+					textChanged={fieldTextChangeHandler}
+					blur={inputBlurHandler}
+					formState={formState}
 				/>
-				<HelperText
-					type="error"
-					visible={
-						formState.touches.emailAddress && formState.errors.emailAddress
-					}
-				>
-					{formState.errors.emailAddress}
-				</HelperText>
 			</View>
 			<View style={styles.inputContainer}>
 				<Input
 					style={styles.input}
+					name="password"
 					label="Password"
 					secureTextEntry
 					returnKeyType="done"
 					returnKeyLabel="Submit"
 					onSubmitEditing={submitHandler}
 					ref={passwordInpRef as MutableRefObject<TextInput>}
-					value={password}
-					error={passwordTouched && !isPasswordValid}
 					disabled={loading}
-					onChangeText={passwordChangeHandler}
-					onBlur={() => inputBlurHandler('password')}
+					textChanged={fieldTextChangeHandler}
+					blur={inputBlurHandler}
+					formState={formState}
 				/>
-				<HelperText type="error" visible={passwordTouched && !isPasswordValid}>
-					Please enter Password.
-				</HelperText>
 			</View>
 			<View style={styles.errorContainer}>
 				{error !== null && (
@@ -155,7 +136,7 @@ const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 			</View>
 			<View>
 				<CustomButton
-					disabled={loading || !isEmailAddressValid}
+					disabled={loading}
 					onPress={submitHandler}
 					loading={loading}
 				>

@@ -121,7 +121,8 @@ const useForm = <T extends string>(initialState: FormState<T>): [FormState<T>, D
 };
 
 export function createInitialState<T extends string>(
-	initialValues: { [U in T]: any }
+	// initialValues: { [U in T]: any }
+	initialValues: { [U in T]: typeof initialValues[U] }
 ): FormState<T> {
 	const errors = {} as { [U in T]: StateError };
 	const touches = {} as { [U in T]: boolean };

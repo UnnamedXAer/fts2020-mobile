@@ -18,7 +18,8 @@ interface Props {
 	toggleAuthScreen: () => void;
 }
 
-type FormFields = 'emailAddress' | 'password';
+const formFields = ['emailAddress', 'password'] as const;
+type FormFields = typeof formFields[number];
 
 const initialState = createInitialState<FormFields>({
 	emailAddress: '',
@@ -41,8 +42,6 @@ const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 			value: txt,
 			type: FormActionTypes.UpdateValue,
 		});
-
-		formState.errors.emailAddress;
 	};
 
 	const inputBlurHandler = (name: FormFields) => {
@@ -50,31 +49,33 @@ const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 			fieldId: name,
 			type: FormActionTypes.MarkAsTouched,
 		});
+		const fieldError = validateAuthFormField(name, formState.values);
+		dispatchForm({
+			type: FormActionTypes.SetError,
+			error: fieldError,
+			fieldId: name,
+		});
 	};
 
 	const submitHandler = async () => {
 		setError(null);
+		let isFormValid = true;
+		formFields.forEach((fieldName) => {
+			const fieldError = validateAuthFormField(fieldName, formState.values);
+			isFormValid = isFormValid && fieldError === null;
 
-		const emailError = validateAuthFormField('emailAddress', formState.values);
-		const passwordError = validateAuthFormField('password', formState.values);
-
-		dispatchForm({
-			type: FormActionTypes.SetError,
-			error: emailError,
-			fieldId: 'emailAddress',
-		});
-
-		dispatchForm({
-			type: FormActionTypes.SetError,
-			error: passwordError,
-			fieldId: 'password',
+			dispatchForm({
+				type: FormActionTypes.SetError,
+				error: fieldError,
+				fieldId: fieldName,
+			});
 		});
 
 		dispatchForm({
 			type: FormActionTypes.SetAllTouched,
 		});
 
-		if (emailError || passwordError) {
+		if (!isFormValid) {
 			setError('Correct the form.');
 			return;
 		}
@@ -88,7 +89,17 @@ const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 			await dispatch(authorize(credentianls, true));
 		} catch (err) {
 			const error = new HttpErrorParser(err);
-			const msg = error.getMessage();
+			let msg: string = error.getMessage();
+			const errArray = error.getFieldsErrors();
+			errArray.forEach((x) => {
+				x.msg;
+				dispatchForm({
+					type: FormActionTypes.SetError,
+					error: x.msg,
+					fieldId: x.param,
+				});
+			});
+
 			setError(msg);
 			setLoading(false);
 		}
@@ -105,6 +116,7 @@ const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 					keyboardType="email-address"
 					returnKeyType="next"
 					returnKeyLabel="next"
+					onSubmitEditing={() => passwordInpRef!.current!.focus()}
 					textChanged={fieldTextChangeHandler}
 					blur={inputBlurHandler}
 					formState={formState}

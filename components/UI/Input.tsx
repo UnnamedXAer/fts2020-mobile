@@ -23,7 +23,12 @@ const Input: React.FC<Props> = React.forwardRef((props, ref) => {
 				value={formState.values[name]}
 				error={(formState.touches[name] && formState.errors[name]) as boolean}
 				{...props}
-				style={[{ backgroundColor: theme.colors.surface }, props.style]}
+				style={[
+					{
+						backgroundColor: theme.colors.surface,
+					},
+					props.style,
+				]}
 			/>
 			<HelperText
 				type="error"

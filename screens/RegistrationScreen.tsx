@@ -1,5 +1,14 @@
 import React, { useState, useRef, MutableRefObject } from 'react';
-import { StyleSheet, View, TextInput, ScrollView } from 'react-native';
+import {
+	StyleSheet,
+	View,
+	TextInput,
+	ScrollView,
+	KeyboardAvoidingView,
+	TouchableWithoutFeedback,
+	Keyboard,
+	StatusBar,
+} from 'react-native';
 import { Theme, withTheme, Button } from 'react-native-paper';
 import Header from '../components/UI/Header';
 import validateAuthFormField from '../utils/validation';
@@ -109,101 +118,110 @@ const RegistrationScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 	};
 
 	return (
-		<ScrollView
-			contentContainerStyle={[
-				styles.screen,
-				{ backgroundColor: theme.colors.surface },
-			]}
-		>
-			<Header style={styles.header}>Sign Up</Header>
-			<View style={styles.inputContainer}>
-				<Input
-					style={styles.input}
-					name="emailAddress"
-					label="Email Address"
-					keyboardType="email-address"
-					returnKeyType="next"
-					returnKeyLabel="next"
-					onSubmitEditing={() => userNameInpRef!.current!.focus()}
-					disabled={loading}
-					formState={formState}
-					textChanged={fieldTextChangeHandler}
-					blur={inputBlurHandler}
-				/>
-			</View>
-			<View style={styles.inputContainer}>
-				<Input
-					style={styles.input}
-					label="User Name"
-					name="userName"
-					keyboardType="default"
-					returnKeyType="next"
-					returnKeyLabel="next"
-					onSubmitEditing={() => passwordInpRef!.current!.focus()}
-					ref={userNameInpRef as MutableRefObject<TextInput>}
-					disabled={loading}
-					formState={formState}
-					textChanged={fieldTextChangeHandler}
-					blur={inputBlurHandler}
-				/>
-			</View>
-			<View style={styles.inputContainer}>
-				<Input
-					style={styles.input}
-					label="Password"
-					name="password"
-					secureTextEntry
-					returnKeyType="next"
-					returnKeyLabel="next"
-					onSubmitEditing={() => confirmPasswordInpRef!.current!.focus()}
-					ref={passwordInpRef as MutableRefObject<TextInput>}
-					disabled={loading}
-					formState={formState}
-					textChanged={fieldTextChangeHandler}
-					blur={inputBlurHandler}
-				/>
-			</View>
-			<View style={styles.inputContainer}>
-				<Input
-					style={styles.input}
-					label="Confirm Password"
-					name="confirmPassword"
-					secureTextEntry
-					returnKeyType="done"
-					returnKeyLabel="Submit"
-					onSubmitEditing={submitHandler}
-					ref={confirmPasswordInpRef as MutableRefObject<TextInput>}
-					disabled={loading}
-					formState={formState}
-					textChanged={fieldTextChangeHandler}
-					blur={inputBlurHandler}
-				/>
-			</View>
-			<View style={styles.errorContainer}>
-				{error !== null && (
-					<NotificationCard serverity="error">{error}</NotificationCard>
-				)}
-			</View>
-			<View style={styles.linkContainer}>
-				<Button onPress={toggleAuthScreen}>Switch to SIGN IN</Button>
-			</View>
-			<View>
-				<CustomButton
-					disabled={loading}
-					onPress={submitHandler}
-					loading={loading}
+		<KeyboardAvoidingView style={styles.keyboardAvoidingView} behavior="height">
+			<TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+				<ScrollView
+					contentContainerStyle={[
+						styles.screen,
+						{ backgroundColor: theme.colors.surface },
+					]}
 				>
-					Sign Up
-				</CustomButton>
-			</View>
-		</ScrollView>
+					<Header style={styles.header}>Sign Up</Header>
+					<View style={styles.inputContainer}>
+						<Input
+							style={styles.input}
+							name="emailAddress"
+							label="Email Address"
+							keyboardType="email-address"
+							returnKeyType="next"
+							returnKeyLabel="next"
+							onSubmitEditing={() => userNameInpRef!.current!.focus()}
+							disabled={loading}
+							formState={formState}
+							textChanged={fieldTextChangeHandler}
+							blur={inputBlurHandler}
+						/>
+					</View>
+					<View style={styles.inputContainer}>
+						<Input
+							style={styles.input}
+							label="User Name"
+							name="userName"
+							keyboardType="default"
+							returnKeyType="next"
+							returnKeyLabel="next"
+							onSubmitEditing={() => passwordInpRef!.current!.focus()}
+							ref={userNameInpRef as MutableRefObject<TextInput>}
+							disabled={loading}
+							formState={formState}
+							textChanged={fieldTextChangeHandler}
+							blur={inputBlurHandler}
+						/>
+					</View>
+					<View style={styles.inputContainer}>
+						<Input
+							style={styles.input}
+							label="Password"
+							name="password"
+							secureTextEntry
+							returnKeyType="next"
+							returnKeyLabel="next"
+							onSubmitEditing={() =>
+								confirmPasswordInpRef!.current!.focus()
+							}
+							ref={passwordInpRef as MutableRefObject<TextInput>}
+							disabled={loading}
+							formState={formState}
+							textChanged={fieldTextChangeHandler}
+							blur={inputBlurHandler}
+						/>
+					</View>
+					<View style={styles.inputContainer}>
+						<Input
+							style={styles.input}
+							label="Confirm Password"
+							name="confirmPassword"
+							secureTextEntry
+							returnKeyType="done"
+							returnKeyLabel="Submit"
+							onSubmitEditing={submitHandler}
+							ref={confirmPasswordInpRef as MutableRefObject<TextInput>}
+							disabled={loading}
+							formState={formState}
+							textChanged={fieldTextChangeHandler}
+							blur={inputBlurHandler}
+						/>
+					</View>
+					<View style={styles.errorContainer}>
+						{error !== null && (
+							<NotificationCard serverity="error">{error}</NotificationCard>
+						)}
+					</View>
+					<View style={styles.linkContainer}>
+						<Button onPress={toggleAuthScreen}>Switch to SIGN IN</Button>
+					</View>
+					<View>
+						<CustomButton
+							disabled={loading}
+							onPress={submitHandler}
+							loading={loading}
+						>
+							Sign Up
+						</CustomButton>
+					</View>
+				</ScrollView>
+			</TouchableWithoutFeedback>
+		</KeyboardAvoidingView>
 	);
 };
 
 const styles = StyleSheet.create({
-	screen: {
-		paddingTop: 100,
+	keyboardAvoidingView: {
 		flex: 1,
+		marginTop: StatusBar.currentHeight,
+	},
+	screen: {
+		paddingTop: 50,
 		flexDirection: 'column',
 		alignItems: 'center',
 	},
@@ -214,10 +232,11 @@ const styles = StyleSheet.create({
 	inputContainer: {
 		width: '90%',
 		maxWidth: 400,
-		marginVertical: 8,
+		marginVertical: 4,
 	},
 	input: {
-		fontSize: 24,
+		fontSize: 16,
+		height: 50,
 	},
 	errorContainer: {
 		width: '90%',

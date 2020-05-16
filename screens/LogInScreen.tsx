@@ -1,5 +1,14 @@
 import React, { useState, useRef, MutableRefObject } from 'react';
-import { StyleSheet, View, TextInput } from 'react-native';
+import {
+	StyleSheet,
+	View,
+	TextInput,
+	KeyboardAvoidingView,
+	TouchableWithoutFeedback,
+	Keyboard,
+	ScrollView,
+	StatusBar,
+} from 'react-native';
 import { Theme, withTheme, Button } from 'react-native-paper';
 import Header from '../components/UI/Header';
 import validateAuthFormField from '../utils/validation';
@@ -106,63 +115,75 @@ const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 	};
 
 	return (
-		<View style={[styles.screen, { backgroundColor: theme.colors.surface }]}>
-			<Header style={styles.header}>Sign In</Header>
-			<View style={styles.inputContainer}>
-				<Input
-					style={styles.input}
-					name="emailAddress"
-					label="Email Address"
-					keyboardType="email-address"
-					returnKeyType="next"
-					returnKeyLabel="next"
-					onSubmitEditing={() => passwordInpRef!.current!.focus()}
-					textChanged={fieldTextChangeHandler}
-					blur={inputBlurHandler}
-					formState={formState}
-				/>
-			</View>
-			<View style={styles.inputContainer}>
-				<Input
-					style={styles.input}
-					name="password"
-					label="Password"
-					secureTextEntry
-					returnKeyType="done"
-					returnKeyLabel="Submit"
-					onSubmitEditing={submitHandler}
-					ref={passwordInpRef as MutableRefObject<TextInput>}
-					disabled={loading}
-					textChanged={fieldTextChangeHandler}
-					blur={inputBlurHandler}
-					formState={formState}
-				/>
-			</View>
-			<View style={styles.errorContainer}>
-				{error !== null && (
-					<NotificationCard serverity="error">{error}</NotificationCard>
-				)}
-			</View>
-			<View style={styles.linkContainer}>
-				<Button onPress={toggleAuthScreen}>Switch to SIGN UP</Button>
-			</View>
-			<View>
-				<CustomButton
-					disabled={loading}
-					onPress={submitHandler}
-					loading={loading}
+		<KeyboardAvoidingView style={styles.keyboardAvoidingView} behavior="height">
+			<TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+				<ScrollView
+					contentContainerStyle={[
+						styles.screen,
+						{ backgroundColor: theme.colors.surface },
+					]}
 				>
-					SIGN IN
-				</CustomButton>
-			</View>
-		</View>
+					<Header style={styles.header}>Sign Up</Header>
+					<View style={styles.inputContainer}>
+						<Input
+							style={styles.input}
+							name="emailAddress"
+							label="Email Address"
+							keyboardType="email-address"
+							returnKeyType="next"
+							returnKeyLabel="next"
+							onSubmitEditing={() => passwordInpRef!.current!.focus()}
+							textChanged={fieldTextChangeHandler}
+							blur={inputBlurHandler}
+							formState={formState}
+						/>
+					</View>
+					<View style={styles.inputContainer}>
+						<Input
+							style={styles.input}
+							name="password"
+							label="Password"
+							secureTextEntry
+							returnKeyType="done"
+							returnKeyLabel="Submit"
+							onSubmitEditing={submitHandler}
+							ref={passwordInpRef as MutableRefObject<TextInput>}
+							disabled={loading}
+							textChanged={fieldTextChangeHandler}
+							blur={inputBlurHandler}
+							formState={formState}
+						/>
+					</View>
+					<View style={styles.errorContainer}>
+						{error !== null && (
+							<NotificationCard serverity="error">{error}</NotificationCard>
+						)}
+					</View>
+					<View style={styles.linkContainer}>
+						<Button onPress={toggleAuthScreen}>Switch to SIGN UP</Button>
+					</View>
+					<View>
+						<CustomButton
+							disabled={loading}
+							onPress={submitHandler}
+							loading={loading}
+						>
+							SIGN IN
+						</CustomButton>
+					</View>
+				</ScrollView>
+			</TouchableWithoutFeedback>
+		</KeyboardAvoidingView>
 	);
 };
 
 const styles = StyleSheet.create({
-	screen: {
-		paddingTop: 100,
+	keyboardAvoidingView: {
 		flex: 1,
+		marginTop: StatusBar.currentHeight,
+	},
+	screen: {
+		paddingTop: 50,
 		flexDirection: 'column',
 		alignItems: 'center',
 	},
@@ -185,6 +206,7 @@ const styles = StyleSheet.create({
 	linkContainer: {
 		alignItems: 'flex-start',
 		width: '90%',
+		marginBottom: 16,
 	},
 });
 

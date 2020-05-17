@@ -97,8 +97,8 @@ const styles = StyleSheet.create({
 	card: {
 		elevation: 0,
 		width: '100%',
-		paddingHorizontal: 10,
-		paddingVertical: 10,
+		paddingHorizontal: 8,
+		paddingVertical: 8,
 		marginVertical: 5,
 	},
 	container: {
@@ -106,6 +106,7 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 	},
 	text: {
+		flex: 1,
 		paddingStart: 10,
 		fontSize: 18,
 	},

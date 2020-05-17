@@ -1,52 +1,146 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Button } from 'react-native-paper';
+import {
+	View,
+	StyleSheet,
+	FlatList,
+	ListRenderItem,
+	RefreshControl,
+	TouchableHighlight,
+} from 'react-native';
+import { Avatar, withTheme, Theme, Paragraph, Headline } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
-import { logOut } from '../store/actions/auth';
 import RootState from '../store/storeTypes';
 import { StateError } from '../store/ReactTypes/customReactTypes';
 import { fetchFlats } from '../store/actions/flats';
 import HttpErrorParser from '../utils/parseError';
+import Flat from '../models/flat';
+import NotificationCard from '../components/UI/NotificationCard';
+import FloatingCard from '../components/FloatingCard';
 
-const FlatsScreen = () => {
+interface Props {
+	theme: Theme;
+}
+
+const FlatsScreen: React.FC<Props> = ({ theme }) => {
 	const dispatch = useDispatch();
 	const flats = useSelector((state: RootState) => state.flats.flats);
-	const [loading, setLoading] = useState(false);
+	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<StateError>(null);
+	const [refreshing, setRefreshing] = useState(false);
 
-	useEffect(() => {
-		if (!flats) {
-			setLoading(true);
+	const loadFlats = React.useMemo(
+		() => async () => {
 			setError(null);
-			const loadFlats = async () => {
-				try {
-					await dispatch(fetchFlats());
-				} catch (err) {
-					const error = new HttpErrorParser(err);
-					const msg = error.getMessage();
-					setError(msg);
-				}
-				setLoading(false);
-			};
-			loadFlats();
-		}
-	}, [dispatch]);
+			try {
+				await dispatch(fetchFlats());
+			} catch (err) {
+				const error = new HttpErrorParser(err);
+				const msg = error.getMessage();
+				setError(msg);
+			}
+		},
+		[dispatch]
+	);
+	useEffect(() => {
+		setLoading(true);
+		loadFlats().then(() => {
+			setLoading(false);
+		});
+	}, []);
+
+	const refreshHandler = async () => {
+		setRefreshing(true);
+		await loadFlats();
+		setRefreshing(false);
+	};
+
+	const flatSelectHandler = (id: number) => {
+		console.log(id);
+	};
+
+	const renderItem: ListRenderItem<Flat> = ({ item }) => {
+		return (
+			<TouchableHighlight
+				underlayColor={theme.colors.primary}
+				onPress={() => flatSelectHandler(item.id!)}
+			>
+				<View
+					style={{
+						paddingVertical: 8,
+						paddingEnd: 8,
+						paddingStart: 4,
+						flexDirection: 'row',
+					}}
+				>
+					<View style={{ marginRight: 4 }}>
+						<Avatar.Icon
+							color={theme.colors.primary}
+							style={{ backgroundColor: theme.colors.background }}
+							icon="home-city-outline"
+						/>
+					</View>
+					<View style={{ flex: 1 }}>
+						<Headline>{item.name}</Headline>
+						<Paragraph>{item.description}</Paragraph>
+					</View>
+				</View>
+			</TouchableHighlight>
+		);
+	};
 
 	return (
-		<View style={styles.container}>
-			<Text>Flats screen</Text>
-			<Button onPress={() => dispatch(logOut())}>Log Out</Button>
+		<View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+			<FlatList
+				ItemSeparatorComponent={() => (
+					<View
+						style={{
+							marginHorizontal: 8,
+							borderColor: 'lightblue',
+							borderBottomWidth: 1,
+						}}
+					/>
+				)}
+				refreshing={loading}
+				refreshControl={
+					<RefreshControl
+						refreshing={refreshing}
+						onRefresh={refreshHandler}
+						title={'Loading flats...'}
+						colors={[theme.colors.accent, theme.colors.primary]}
+					/>
+				}
+				keyExtractor={(item) => item.id!.toString()}
+				data={flats}
+				renderItem={renderItem}
+				ListEmptyComponent={
+					!error ? (
+						<View style={{ marginTop: '5%', marginHorizontal: 8 }}>
+							<NotificationCard>
+								Your are not a member of any flat yet.{'\n'}Add new flat
+								or find existing.
+							</NotificationCard>
+						</View>
+					) : null
+				}
+			/>
+			{error && (
+				<FloatingCard
+					onPress={() => {
+						setError(null);
+					}}
+				>
+					<NotificationCard serverity="error">{error}</NotificationCard>
+				</FloatingCard>
+			)}
 		</View>
 	);
 };
 
 const styles = StyleSheet.create({
 	container: {
+		position: 'relative',
 		flex: 1,
-		backgroundColor: '#fff',
-		alignItems: 'center',
-		justifyContent: 'center',
 	},
 });
 
-export default FlatsScreen;
+export default withTheme(FlatsScreen);

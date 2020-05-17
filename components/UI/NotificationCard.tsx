@@ -2,7 +2,7 @@ import React from 'react';
 import {
 	StyleSheet,
 	View,
-	GestureResponderEvent,
+	// GestureResponderEvent,
 	ViewStyle,
 	TextStyle,
 } from 'react-native';
@@ -12,7 +12,7 @@ import { Theme } from 'react-native-paper/lib/typescript/src/types';
 
 interface Props {
 	serverity?: 'error' | 'warning' | 'info' | 'success';
-	onPress?: (ev: GestureResponderEvent) => void;
+	// onPress?: (ev: GestureResponderEvent) => void;
 	children: React.ReactNode;
 	theme: Theme;
 }

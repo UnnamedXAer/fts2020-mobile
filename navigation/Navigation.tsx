@@ -10,12 +10,21 @@ import User from '../models/user';
 import { tryAuthorize } from '../store/actions/auth';
 import LoadingScreen from '../screens/LoadingScreen';
 import RegistrationScreen from '../screens/RegistrationScreen';
+import FlatDetailsScreen from '../screens/FlatDetailsScreen';
 
-const FlatsStack = createStackNavigator();
-const FlatsStackNavigator = () => (
-	<FlatsStack.Navigator>
-		<FlatsStack.Screen name="Flats" component={FlatsScreen} />
-	</FlatsStack.Navigator>
+export type RootStackParamList = {
+	Flats: undefined;
+	FlatDetails: {
+		id: number
+	}
+}
+
+const RootStack = createStackNavigator<RootStackParamList>();
+const RootStackNavigator = () => (
+	<RootStack.Navigator>
+		<RootStack.Screen name="Flats" options={{title: 'Your Flats'}} component={FlatsScreen} />
+		<RootStack.Screen name="FlatDetails" options={{ title: 'View Flat'}} component={FlatDetailsScreen} />
+	</RootStack.Navigator>
 );
 
 const AppNavitaionContainer = () => {
@@ -43,7 +52,7 @@ const AppNavitaionContainer = () => {
 			{loading ? (
 				<LoadingScreen />
 			) : loggedUser ? (
-				<FlatsStackNavigator />
+				<RootStackNavigator />
 			) : isLogIn ? (
 				<LogInScreen
 					toggleAuthScreen={() => setIsLogIn((prevState) => !prevState)}

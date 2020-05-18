@@ -10,18 +10,26 @@ import {
 import { Avatar, withTheme, Theme, Paragraph, Headline } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
 import RootState from '../store/storeTypes';
-import { StateError } from '../store/ReactTypes/customReactTypes';
 import { fetchFlats } from '../store/actions/flats';
 import HttpErrorParser from '../utils/parseError';
 import Flat from '../models/flat';
 import NotificationCard from '../components/UI/NotificationCard';
 import FloatingCard from '../components/FloatingCard';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../navigation/Navigation';
+import { StateError } from '../store/ReactTypes/customReactTypes';
+
+type FaltDetailsScreenNavigationProps = StackNavigationProp<
+	RootStackParamList,
+	'FlatDetails'
+>;
 
 interface Props {
 	theme: Theme;
+	navigation: FaltDetailsScreenNavigationProps;
 }
 
-const FlatsScreen: React.FC<Props> = ({ theme }) => {
+const FlatsScreen: React.FC<Props> = ({ theme, navigation }) => {
 	const dispatch = useDispatch();
 	const flats = useSelector((state: RootState) => state.flats.flats);
 	const [loading, setLoading] = useState(true);
@@ -55,7 +63,7 @@ const FlatsScreen: React.FC<Props> = ({ theme }) => {
 	};
 
 	const flatSelectHandler = (id: number) => {
-		console.log(id);
+		navigation.navigate('FlatDetails', {id: id});
 	};
 
 	const renderItem: ListRenderItem<Flat> = ({ item }) => {

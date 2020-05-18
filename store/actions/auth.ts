@@ -9,7 +9,7 @@ import {
 	FlatsActionTypes,
 	AuthActionTypes,
 } from './actionTypes';
-import RootState from '../storeTypes';
+import RootState, { StoreAction } from '../storeTypes';
 import User from '../../models/user';
 
 type AuthorizeActionPayload = {
@@ -133,7 +133,7 @@ export const updatePassword = (
 	{ type: AuthActionTypes.UpdatePassword }
 > => {
 	return async (dispatch) => {
-		const url = `/auth/changePassword`;
+		const url = `/auth/change-password`;
 		try {
 			await axios.post(url, {
 				oldPassword,

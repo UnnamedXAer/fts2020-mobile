@@ -14,10 +14,18 @@ export enum FlatsActionTypes {
 }
 
 export enum TasksActionTypes {
-	Set = 'TASK_SET',
 	Add = 'TASK_ADD',
+	SetTask = 'TASK_SET',
+	SetOwner = 'TASK_SET_OWNER',
+	SetFlatTasks = 'TASK_SET_FLAT_TASKS',
+	SetUserTasks = 'TASK_SET_USER_TASKS',
 	SetMembers = 'FLAT_TASK_SET_MEMBERS',
 	ClearState = 'TASK_CLEAR_STATE',
+}
+
+export enum TaskPeriodsTypes {
+	SetTaskPeriods = 'PERIOD_SET_TASK_PERIODS',
+	CompletePeriod = 'PERIOD_COMPLETE'
 }
 
 export enum UsersActionTypes {

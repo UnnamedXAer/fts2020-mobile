@@ -97,7 +97,7 @@ const FlatsScreen: React.FC<Props> = ({ theme, navigation }) => {
 	};
 
 	return (
-		<View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+		<View style={styles.container}>
 			<FlatList
 				ItemSeparatorComponent={() => (
 					<View

@@ -11,19 +11,28 @@ import { tryAuthorize } from '../store/actions/auth';
 import LoadingScreen from '../screens/LoadingScreen';
 import RegistrationScreen from '../screens/RegistrationScreen';
 import FlatDetailsScreen from '../screens/FlatDetailsScreen';
+import { navigationContainerTheme } from '../config/theme';
 
 export type RootStackParamList = {
 	Flats: undefined;
 	FlatDetails: {
-		id: number
-	}
-}
+		id: number;
+	};
+};
 
 const RootStack = createStackNavigator<RootStackParamList>();
 const RootStackNavigator = () => (
 	<RootStack.Navigator>
-		<RootStack.Screen name="Flats" options={{title: 'Your Flats'}} component={FlatsScreen} />
-		<RootStack.Screen name="FlatDetails" options={{ title: 'View Flat'}} component={FlatDetailsScreen} />
+		<RootStack.Screen
+			name="Flats"
+			options={{ title: 'Your Flats' }}
+			component={FlatsScreen}
+		/>
+		<RootStack.Screen
+			name="FlatDetails"
+			options={{ title: 'View Flat' }}
+			component={FlatDetailsScreen}
+		/>
 	</RootStack.Navigator>
 );
 
@@ -46,9 +55,9 @@ const AppNavitaionContainer = () => {
 			setLoading(false);
 		}
 	}, [loggedUser]);
-
+	
 	return (
-		<NavigationContainer>
+		<NavigationContainer theme={navigationContainerTheme}>
 			{loading ? (
 				<LoadingScreen />
 			) : loggedUser ? (

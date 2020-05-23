@@ -1,27 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import moment from 'moment';
-import { StyleSheet, View, Image } from 'react-native';
+import { StyleSheet, View, Dimensions } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import {
-	Paragraph,
-	Title,
-	Headline,
-	useTheme,
-	TouchableRipple,
-} from 'react-native-paper';
-import { Placeholder, PlaceholderMedia, PlaceholderLine, Shine } from 'rn-placeholder';
+import { Paragraph, Title, Headline, useTheme, Divider, Text } from 'react-native-paper';
+import { Placeholder, PlaceholderLine, Shine } from 'rn-placeholder';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { RootStackParamList } from '../navigation/Navigation';
 import { RouteProp } from '@react-navigation/native';
 import { useSelector, useDispatch } from 'react-redux';
 import RootState from '../store/storeTypes';
 import { StateError } from '../store/ReactTypes/customReactTypes';
 import { fetchFlatOwner, fetchFlatMembers } from '../store/actions/flats';
+import Link from '../components/UI/Link';
 
 type FlatDetailsScreenRouteProps = RouteProp<RootStackParamList, 'FlatDetails'>;
 
 interface Props {
 	route: FlatDetailsScreenRouteProps;
 }
+
+const dimensions = Dimensions.get('screen');
+console.log(dimensions);
 
 const FlatDetailsScreen: React.FC<Props> = ({ route }) => {
 	const theme = useTheme();
@@ -93,58 +92,79 @@ const FlatDetailsScreen: React.FC<Props> = ({ route }) => {
 		}
 	}, [flat, dispatch, loadingElements, elementsErrors]);
 
+	const personClickHandler = (id: number) => {
+		// navigate
+	};
+
 	return (
 		<ScrollView style={styles.screen}>
-			<View style={{ marginBottom: 24}}>
-				<Image
-					source={{
-						uri:
-							'https://cdn.makespace.com/blog/wp-content/uploads/2016/02/04155215/white-living-area-studio-apartment-home-designing-1600x715.jpeg',
-						height: 90,
-					}}
-				/>
-			</View>
-			<Headline style={{alignSelf: 'center'}}>{flat.name}</Headline>
-			
-			<View style={[styles.flatCard, styles.infoContainer]}>
-				{flat.owner ? (
-					<>
-						<View style={{ flexDirection: 'row' }}>
-							<Paragraph>Created by</Paragraph>
-							{flat.owner ? (
-								<TouchableRipple
-									onPress={() => console.log("i'm clicking!")}
-								>
-									<Paragraph style={{ color: theme.colors.primary }}>
-										{' '}
-										{flat.owner.emailAddress}{' '}
-									</Paragraph>
-								</TouchableRipple>
-							) : (
-								<PlaceholderLine height={16} />
-							)}
-						</View>
-						<Paragraph>
-							Created at {moment(flat.createAt).format('ll')}
-						</Paragraph>
-					</>
-				) : (
-					<Placeholder
-						style={{ marginTop: 8, flexDirection: 'row' }}
-						Animation={Shine}
-					>
-						<PlaceholderMedia size={46} />
-						<View style={{ margin: 8 }}>
-							<PlaceholderLine height={16} />
-							<PlaceholderLine height={16} />
-						</View>
-					</Placeholder>
-				)}
-			</View>
+			<Headline style={{ alignSelf: 'center', paddingTop: 24 }}>
+				{flat.name}
+			</Headline>
 
-			<View style={styles.flatCard}>
+			<View style={[styles.section, styles.infoContainer]}>
+				<View style={styles.avatarContainer}>
+					<View
+						style={[
+							{ backgroundColor: theme.colors.disabled },
+							styles.avatar,
+						]}
+					>
+						<MaterialCommunityIcons
+							name="home-city-outline"
+							size={40}
+							color={theme.colors.background}
+						/>
+					</View>
+				</View>
+				<View
+					style={{
+						minWidth: (() => {
+							const x = dimensions.width - 32 - 16 - 64;
+							console.log(x);
+							return x;
+						})(),
+
+						marginStart: 8,
+						justifyContent: 'center',
+					}}
+				>
+					{flat.owner ? (
+						<>
+							<View
+								style={{
+									flexDirection: 'row',
+									flexWrap: 'wrap',
+									justifyContent: 'flex-start',
+								}}
+							>
+								<Text>Created by </Text>
+								<Link onPress={() => personClickHandler(flat.owner!.id)}>
+									tereszkiewiczkamil@gmail.com
+								</Link>
+							</View>
+							<Text>Created at {moment(flat.createAt).format('ll')}</Text>
+						</>
+					) : (
+						<Placeholder Animation={Shine}>
+							<PlaceholderLine height={16} />
+							<PlaceholderLine height={16} />
+						</Placeholder>
+					)}
+				</View>
+			</View>
+			<Divider style={styles.divider} />
+			<View style={styles.section}>
 				<Title>Description</Title>
 				<Paragraph>{flat.description}</Paragraph>
+			</View>
+			<Divider style={styles.divider} />
+			<View style={styles.section}>
+				<Title>Members</Title>
+			</View>
+			<Divider style={styles.divider} />
+			<View style={styles.section}>
+				<Title>Tasks</Title>
 			</View>
 		</ScrollView>
 	);
@@ -154,14 +174,33 @@ const styles = StyleSheet.create({
 	screen: {
 		flex: 1,
 	},
-	flatCard: {
-		// borderWidth: 1,
-		// borderColor: '#ccc',
+	section: {
 		paddingHorizontal: 8,
 		paddingBottom: 8,
-		marginVertical: 8,
 	},
-	infoContainer: {},
+	infoContainer: {
+		paddingVertical: 8,
+		justifyContent: 'center',
+		flexWrap: 'wrap',
+		flexDirection: 'row',
+	},
+	avatarContainer: {
+		marginVertical: 8,
+		height: 64,
+		width: 64,
+		borderRadius: 32,
+		backgroundColor: 'white',
+		overflow: 'hidden',
+	},
+	avatar: {
+		width: '100%',
+		height: '100%',
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
+	divider: {
+		marginHorizontal: 16,
+	},
 });
 
 export default FlatDetailsScreen;

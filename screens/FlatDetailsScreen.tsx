@@ -1,8 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import moment from 'moment';
-import { StyleSheet, View, Dimensions } from 'react-native';
+import { StyleSheet, View, Dimensions, Image } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { Paragraph, Title, Headline, useTheme, Divider, Text } from 'react-native-paper';
+import {
+	Paragraph,
+	Title,
+	Headline,
+	useTheme,
+	Divider,
+	Text,
+	List,
+	Avatar,
+} from 'react-native-paper';
 import { Placeholder, PlaceholderLine, Shine } from 'rn-placeholder';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { RootStackParamList } from '../navigation/Navigation';
@@ -12,7 +21,7 @@ import RootState from '../store/storeTypes';
 import { StateError } from '../store/ReactTypes/customReactTypes';
 import { fetchFlatOwner, fetchFlatMembers } from '../store/actions/flats';
 import Link from '../components/UI/Link';
-
+import { Item } from 'react-native-paper/lib/typescript/src/components/List/List';
 type FlatDetailsScreenRouteProps = RouteProp<RootStackParamList, 'FlatDetails'>;
 
 interface Props {
@@ -20,7 +29,6 @@ interface Props {
 }
 
 const dimensions = Dimensions.get('screen');
-console.log(dimensions);
 
 const FlatDetailsScreen: React.FC<Props> = ({ route }) => {
 	const theme = useTheme();
@@ -121,7 +129,6 @@ const FlatDetailsScreen: React.FC<Props> = ({ route }) => {
 					style={{
 						minWidth: (() => {
 							const x = dimensions.width - 32 - 16 - 64;
-							console.log(x);
 							return x;
 						})(),
 
@@ -161,6 +168,34 @@ const FlatDetailsScreen: React.FC<Props> = ({ route }) => {
 			<Divider style={styles.divider} />
 			<View style={styles.section}>
 				<Title>Members</Title>
+				{flat.members ? (
+					flat.members.map((member) => {
+						return (
+							<List.Item
+								key={member.id}
+								title={member.emailAddress}
+								description={member.userName}
+								left={(props) => (
+									<Avatar.Image
+										source={
+											member.avatarUrl
+												? {
+														uri: member.avatarUrl,
+												  }
+												: require('../assets/icons/person-rounded-black-48dp.svg')
+										}
+										size={48}
+									/>
+								)}
+							/>
+						);
+					})
+				) : (
+					<Placeholder Animation={Shine}>
+						<PlaceholderLine height={24} />
+						<PlaceholderLine height={24} />
+					</Placeholder>
+				)}
 			</View>
 			<Divider style={styles.divider} />
 			<View style={styles.section}>

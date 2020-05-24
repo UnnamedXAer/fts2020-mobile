@@ -20,7 +20,6 @@ const setUserTasks: SimpleReducer<TasksState, Task[]> = (state, action) => {
 const setTask: SimpleReducer<TasksState, Task> = (state, action) => {
 	const task = action.payload;
 	const updatedTasks = [...state.tasks];
-
 	const taskIdx = updatedTasks.findIndex((x) => x.id === task.id);
 	if (taskIdx === -1) {
 		updatedTasks.push(task);
@@ -38,10 +37,11 @@ const setFlatTasks: SimpleReducer<
 	TasksState,
 	{ flatId: number; tasks: Task[] }
 > = (state, action) => {
-	const { flatId, tasks } = action.payload;
-	const updatedTasks = state.tasks.filter((x) => x.flatId !== flatId);
 
-	updatedTasks.concat(tasks);
+	const { flatId, tasks } = action.payload;
+	const updatedTasks = state.tasks
+		.filter((x) => x.flatId !== flatId)
+		.concat(tasks);
 
 	return {
 		...state,

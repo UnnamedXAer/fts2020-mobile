@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import moment from 'moment';
-import { StyleSheet, View, Dimensions, Image } from 'react-native';
+import { StyleSheet, View, Dimensions } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import {
 	Paragraph,
@@ -12,6 +12,7 @@ import {
 	List,
 	Avatar,
 } from 'react-native-paper';
+import { MaterialIcons } from '@expo/vector-icons';
 import { Placeholder, PlaceholderLine, Shine } from 'rn-placeholder';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { RootStackParamList } from '../navigation/Navigation';
@@ -21,7 +22,8 @@ import RootState from '../store/storeTypes';
 import { StateError } from '../store/ReactTypes/customReactTypes';
 import { fetchFlatOwner, fetchFlatMembers } from '../store/actions/flats';
 import Link from '../components/UI/Link';
-import { Item } from 'react-native-paper/lib/typescript/src/components/List/List';
+import FlatTasksList from '../components/Flat/FlatTasksList';
+
 type FlatDetailsScreenRouteProps = RouteProp<RootStackParamList, 'FlatDetails'>;
 
 interface Props {
@@ -104,6 +106,10 @@ const FlatDetailsScreen: React.FC<Props> = ({ route }) => {
 		// navigate
 	};
 
+	const memberSelectHandler = (id: number) => {
+		// open modal with options
+	};
+
 	return (
 		<ScrollView style={styles.screen}>
 			<Headline style={{ alignSelf: 'center', paddingTop: 24 }}>
@@ -147,7 +153,7 @@ const FlatDetailsScreen: React.FC<Props> = ({ route }) => {
 							>
 								<Text>Created by </Text>
 								<Link onPress={() => personClickHandler(flat.owner!.id)}>
-									tereszkiewiczkamil@gmail.com
+									{flat.owner.emailAddress}
 								</Link>
 							</View>
 							<Text>Created at {moment(flat.createAt).format('ll')}</Text>
@@ -175,31 +181,42 @@ const FlatDetailsScreen: React.FC<Props> = ({ route }) => {
 								key={member.id}
 								title={member.emailAddress}
 								description={member.userName}
-								left={(props) => (
-									<Avatar.Image
-										source={
-											member.avatarUrl
-												? {
-														uri: member.avatarUrl,
-												  }
-												: require('../assets/icons/person-rounded-black-48dp.svg')
-										}
-										size={48}
-									/>
-								)}
+								left={(props) =>
+									member.avatarUrl ? (
+										<Avatar.Image
+											source={{
+												uri: member.avatarUrl,
+											}}
+											size={48}
+										/>
+									) : (
+										<Avatar.Icon
+											icon="account-outline"
+											size={48}
+											theme={{
+												colors: {
+													primary: theme.colors.disabled,
+												},
+											}}
+										/>
+									)
+								}
+								rippleColor={theme.colors.primary}
+								onPress={() => memberSelectHandler(member.id)}
 							/>
 						);
 					})
 				) : (
 					<Placeholder Animation={Shine}>
-						<PlaceholderLine height={24} />
-						<PlaceholderLine height={24} />
+						<PlaceholderLine height={40} />
+						<PlaceholderLine height={40} />
 					</Placeholder>
 				)}
 			</View>
 			<Divider style={styles.divider} />
 			<View style={styles.section}>
 				<Title>Tasks</Title>
+				<FlatTasksList flatId={id!} />
 			</View>
 		</ScrollView>
 	);

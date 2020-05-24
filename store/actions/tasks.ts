@@ -142,7 +142,6 @@ export const fetchFlatTasks = (
 						createBy: x.createBy,
 					})
 			);
-
 			dispatch({
 				type: TasksActionTypes.SetFlatTasks,
 				payload: {

@@ -51,9 +51,11 @@ export const authorize = (
 				},
 			});
 
-			setTimeout(() => {
-				dispatch(logOut());
-			}, data.expiresIn);
+			if (data.expiresIn < 1000 * 60 * 5) {
+				setTimeout(() => {
+					dispatch(logOut());
+				}, data.expiresIn);
+			}
 
 			await AsyncStorage.multiSet([['loggedUser', JSON.stringify(user)], ['expirationTime', '' + expirationTime]]);
 		} catch (err) {
@@ -78,9 +80,12 @@ export const tryAuthorize = (): ThunkAction<Promise<void>, RootState, any, Autho
 				},
 			});
 
-			setTimeout(() => {
-				dispatch(logOut());
-			}, +expirationTime - Date.now());
+			const expiresIn = +expirationTime - Date.now();
+			if (expiresIn < 999 * 60) {
+				setTimeout(() => {
+					dispatch(logOut());
+				}, expiresIn);
+			}
 		} else {
 			throw new Error('Auto-authorization was not possible.');
 		}

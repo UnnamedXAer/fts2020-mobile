@@ -17,9 +17,12 @@ const FlatTasksList: React.FC<Props> = ({ flatId, theme }) => {
 	const dispatch = useDispatch();
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [tasksFetchTime, setTasksFetchTime] = useState<number>(0);
 	const tasks = useSelector<RootState, Task[]>((state) => {
 		return state.tasks.tasks.filter((x) => x.flatId === flatId);
+	});
+	const tasksLoadTime = useSelector((state: RootState) => {
+		const time = state.tasks.tasksLoadTimes[flatId];
+		return time !== void 0 ? time : 0;
 	});
 	const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
 	const [showTaskModal, setShowTaskModal] = useState(false);
@@ -29,14 +32,13 @@ const FlatTasksList: React.FC<Props> = ({ flatId, theme }) => {
 	const [membersError, setMembersError] = useState<{
 		[taskId: number]: string | null;
 	}>({});
+	const [openTime] = useState(Date.now() - 1000 * 60 * 10);
 
 	useEffect(() => {
-		if (!loading && !error && tasksFetchTime < Date.now() - 1000 * 60 * 60 * 1) {
+		if (tasksLoadTime < openTime) {
 			setLoading(true);
 			setError(null);
 			const loadTasks = async () => {
-				console.log('fetching');
-
 				try {
 					await dispatch(fetchFlatTasks(flatId));
 				} catch (err) {
@@ -45,12 +47,11 @@ const FlatTasksList: React.FC<Props> = ({ flatId, theme }) => {
 				}
 				setLoading(false);
 			};
-			setTasksFetchTime(Date.now());
-			loadTasks();
-		} else {
-			setLoading(false);
+			setTimeout(async () => {
+				loadTasks();
+			}, 1100);
 		}
-	}, [dispatch, flatId, tasks]);
+	}, [flatId, tasksLoadTime, openTime, dispatch]);
 
 	// useEffect(() => {
 	// 	if (
@@ -92,10 +93,10 @@ const FlatTasksList: React.FC<Props> = ({ flatId, theme }) => {
 		setSelectedTaskId(id);
 		setShowTaskModal(true);
 	};
-	console.log(flatId, tasks);
+
 	return (
-		<View>
-			{tasks ? (
+		<View style={{ flex: 1 }}>
+			{!loading ? (
 				tasks.map((task) => {
 					return (
 						<List.Item

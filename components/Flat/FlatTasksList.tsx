@@ -2,28 +2,34 @@ import React, { useState, useEffect } from 'react';
 import { View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import RootState from '../../store/storeTypes';
-import { List, Avatar, withTheme, Theme } from 'react-native-paper';
+import { List, Avatar, withTheme, Theme, Divider } from 'react-native-paper';
 import { Placeholder, Shine, PlaceholderLine } from 'rn-placeholder';
 import { fetchFlatTasks, fetchTaskMembers } from '../../store/actions/tasks';
 import HttpErrorParser from '../../utils/parseError';
 import Task from '../../models/task';
+import NotificationCard from '../UI/NotificationCard';
+import Link from '../UI/Link';
 
 interface Props {
 	flatId: number;
 	theme: Theme;
 }
 
+let cnt = 0;
+
 const FlatTasksList: React.FC<Props> = ({ flatId, theme }) => {
 	const dispatch = useDispatch();
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
-	const tasks = useSelector<RootState, Task[]>((state) => {
-		return state.tasks.tasks.filter((x) => x.flatId === flatId);
-	});
+	const [openTime] = useState(Date.now() - 1000 * 60 * 10);
 	const tasksLoadTime = useSelector((state: RootState) => {
 		const time = state.tasks.tasksLoadTimes[flatId];
 		return time !== void 0 ? time : 0;
 	});
+	const [tasksLoading, setTasksLoading] = useState(tasksLoadTime < openTime);
+	const [error, setError] = useState<string | null>(null);
+	const tasks = useSelector<RootState, Task[]>((state) => {
+		return state.tasks.tasks.filter((x) => x.flatId === flatId);
+	});
+
 	const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
 	const [showTaskModal, setShowTaskModal] = useState(false);
 	const [membersLoading, setMembersLoading] = useState<{
@@ -32,11 +38,12 @@ const FlatTasksList: React.FC<Props> = ({ flatId, theme }) => {
 	const [membersError, setMembersError] = useState<{
 		[taskId: number]: string | null;
 	}>({});
-	const [openTime] = useState(Date.now() - 1000 * 60 * 10);
+	console.log(++cnt, openTime, tasksLoading);
 
 	useEffect(() => {
 		if (tasksLoadTime < openTime) {
-			setLoading(true);
+			setTasksLoading(true);
+			console.log('fetching');
 			setError(null);
 			const loadTasks = async () => {
 				try {
@@ -45,7 +52,8 @@ const FlatTasksList: React.FC<Props> = ({ flatId, theme }) => {
 					const message = new HttpErrorParser(err).getMessage();
 					setError(message);
 				}
-				setLoading(false);
+				console.log('fetching - done');
+				setTasksLoading(false);
 			};
 			setTimeout(async () => {
 				loadTasks();
@@ -94,39 +102,54 @@ const FlatTasksList: React.FC<Props> = ({ flatId, theme }) => {
 		setShowTaskModal(true);
 	};
 
-	return (
-		<View style={{ flex: 1 }}>
-			{!loading ? (
-				tasks.map((task) => {
+	let content: JSX.Element;
+
+	if (error) {
+		content = <NotificationCard serverity="error">{error}</NotificationCard>;
+	} else if (tasksLoading) {
+		content = (
+			<Placeholder Animation={Shine}>
+				<PlaceholderLine height={40} />
+				<Divider />
+				<PlaceholderLine height={40} />
+			</Placeholder>
+		);
+	} else if (tasks.length === 0) {
+		content = (
+			<NotificationCard>There is no pending tasks for this flat.</NotificationCard>
+		);
+	} else {
+		content = (
+			<>
+				{tasks.map((task) => {
 					return (
-						<List.Item
-							key={task.id}
-							title={task.name}
-							description={task.description}
-							right={(props) => (
-								<Avatar.Icon
-									icon="check"
-									size={24}
-									theme={{
-										colors: {
-											primary: theme.colors.disabled,
-										},
-									}}
-								/>
-							)}
-							rippleColor={theme.colors.primary}
-							onPress={() => taskSelectHandler(task.id!)}
-						/>
+						<React.Fragment key={task.id}>
+							<List.Item
+								title={task.name}
+								description={task.description}
+								right={(props) => (
+									<Avatar.Icon
+										icon="check"
+										size={24}
+										theme={{
+											colors: {
+												primary: theme.colors.disabled,
+											},
+										}}
+									/>
+								)}
+								rippleColor={theme.colors.primary}
+								onPress={() => taskSelectHandler(task.id!)}
+							/>
+							<Divider />
+						</React.Fragment>
 					);
-				})
-			) : (
-				<Placeholder Animation={Shine}>
-					<PlaceholderLine height={40} />
-					<PlaceholderLine height={40} />
-				</Placeholder>
-			)}
-		</View>
-	);
+				})}
+			</>
+		);
+	}
+
+	return <View style={{ flex: 1 }}>{content}</View>;
 };
 
 export default withTheme(FlatTasksList);

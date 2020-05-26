@@ -2,20 +2,26 @@ import React, { useState, useEffect } from 'react';
 import { View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import RootState from '../../store/storeTypes';
-import { List, Avatar, withTheme, Theme, Divider } from 'react-native-paper';
+import {
+	List,
+	withTheme,
+	Theme,
+	Divider,
+	IconButton,
+	Dialog,
+	Menu,
+	Portal,
+} from 'react-native-paper';
 import { Placeholder, Shine, PlaceholderLine } from 'rn-placeholder';
 import { fetchFlatTasks, fetchTaskMembers } from '../../store/actions/tasks';
 import HttpErrorParser from '../../utils/parseError';
 import Task from '../../models/task';
 import NotificationCard from '../UI/NotificationCard';
-import Link from '../UI/Link';
 
 interface Props {
 	flatId: number;
 	theme: Theme;
 }
-
-let cnt = 0;
 
 const FlatTasksList: React.FC<Props> = ({ flatId, theme }) => {
 	const dispatch = useDispatch();
@@ -38,12 +44,10 @@ const FlatTasksList: React.FC<Props> = ({ flatId, theme }) => {
 	const [membersError, setMembersError] = useState<{
 		[taskId: number]: string | null;
 	}>({});
-	console.log(++cnt, openTime, tasksLoading);
 
 	useEffect(() => {
 		if (tasksLoadTime < openTime) {
 			setTasksLoading(true);
-			console.log('fetching');
 			setError(null);
 			const loadTasks = async () => {
 				try {
@@ -52,7 +56,6 @@ const FlatTasksList: React.FC<Props> = ({ flatId, theme }) => {
 					const message = new HttpErrorParser(err).getMessage();
 					setError(message);
 				}
-				console.log('fetching - done');
 				setTasksLoading(false);
 			};
 			setTimeout(async () => {
@@ -61,44 +64,48 @@ const FlatTasksList: React.FC<Props> = ({ flatId, theme }) => {
 		}
 	}, [flatId, tasksLoadTime, openTime, dispatch]);
 
-	// useEffect(() => {
-	// 	if (
-	// 		selectedTaskId &&
-	// 		!membersLoading[selectedTaskId] &&
-	// 		!membersError[selectedTaskId]
-	// 	) {
-	// 		const task = tasks.find((x) => x.id === selectedTaskId)!;
-	// 		if (!task.members) {
-	// 			const loadMembers = async (taskId: number) => {
-	// 				setMembersError((prevState) => ({
-	// 					...prevState,
-	// 					[taskId]: null,
-	// 				}));
-	// 				setMembersLoading((prevState) => ({
-	// 					...prevState,
-	// 					[taskId]: true,
-	// 				}));
-	// 				try {
-	// 					await dispatch(fetchTaskMembers(taskId));
-	// 				} catch (err) {
-	// 					setMembersError((prevState) => ({
-	// 						...prevState,
-	// 						[taskId]: err.message,
-	// 					}));
-	// 				}
-	// 				setMembersLoading((prevState) => ({
-	// 					...prevState,
-	// 					[taskId]: false,
-	// 				}));
-	// 			};
+	useEffect(() => {
+		if (
+			selectedTaskId &&
+			!membersLoading[selectedTaskId] &&
+			!membersError[selectedTaskId]
+		) {
+			const task = tasks.find((x) => x.id === selectedTaskId)!;
+			if (!task.members) {
+				const loadMembers = async (taskId: number) => {
+					setMembersError((prevState) => ({
+						...prevState,
+						[taskId]: null,
+					}));
+					setMembersLoading((prevState) => ({
+						...prevState,
+						[taskId]: true,
+					}));
+					try {
+						await dispatch(fetchTaskMembers(taskId));
+					} catch (err) {
+						setMembersError((prevState) => ({
+							...prevState,
+							[taskId]: err.message,
+						}));
+					}
+					setMembersLoading((prevState) => ({
+						...prevState,
+						[taskId]: false,
+					}));
+				};
 
-	// 			loadMembers(selectedTaskId);
-	// 		}
-	// 	}
-	// }, [dispatch, flatId, membersError, membersLoading, selectedTaskId, tasks]);
+				loadMembers(selectedTaskId);
+			}
+		}
+	}, [dispatch, flatId, membersError, membersLoading, selectedTaskId, tasks]);
 
 	const taskSelectHandler = (id: number) => {
 		setSelectedTaskId(id);
+		// navigate
+	};
+
+	const taskSettingsPressHandeler = (id: number) => {
 		setShowTaskModal(true);
 	};
 
@@ -121,27 +128,26 @@ const FlatTasksList: React.FC<Props> = ({ flatId, theme }) => {
 	} else {
 		content = (
 			<>
-				{tasks.map((task) => {
+				{tasks.map((task, i) => {
 					return (
 						<React.Fragment key={task.id}>
 							<List.Item
 								title={task.name}
 								description={task.description}
 								right={(props) => (
-									<Avatar.Icon
-										icon="check"
+									<IconButton
+										onPress={() =>
+											taskSettingsPressHandeler(task.id!)
+										}
+										icon="dots-vertical"
 										size={24}
-										theme={{
-											colors: {
-												primary: theme.colors.disabled,
-											},
-										}}
+										color={theme.colors.placeholder}
 									/>
 								)}
 								rippleColor={theme.colors.primary}
 								onPress={() => taskSelectHandler(task.id!)}
 							/>
-							<Divider />
+							{tasks.length > i + 1 && <Divider />}
 						</React.Fragment>
 					);
 				})}
@@ -149,7 +155,21 @@ const FlatTasksList: React.FC<Props> = ({ flatId, theme }) => {
 		);
 	}
 
-	return <View style={{ flex: 1 }}>{content}</View>;
+	return (
+		<>
+			<View style={{ flex: 1 }}>{content}</View>
+			<Portal>
+				<Dialog visible={showTaskModal}>
+					<Dialog.Title>
+						{tasks.find((x) => x.id === selectedTaskId)?.name}
+					</Dialog.Title>
+					<Dialog.Content>
+						<Menu.Item title="Open Details" />
+					</Dialog.Content>
+				</Dialog>
+			</Portal>
+		</>
+	);
 };
 
 export default withTheme(FlatTasksList);

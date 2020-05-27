@@ -21,39 +21,50 @@ import { fetchFlatOwner, fetchFlatMembers } from '../store/actions/flats';
 import Link from '../components/UI/Link';
 import FlatTasksList from '../components/Flat/FlatTasksList';
 import {
-	FlatDetailsScreenRouteProps,
-	FlatDetailsScreenNavigationProp,
+	TaskDetailsScreenRouteProps,
+	TaskDetailsScreenNavigationProp,
 } from '../types/types';
+import { fetchTaskOwner, fetchTaskMembers } from '../store/actions/tasks';
+import PeriodsTable from '../components/Task/PeriodsTable';
+import HttpErrorParser from '../utils/parseError';
+import { fetchTaskPeriods } from '../store/actions/periods';
 
 interface Props {
-	route: FlatDetailsScreenRouteProps;
-	navigation: FlatDetailsScreenNavigationProp;
+	route: TaskDetailsScreenRouteProps;
+	navigation: TaskDetailsScreenNavigationProp;
 }
 
 const dimensions = Dimensions.get('screen');
 
-const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
+const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 	const theme = useTheme();
 	const dispatch = useDispatch();
 	const id = route.params.id;
+	const task = useSelector(
+		(state: RootState) => state.tasks.tasks.find((x) => x.id === route.params.id)!
+	);
 	const flat = useSelector((state: RootState) =>
-		state.flats.flats.find((x) => x.id === id)
-	)!;
+		state.flats.flats.find((x) => x.id === task.flatId!)
+	);
+	const periods = useSelector((state: RootState) => state.periods.taskPeriods[id]);
 	const [loadingElements, setLoadingElements] = useState({
-		owner: !!flat.owner,
-		members: !!flat.members,
+		owner: !!task.owner,
+		members: !!task.members,
+		schedule: !!periods,
 	});
 
 	const [elementsErrors, setElementsErrors] = useState<{
 		owner: StateError;
 		members: StateError;
+		schedule: StateError;
 	}>({
 		owner: null,
 		members: null,
+		schedule: null,
 	});
 
 	useEffect(() => {
-		if (!flat.owner && !loadingElements.owner && !elementsErrors.owner) {
+		if (!task.owner && !loadingElements.owner && !elementsErrors.owner) {
 			const loadOwner = async () => {
 				setLoadingElements((prevState) => ({
 					...prevState,
@@ -61,7 +72,7 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 				}));
 				setTimeout(async () => {
 					try {
-						await dispatch(fetchFlatOwner(flat.ownerId, flat.id!));
+						await dispatch(fetchTaskOwner(task.createBy!, task.id!));
 					} catch (err) {
 						setElementsErrors((prevState) => ({
 							...prevState,
@@ -78,14 +89,14 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 			loadOwner();
 		}
 
-		if (!flat.members && !loadingElements.members && !elementsErrors.members) {
+		if (!task.members && !loadingElements.members && !elementsErrors.members) {
 			const loadMembers = async () => {
 				setLoadingElements((prevState) => ({
 					...prevState,
 					members: true,
 				}));
 				try {
-					await dispatch(fetchFlatMembers(flat.id!));
+					await dispatch(fetchTaskMembers(task.id!));
 				} catch (err) {
 					setElementsErrors((prevState) => ({
 						...prevState,
@@ -100,9 +111,35 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 
 			loadMembers();
 		}
-	}, [flat, dispatch, loadingElements, elementsErrors]);
+	}, [task, dispatch, loadingElements, elementsErrors]);
 
-	const personClickHandler = (id: number) => {
+	useEffect(() => {
+		if (task && !periods && !loadingElements.schedule && !elementsErrors.schedule) {
+			const loadSchedule = async (id: number) => {
+				setLoadingElements((prevState) => ({
+					...prevState,
+					schedule: true,
+				}));
+				try {
+					await dispatch(fetchTaskPeriods(id));
+				} catch (err) {
+					const error = new HttpErrorParser(err);
+					const msg = error.getMessage();
+					setElementsErrors((prevState) => ({
+						...prevState,
+						schedule: msg,
+					}));
+				}
+				setLoadingElements((prevState) => ({
+					...prevState,
+					schedule: false,
+				}));
+			};
+			loadSchedule(task.id!);
+		}
+	}, [dispatch, elementsErrors.schedule, loadingElements.schedule, periods, task]);
+
+	const peronTouchChanger = (id: number) => {
 		// navigate
 	};
 
@@ -113,7 +150,7 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 	return (
 		<ScrollView style={styles.screen}>
 			<Headline style={{ alignSelf: 'center', paddingTop: 24 }}>
-				{flat.name}
+				{task.name}
 			</Headline>
 
 			<View style={[styles.section, styles.infoContainer]}>
@@ -125,7 +162,7 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 						]}
 					>
 						<MaterialCommunityIcons
-							name="home-city-outline"
+							name="all-inclusive"
 							size={40}
 							color={theme.colors.background}
 						/>
@@ -142,7 +179,7 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 						justifyContent: 'center',
 					}}
 				>
-					{flat.owner ? (
+					{task.owner ? (
 						<>
 							<View
 								style={{
@@ -152,11 +189,11 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 								}}
 							>
 								<Text>Created by </Text>
-								<Link onPress={() => personClickHandler(flat.owner!.id)}>
-									{flat.owner.emailAddress}
+								<Link onPress={() => peronTouchChanger(task.owner!.id)}>
+									{task.owner.emailAddress}
 								</Link>
 							</View>
-							<Text>Created at {moment(flat.createAt).format('ll')}</Text>
+							<Text>Created at {moment(task.createAt).format('ll')}</Text>
 						</>
 					) : (
 						<Placeholder Animation={Shine}>
@@ -169,13 +206,13 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 			<Divider style={styles.divider} />
 			<View style={styles.section}>
 				<Title>Description</Title>
-				<Paragraph>{flat.description}</Paragraph>
+				<Paragraph>{task.description}</Paragraph>
 			</View>
 			<Divider style={styles.divider} />
 			<View style={styles.section}>
 				<Title>Members</Title>
-				{flat.members ? (
-					flat.members.map((member) => {
+				{task.members ? (
+					task.members.map((member) => {
 						return (
 							<List.Item
 								key={member.id}
@@ -215,8 +252,8 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 			</View>
 			<Divider style={styles.divider} />
 			<View style={styles.section}>
-				<Title>Tasks</Title>
-				<FlatTasksList flatId={id!} navigation={navigation} />
+				<Title>Periods</Title>
+				<PeriodsTable periods={periods} />
 			</View>
 		</ScrollView>
 	);
@@ -255,4 +292,4 @@ const styles = StyleSheet.create({
 	},
 });
 
-export default FlatDetailsScreen;
+export default TaskDetailsScreen;

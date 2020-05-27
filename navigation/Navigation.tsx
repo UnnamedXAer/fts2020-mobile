@@ -13,13 +13,8 @@ import RegistrationScreen from '../screens/RegistrationScreen';
 import FlatDetailsScreen from '../screens/FlatDetailsScreen';
 import { navigationContainerTheme } from '../config/theme';
 import Link from '../components/UI/Link';
-
-export type RootStackParamList = {
-	Flats: undefined;
-	FlatDetails: {
-		id: number;
-	};
-};
+import { RootStackParamList } from '../types/types';
+import TaskDetailsScreen from '../screens/TaskDetailsScreen';
 
 const RootStack = createStackNavigator<RootStackParamList>();
 const RootStackNavigator = () => {
@@ -39,6 +34,11 @@ const RootStackNavigator = () => {
 				name="FlatDetails"
 				options={{ title: 'View Flat' }}
 				component={FlatDetailsScreen}
+			/>
+			<RootStack.Screen
+				name="TaskDetails"
+				options={{ title: 'View Task' }}
+				component={TaskDetailsScreen}
 			/>
 		</RootStack.Navigator>
 	);

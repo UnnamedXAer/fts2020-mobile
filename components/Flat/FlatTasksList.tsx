@@ -2,28 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import RootState from '../../store/storeTypes';
-import {
-	List,
-	withTheme,
-	Theme,
-	Divider,
-	IconButton,
-	Dialog,
-	Menu,
-	Portal,
-} from 'react-native-paper';
+import { List, withTheme, Theme, Divider } from 'react-native-paper';
 import { Placeholder, Shine, PlaceholderLine } from 'rn-placeholder';
 import { fetchFlatTasks, fetchTaskMembers } from '../../store/actions/tasks';
 import HttpErrorParser from '../../utils/parseError';
 import Task from '../../models/task';
 import NotificationCard from '../UI/NotificationCard';
+import { FlatDetailsScreenNavigationProp } from '../../types/types';
 
 interface Props {
 	flatId: number;
 	theme: Theme;
+	navigation: FlatDetailsScreenNavigationProp;
 }
 
-const FlatTasksList: React.FC<Props> = ({ flatId, theme }) => {
+const FlatTasksList: React.FC<Props> = ({ flatId, theme, navigation }) => {
 	const dispatch = useDispatch();
 	const [openTime] = useState(Date.now() - 1000 * 60 * 10);
 	const tasksLoadTime = useSelector((state: RootState) => {
@@ -37,7 +30,6 @@ const FlatTasksList: React.FC<Props> = ({ flatId, theme }) => {
 	});
 
 	const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
-	const [showTaskModal, setShowTaskModal] = useState(false);
 	const [membersLoading, setMembersLoading] = useState<{
 		[taskId: number]: boolean;
 	}>({});
@@ -101,12 +93,7 @@ const FlatTasksList: React.FC<Props> = ({ flatId, theme }) => {
 	}, [dispatch, flatId, membersError, membersLoading, selectedTaskId, tasks]);
 
 	const taskSelectHandler = (id: number) => {
-		setSelectedTaskId(id);
-		// navigate
-	};
-
-	const taskSettingsPressHandeler = (id: number) => {
-		setShowTaskModal(true);
+		navigation.navigate('TaskDetails', { id: id });
 	};
 
 	let content: JSX.Element;
@@ -134,20 +121,12 @@ const FlatTasksList: React.FC<Props> = ({ flatId, theme }) => {
 							<List.Item
 								title={task.name}
 								description={task.description}
-								right={(props) => (
-									<IconButton
-										onPress={() =>
-											taskSettingsPressHandeler(task.id!)
-										}
-										icon="dots-vertical"
-										size={24}
-										color={theme.colors.placeholder}
-									/>
-								)}
 								rippleColor={theme.colors.primary}
 								onPress={() => taskSelectHandler(task.id!)}
 							/>
-							{tasks.length > i + 1 && <Divider />}
+							{tasks.length > i + 1 && (
+								<Divider style={{ marginHorizontal: '10%' }} />
+							)}
 						</React.Fragment>
 					);
 				})}
@@ -155,21 +134,7 @@ const FlatTasksList: React.FC<Props> = ({ flatId, theme }) => {
 		);
 	}
 
-	return (
-		<>
-			<View style={{ flex: 1 }}>{content}</View>
-			<Portal>
-				<Dialog visible={showTaskModal}>
-					<Dialog.Title>
-						{tasks.find((x) => x.id === selectedTaskId)?.name}
-					</Dialog.Title>
-					<Dialog.Content>
-						<Menu.Item title="Open Details" />
-					</Dialog.Content>
-				</Dialog>
-			</Portal>
-		</>
-	);
+	return <View style={{ flex: 1 }}>{content}</View>;
 };
 
 export default withTheme(FlatTasksList);

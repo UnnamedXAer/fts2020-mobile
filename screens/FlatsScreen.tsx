@@ -7,7 +7,14 @@ import {
 	RefreshControl,
 	TouchableHighlight,
 } from 'react-native';
-import { Avatar, withTheme, Theme, Paragraph, Headline } from 'react-native-paper';
+import {
+	Avatar,
+	withTheme,
+	Theme,
+	Paragraph,
+	Headline,
+	Divider,
+} from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
 import RootState from '../store/storeTypes';
 import { fetchFlats } from '../store/actions/flats';
@@ -16,8 +23,10 @@ import Flat from '../models/flat';
 import NotificationCard from '../components/UI/NotificationCard';
 import FloatingCard from '../components/FloatingCard';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../navigation/Navigation';
 import { StateError } from '../store/ReactTypes/customReactTypes';
+import { RootStackParamList } from '../types/types';
+import { Placeholder } from 'rn-placeholder';
+import { PlaceholderLine, Shine } from '../components/UI/Placeholder/Placeholder';
 
 type FaltDetailsScreenNavigationProps = StackNavigationProp<
 	RootStackParamList,
@@ -63,7 +72,7 @@ const FlatsScreen: React.FC<Props> = ({ theme, navigation }) => {
 	};
 
 	const flatSelectHandler = (id: number) => {
-		navigation.navigate('FlatDetails', {id: id});
+		navigation.navigate('FlatDetails', { id: id });
 	};
 
 	const renderItem: ListRenderItem<Flat> = ({ item }) => {
@@ -108,7 +117,6 @@ const FlatsScreen: React.FC<Props> = ({ theme, navigation }) => {
 						}}
 					/>
 				)}
-				refreshing={loading}
 				refreshControl={
 					<RefreshControl
 						refreshing={refreshing}
@@ -123,14 +131,29 @@ const FlatsScreen: React.FC<Props> = ({ theme, navigation }) => {
 				ListEmptyComponent={
 					!error ? (
 						<View style={{ marginTop: '5%', marginHorizontal: 8 }}>
-							<NotificationCard>
-								Your are not a member of any flat yet.{'\n'}Add new flat
-								or find existing.
-							</NotificationCard>
+							{loading ? (
+								<Placeholder Animation={Shine}>
+									<PlaceholderLine
+										height={64}
+										noMargin
+										style={{ borderRadius: theme.roundness }}
+									/>
+									<Divider style={{ marginVertical: 16 }} />
+									<PlaceholderLine height={64} noMargin />
+									<Divider style={{ marginVertical: 16 }} />
+									<PlaceholderLine height={64} />
+								</Placeholder>
+							) : (
+								<NotificationCard>
+									Your are not a member of any flat yet.{'\n'}Add new
+									flat or find existing.
+								</NotificationCard>
+							)}
 						</View>
 					) : null
 				}
 			/>
+
 			{error && (
 				<FloatingCard
 					onPress={() => {

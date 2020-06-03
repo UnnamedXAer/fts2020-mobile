@@ -15,6 +15,9 @@ import { navigationContainerTheme } from '../config/theme';
 import Link from '../components/UI/Link';
 import { RootStackParamList } from '../types/types';
 import TaskDetailsScreen from '../screens/TaskDetailsScreen';
+import NewFlatInfoScreen from '../screens/NewFlatInfoScreen';
+import NewFlatScreen from '../screens/NewFlatScreen';
+import InviteMembersScreen from '../screens/InviteMembersScreen';
 
 const RootStack = createStackNavigator<RootStackParamList>();
 const RootStackNavigator = () => {
@@ -34,6 +37,21 @@ const RootStackNavigator = () => {
 				name="FlatDetails"
 				options={{ title: 'View Flat' }}
 				component={FlatDetailsScreen}
+			/>
+			<RootStack.Screen
+				name="NewFlatInfo"
+				options={{ title: 'Add Flat' }}
+				component={NewFlatInfoScreen}
+			/>
+			<RootStack.Screen
+				name="NewFlat"
+				options={{ title: 'Add Flat' }}
+				component={NewFlatScreen}
+			/>
+			<RootStack.Screen
+				name="InviteMembers"
+				options={{ title: 'Invite Members' }}
+				component={InviteMembersScreen}
 			/>
 			<RootStack.Screen
 				name="TaskDetails"

@@ -14,6 +14,7 @@ import {
 	Paragraph,
 	Headline,
 	Divider,
+	FAB,
 } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
 import RootState from '../store/storeTypes';
@@ -22,20 +23,14 @@ import HttpErrorParser from '../utils/parseError';
 import Flat from '../models/flat';
 import NotificationCard from '../components/UI/NotificationCard';
 import FloatingCard from '../components/FloatingCard';
-import { StackNavigationProp } from '@react-navigation/stack';
 import { StateError } from '../store/ReactTypes/customReactTypes';
-import { RootStackParamList } from '../types/types';
+import {  FlatDetailsScreenNavigationProps } from '../types/types';
 import { Placeholder } from 'rn-placeholder';
 import { PlaceholderLine, Shine } from '../components/UI/Placeholder/Placeholder';
 
-type FaltDetailsScreenNavigationProps = StackNavigationProp<
-	RootStackParamList,
-	'FlatDetails'
->;
-
 interface Props {
 	theme: Theme;
-	navigation: FaltDetailsScreenNavigationProps;
+	navigation: FlatDetailsScreenNavigationProps;
 }
 
 const FlatsScreen: React.FC<Props> = ({ theme, navigation }) => {
@@ -163,6 +158,12 @@ const FlatsScreen: React.FC<Props> = ({ theme, navigation }) => {
 					<NotificationCard serverity="error">{error}</NotificationCard>
 				</FloatingCard>
 			)}
+			<FAB
+				style={styles.fab}
+				icon="plus"
+				color="white"
+				onPress={() => navigation.navigate('NewFlatInfo')}
+			></FAB>
 		</View>
 	);
 };
@@ -171,6 +172,12 @@ const styles = StyleSheet.create({
 	container: {
 		position: 'relative',
 		flex: 1,
+	},
+	fab: {
+		position: 'absolute',
+		margin: 16,
+		right: 0,
+		bottom: 0,
 	},
 });
 

@@ -117,6 +117,8 @@ const NewFlatScreen: React.FC<Props> = ({ theme, navigation }) => {
 							keyboardType="default"
 							returnKeyType="done"
 							returnKeyLabel="submit"
+							multiline
+							numberOfLines={3}
 							ref={descriptionInpRef as MutableRefObject<TextInput>}
 							onSubmitEditing={submitHandler}
 							disabled={loading}
@@ -147,7 +149,6 @@ const NewFlatScreen: React.FC<Props> = ({ theme, navigation }) => {
 const styles = StyleSheet.create({
 	keyboardAvoidingView: {
 		flex: 1,
-		marginTop: StatusBar.currentHeight,
 	},
 	screen: {
 		flexDirection: 'column',
@@ -161,11 +162,6 @@ const styles = StyleSheet.create({
 		fontSize: 20,
 		marginVertical: 8,
 	},
-	infoParagraphHelper: {
-		fontSize: 14,
-		color: '#666',
-		marginVertical: 8,
-	},
 	inputContainer: {
 		width: '90%',
 		maxWidth: 400,
@@ -173,7 +169,6 @@ const styles = StyleSheet.create({
 	},
 	input: {
 		fontSize: 16,
-		height: 50,
 	},
 	actions: {
 		flexDirection: 'row',

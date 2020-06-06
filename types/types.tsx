@@ -11,7 +11,7 @@ export type RootStackParamList = {
 	};
 	NewFlatInfo: undefined;
 	NewFlat: undefined;
-	InviteMembers: { flatId: number };
+	InviteMembers: { flatId: number, isNewFlat: boolean };
 };
 
 export type FlatDetailsScreenRouteProps = RouteProp<RootStackParamList, 'FlatDetails'>;

@@ -29,3 +29,21 @@ export default class Flat {
 		this.createAt = createAt;
 	}
 }
+
+export class FlatData {
+	id?: number;
+	name?: string;
+	description?: string;
+	members?: User['emailAddress'][];
+	active?: boolean;
+
+	constructor(prams: FlatData = {} as FlatData) {
+		const { id, name, description, members, active } = prams;
+
+		this.id = id;
+		this.name = name;
+		this.description = description;
+		this.members = members;
+		this.active = active;
+	}
+}

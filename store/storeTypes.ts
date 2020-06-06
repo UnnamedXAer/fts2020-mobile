@@ -24,6 +24,7 @@ export type UsersState = {
 export type FlatsState = {
 	flats: Flat[];
 	flatsLoadTime: number;
+	createdFlatsTmpIds: { [key: string]: number | undefined };
 };
 
 export type TasksState = {

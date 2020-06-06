@@ -1,4 +1,4 @@
-import React, { useRef, MutableRefObject, useState } from 'react';
+import React, { useRef, MutableRefObject, useState, useEffect } from 'react';
 import {
 	StyleSheet,
 	View,
@@ -19,6 +19,12 @@ import useForm, { createInitialState, FormActionTypes } from '../hooks/useForm';
 import { StateError } from '../store/ReactTypes/customReactTypes';
 import { validateFlatFields } from '../utils/validation';
 import NotificationCard from '../components/UI/NotificationCard';
+import { createFlat } from '../store/actions/flats';
+import { useDispatch, useSelector } from 'react-redux';
+import HttpErrorParser from '../utils/parseError';
+import { getRandomInt } from '../utils/random';
+import { FlatData } from '../models/flat';
+import RootState from '../store/storeTypes';
 
 interface Props {
 	theme: Theme;
@@ -31,10 +37,34 @@ export type NewFlatFormFields = typeof newFlatFormFields[number];
 const initialState = createInitialState<NewFlatFormFields>({ name: '', description: '' });
 
 const NewFlatScreen: React.FC<Props> = ({ theme, navigation }) => {
+	const [tmpFlatId] = useState(String.fromCharCode(getRandomInt(97, 123)) + Date.now());
+	const flatId = useSelector(
+		(state: RootState) => state.flats.createdFlatsTmpIds[tmpFlatId]
+	);
+	const dispatch = useDispatch();
 	const descriptionInpRef: MutableRefObject<TextInput | undefined> = useRef();
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<StateError>(null);
 	const [formState, dispatchForm] = useForm<NewFlatFormFields>(initialState);
+	const isMounted = useRef(true);
+	useEffect(() => {
+		isMounted.current = true;
+		return () => {
+			isMounted.current = false;
+		};
+	}, []);
+
+	useEffect(() => {
+		if (flatId) {
+			if (isMounted.current) {
+				navigation.popToTop();
+				navigation.navigate('InviteMembers', {
+					flatId,
+					isNewFlat: true,
+				});
+			}
+		}
+	}, [flatId, isMounted, navigation]);
 
 	const fieldTextChangeHandler = (fieldName: NewFlatFormFields, txt: string) => {
 		dispatchForm({
@@ -80,8 +110,30 @@ const NewFlatScreen: React.FC<Props> = ({ theme, navigation }) => {
 			return;
 		}
 		setLoading(true);
-		navigation.popToTop();
-		navigation.navigate('InviteMembers');
+
+		const newFlat = new FlatData({
+			description: formState.values.description,
+			name: formState.values.name,
+		});
+
+		try {
+			await dispatch(createFlat(newFlat, tmpFlatId));
+		} catch (err) {
+			if (isMounted.current) {
+				const errorData = new HttpErrorParser(err);
+				const fieldsErrors = errorData.getFieldsErrors();
+				fieldsErrors.forEach((x) =>
+					dispatchForm({
+						type: FormActionTypes.SetError,
+						fieldId: x.param,
+						error: x.msg,
+					})
+				);
+
+				setError(errorData.getMessage());
+				setLoading(false);
+			}
+		}
 	};
 
 	return (
@@ -111,7 +163,7 @@ const NewFlatScreen: React.FC<Props> = ({ theme, navigation }) => {
 					</View>
 					<View style={styles.inputContainer}>
 						<Input
-							style={styles.input}
+							style={[styles.input, { maxHeight: 87.3 }]}
 							name="Desciption"
 							label="Description"
 							keyboardType="default"
@@ -136,9 +188,7 @@ const NewFlatScreen: React.FC<Props> = ({ theme, navigation }) => {
 						<CustomButton accent onPress={() => navigation.popToTop()}>
 							CANCEL
 						</CustomButton>
-						<CustomButton onPress={submitHandler}>
-							NEXT
-						</CustomButton>
+						<CustomButton onPress={submitHandler}>NEXT</CustomButton>
 					</View>
 				</ScrollView>
 			</TouchableWithoutFeedback>

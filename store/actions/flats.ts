@@ -1,4 +1,4 @@
-import Flat from '../../models/flat';
+import Flat, { FlatData } from '../../models/flat';
 import { ThunkAction } from 'redux-thunk';
 import RootState, { StoreAction } from '../storeTypes';
 import { FlatsActionTypes } from './actionTypes';
@@ -14,28 +14,36 @@ type APIFlat = {
 	createAt: Date;
 };
 
+export type AddFlatActionPayload = { flat: Flat; tmpId: string };
+
+
 export const createFlat = (
-	flat: Flat
-): ThunkAction<Promise<void>, RootState, any, StoreAction<Flat, string>> => {
-	return async dispatch => {
+	flat: FlatData,
+	tmpId: string
+): ThunkAction<
+	Promise<void>,
+	RootState,
+	any,
+	StoreAction<AddFlatActionPayload, string>
+> => {
+	return async (dispatch) => {
 		const url = '/flats';
 		try {
-			const requestPayload = {
-				name: flat.name,
-				description: flat.description,
-				members: flat.members!.map(x => x.id)
-			};
-			const { data } = await axios.post<APIFlat>(url, requestPayload);
+			const { data } = await axios.post<APIFlat>(url, flat);
 			const createdFlat = new Flat({
 				id: data.id,
 				name: data.name,
 				description: data.description,
 				createAt: data.createAt,
-				ownerId: data.createBy
+				ownerId: data.createBy,
 			});
+
 			dispatch({
 				type: FlatsActionTypes.Add,
-				payload: createdFlat
+				payload: {
+					flat: createdFlat,
+					tmpId: tmpId,
+				},
 			});
 		} catch (err) {
 			throw err;
@@ -117,7 +125,7 @@ export const fetchFlatMembers = (
 	Promise<void>,
 	RootState,
 	any,
-	StoreAction<{flatId: number, members: User[]}, FlatsActionTypes.SetMembers>
+	StoreAction<{ flatId: number, members: User[] }, FlatsActionTypes.SetMembers>
 > => {
 	return async dispatch => {
 		const url = `/flats/${flatId}/members`;
@@ -140,8 +148,8 @@ export const fetchFlatMembers = (
 				type: FlatsActionTypes.SetMembers,
 				payload: {
 					members,
-					flatId 
-				}	
+					flatId
+				}
 			});
 		} catch (err) {
 			throw err;

@@ -13,7 +13,7 @@ import { withTheme } from 'react-native-paper';
 import { Theme } from 'react-native-paper/lib/typescript/src/types';
 import Header from '../components/UI/Header';
 import CustomButton from '../components/UI/CustomButton';
-import { NewFlatScreenNavigationProps } from '../types/types';
+import { NewFlatScreenNavigationProps } from '../types/navigationTypes';
 import Input from '../components/UI/Input';
 import useForm, { createInitialState, FormActionTypes } from '../hooks/useForm';
 import { StateError } from '../store/ReactTypes/customReactTypes';

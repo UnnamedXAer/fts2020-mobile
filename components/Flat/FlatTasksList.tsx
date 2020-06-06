@@ -8,12 +8,12 @@ import { fetchFlatTasks, fetchTaskMembers } from '../../store/actions/tasks';
 import HttpErrorParser from '../../utils/parseError';
 import Task from '../../models/task';
 import NotificationCard from '../UI/NotificationCard';
-import { FlatDetailsScreenNavigationProp } from '../../types/types';
+import { FlatDetailsScreenNavigationProps } from '../../types/navigationTypes';
 
 interface Props {
 	flatId: number;
 	theme: Theme;
-	navigation: FlatDetailsScreenNavigationProp;
+	navigation: FlatDetailsScreenNavigationProps;
 }
 
 const FlatTasksList: React.FC<Props> = ({ flatId, theme, navigation }) => {

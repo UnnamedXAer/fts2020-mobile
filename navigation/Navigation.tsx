@@ -13,7 +13,7 @@ import RegistrationScreen from '../screens/RegistrationScreen';
 import FlatDetailsScreen from '../screens/FlatDetailsScreen';
 import { navigationContainerTheme } from '../config/theme';
 import Link from '../components/UI/Link';
-import { RootStackParamList } from '../types/types';
+import { RootStackParamList } from '../types/navigationTypes';
 import TaskDetailsScreen from '../screens/TaskDetailsScreen';
 import NewFlatInfoScreen from '../screens/NewFlatInfoScreen';
 import NewFlatScreen from '../screens/NewFlatScreen';

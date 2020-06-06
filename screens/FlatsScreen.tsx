@@ -24,7 +24,7 @@ import Flat from '../models/flat';
 import NotificationCard from '../components/UI/NotificationCard';
 import FloatingCard from '../components/FloatingCard';
 import { StateError } from '../store/ReactTypes/customReactTypes';
-import {  FlatDetailsScreenNavigationProps } from '../types/types';
+import {  FlatDetailsScreenNavigationProps } from '../types/navigationTypes';
 import { Placeholder } from 'rn-placeholder';
 import { PlaceholderLine, Shine } from '../components/UI/Placeholder/Placeholder';
 

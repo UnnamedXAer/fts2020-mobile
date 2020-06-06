@@ -22,12 +22,12 @@ import Link from '../components/UI/Link';
 import FlatTasksList from '../components/Flat/FlatTasksList';
 import {
 	FlatDetailsScreenRouteProps,
-	FlatDetailsScreenNavigationProp,
-} from '../types/types';
+	FlatDetailsScreenNavigationProps,
+} from '../types/navigationTypes';
 
 interface Props {
 	route: FlatDetailsScreenRouteProps;
-	navigation: FlatDetailsScreenNavigationProp;
+	navigation: FlatDetailsScreenNavigationProps;
 }
 
 const dimensions = Dimensions.get('screen');

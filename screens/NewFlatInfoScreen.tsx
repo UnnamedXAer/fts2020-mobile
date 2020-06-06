@@ -12,7 +12,7 @@ import { withTheme, Paragraph, Divider, Title } from 'react-native-paper';
 import { Theme } from 'react-native-paper/lib/typescript/src/types';
 import Header from '../components/UI/Header';
 import CustomButton from '../components/UI/CustomButton';
-import { NewFlatInfoScreenNavigationProps } from '../types/types';
+import { NewFlatInfoScreenNavigationProps } from '../types/navigationTypes';
 
 interface Props {
 	theme: Theme;

@@ -22,8 +22,8 @@ import Link from '../components/UI/Link';
 import FlatTasksList from '../components/Flat/FlatTasksList';
 import {
 	TaskDetailsScreenRouteProps,
-	TaskDetailsScreenNavigationProp,
-} from '../types/types';
+	TaskDetailsScreenNavigationProps,
+} from '../types/navigationTypes';
 import { fetchTaskOwner, fetchTaskMembers } from '../store/actions/tasks';
 import PeriodsTable from '../components/Task/PeriodsTable';
 import HttpErrorParser from '../utils/parseError';
@@ -31,7 +31,7 @@ import { fetchTaskPeriods } from '../store/actions/periods';
 
 interface Props {
 	route: TaskDetailsScreenRouteProps;
-	navigation: TaskDetailsScreenNavigationProp;
+	navigation: TaskDetailsScreenNavigationProps;
 }
 
 const dimensions = Dimensions.get('screen');

@@ -12,8 +12,6 @@ interface Props {
 }
 
 const PeriodsTable: React.FC<Props> = ({ periods }) => {
-	console.log(periods);
-
 	return (
 		<DataTable>
 			<DataTable.Header>
@@ -24,7 +22,7 @@ const PeriodsTable: React.FC<Props> = ({ periods }) => {
 
 			{periods?.map((period) => {
 				return (
-					<DataTable.Row>
+					<DataTable.Row key={period.id}>
 						<DataTable.Cell>{period.assignedTo.emailAddress}</DataTable.Cell>
 						<DataTable.Cell>
 							{moment(period.endDate).format('ll')}
@@ -45,9 +43,7 @@ const PeriodsTable: React.FC<Props> = ({ periods }) => {
 				<DataTable.Pagination
 					page={1}
 					numberOfPages={3}
-					onPageChange={(page) => {
-						console.log(page);
-					}}
+					onPageChange={(page) => {}}
 					label={`${1}-${periods.length < 10 ? periods.length : 10} of ${
 						periods?.length
 					}`}

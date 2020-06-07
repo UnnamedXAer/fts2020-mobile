@@ -2,6 +2,7 @@ import React from 'react';
 import { TextInputProps } from 'react-native-paper/lib/typescript/src/components/TextInput/TextInput';
 import { TextInput, Theme, withTheme, HelperText } from 'react-native-paper';
 import { FormState } from '../../hooks/useForm';
+import { TextInput as TextInputType } from 'react-native';
 
 interface Props extends TextInputProps {
 	theme: Theme;
@@ -11,7 +12,7 @@ interface Props extends TextInputProps {
 	blur: (name: any) => void;
 }
 
-const Input: React.FC<Props> = React.forwardRef((props, ref) => {
+const Input = React.forwardRef<TextInputType, Props>((props, ref) => {
 	const { formState, theme, name, blur, textChanged } = props;
 
 	return (

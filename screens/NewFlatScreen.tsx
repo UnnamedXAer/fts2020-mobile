@@ -42,7 +42,7 @@ const NewFlatScreen: React.FC<Props> = ({ theme, navigation }) => {
 		(state: RootState) => state.flats.createdFlatsTmpIds[tmpFlatId]
 	);
 	const dispatch = useDispatch();
-	const descriptionInpRef: MutableRefObject<TextInput | undefined> = useRef();
+	const descriptionInpRef: MutableRefObject<TextInput | null> = useRef(null);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<StateError>(null);
 	const [formState, dispatchForm] = useForm<NewFlatFormFields>(initialState);
@@ -171,7 +171,7 @@ const NewFlatScreen: React.FC<Props> = ({ theme, navigation }) => {
 							returnKeyLabel="submit"
 							multiline
 							numberOfLines={3}
-							ref={descriptionInpRef as MutableRefObject<TextInput>}
+							ref={descriptionInpRef}
 							onSubmitEditing={submitHandler}
 							disabled={loading}
 							formState={formState}

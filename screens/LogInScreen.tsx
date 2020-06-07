@@ -43,7 +43,7 @@ const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 
 	const dispatch = useDispatch();
 
-	const passwordInpRef: MutableRefObject<TextInput | undefined> = useRef();
+	const passwordInpRef: MutableRefObject<TextInput | null> = useRef(null);
 
 	const fieldTextChangeHandler = (fieldName: FormFields, txt: string) => {
 		dispatchForm({
@@ -147,7 +147,7 @@ const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 							returnKeyType="done"
 							returnKeyLabel="Submit"
 							onSubmitEditing={submitHandler}
-							ref={passwordInpRef as MutableRefObject<TextInput>}
+							ref={passwordInpRef}
 							disabled={loading}
 							textChanged={fieldTextChangeHandler}
 							blur={inputBlurHandler}

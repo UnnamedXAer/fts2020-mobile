@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { RefObject } from 'react';
 import {
 	ViewStyle,
 	TextStyle,
@@ -22,21 +22,26 @@ interface Props {
 	textStyle?: TextStyle;
 	loading?: boolean;
 	disabled?: boolean;
-	onPress: ((event: GestureResponderEvent) => void) & (() => void | null | Promise<void>);
+	onPress: ((event: GestureResponderEvent) => void) &
+		(() => void | null | Promise<void>);
 	accent?: boolean;
 }
 
-const CustomButton: React.FC<Props> = (props) => {
+const CustomButton = React.forwardRef<View, Props>((props, ref) => {
 	const { theme } = props;
 	return (
 		<TouchableRipple
 			style={props.style}
 			rippleColor={!props.accent ? Colors.teal100 : Colors.orange100}
 			underlayColor={!props.accent ? Colors.teal100 : Colors.orange100}
-            onPress={props.onPress}
-            disabled={props.disabled}
+			onPress={
+				props.onPress as
+					| (((event: GestureResponderEvent) => void) & (() => void | null))
+					| undefined
+			}
+			disabled={props.disabled}
 		>
-			<View style={styles.container}>
+			<View style={styles.container} ref={ref}>
 				<Text
 					style={[
 						styles.text,
@@ -65,7 +70,7 @@ const CustomButton: React.FC<Props> = (props) => {
 			</View>
 		</TouchableRipple>
 	);
-};
+});
 
 const styles = StyleSheet.create({
 	container: {

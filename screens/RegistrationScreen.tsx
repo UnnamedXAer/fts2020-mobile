@@ -44,9 +44,9 @@ const RegistrationScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 
 	const dispatch = useDispatch();
 
-	const passwordInpRef: MutableRefObject<TextInput | undefined> = useRef();
-	const confirmPasswordInpRef: MutableRefObject<TextInput | undefined> = useRef();
-	const userNameInpRef: MutableRefObject<TextInput | undefined> = useRef();
+	const passwordInpRef: MutableRefObject<TextInput | null> = useRef(null);
+	const confirmPasswordInpRef: MutableRefObject<TextInput | null> = useRef(null);
+	const userNameInpRef: MutableRefObject<TextInput | null> = useRef(null);
 
 	const fieldTextChangeHandler = (fieldName: FormFields, txt: string) => {
 		dispatchForm({
@@ -151,7 +151,7 @@ const RegistrationScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 							returnKeyType="next"
 							returnKeyLabel="next"
 							onSubmitEditing={() => passwordInpRef!.current!.focus()}
-							ref={userNameInpRef as MutableRefObject<TextInput>}
+							ref={userNameInpRef}
 							disabled={loading}
 							formState={formState}
 							textChanged={fieldTextChangeHandler}
@@ -169,7 +169,7 @@ const RegistrationScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 							onSubmitEditing={() =>
 								confirmPasswordInpRef!.current!.focus()
 							}
-							ref={passwordInpRef as MutableRefObject<TextInput>}
+							ref={passwordInpRef}
 							disabled={loading}
 							formState={formState}
 							textChanged={fieldTextChangeHandler}
@@ -185,7 +185,7 @@ const RegistrationScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 							returnKeyType="done"
 							returnKeyLabel="Submit"
 							onSubmitEditing={submitHandler}
-							ref={confirmPasswordInpRef as MutableRefObject<TextInput>}
+							ref={confirmPasswordInpRef}
 							disabled={loading}
 							formState={formState}
 							textChanged={fieldTextChangeHandler}

@@ -6,7 +6,6 @@ import {
 	KeyboardAvoidingView,
 	TouchableWithoutFeedback,
 	Keyboard,
-	StatusBar,
 	TextInput,
 } from 'react-native';
 import { withTheme } from 'react-native-paper';
@@ -137,7 +136,11 @@ const NewFlatScreen: React.FC<Props> = ({ theme, navigation }) => {
 	};
 
 	return (
-		<KeyboardAvoidingView style={styles.keyboardAvoidingView} behavior="height">
+		<KeyboardAvoidingView
+			style={styles.keyboardAvoidingView}
+			behavior="height"
+			keyboardVerticalOffset={100}
+		>
 			<TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
 				<ScrollView
 					contentContainerStyle={[

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
 	View,
 	StyleSheet,
@@ -24,7 +24,7 @@ import Flat from '../models/flat';
 import NotificationCard from '../components/UI/NotificationCard';
 import FloatingCard from '../components/FloatingCard';
 import { StateError } from '../store/ReactTypes/customReactTypes';
-import {  FlatDetailsScreenNavigationProps } from '../types/navigationTypes';
+import { FlatDetailsScreenNavigationProps } from '../types/navigationTypes';
 import { Placeholder } from 'rn-placeholder';
 import { PlaceholderLine, Shine } from '../components/UI/Placeholder/Placeholder';
 
@@ -40,25 +40,23 @@ const FlatsScreen: React.FC<Props> = ({ theme, navigation }) => {
 	const [error, setError] = useState<StateError>(null);
 	const [refreshing, setRefreshing] = useState(false);
 
-	const loadFlats = React.useMemo(
-		() => async () => {
-			setError(null);
-			try {
-				await dispatch(fetchFlats());
-			} catch (err) {
-				const error = new HttpErrorParser(err);
-				const msg = error.getMessage();
-				setError(msg);
-			}
-		},
-		[dispatch]
-	);
+	const loadFlats = useCallback(async () => {
+		setError(null);
+		try {
+			await dispatch(fetchFlats());
+		} catch (err) {
+			const error = new HttpErrorParser(err);
+			const msg = error.getMessage();
+			setError(msg);
+		}
+	}, [dispatch]);
+
 	useEffect(() => {
 		setLoading(true);
 		loadFlats().then(() => {
 			setLoading(false);
 		});
-	}, []);
+	}, [loadFlats]);
 
 	const refreshHandler = async () => {
 		setRefreshing(true);

@@ -88,9 +88,12 @@ export const tryAuthorize = (): ThunkAction<Promise<void>, RootState, any, Autho
 				payload: userObj,
 			});
 
-			setTimeout(() => {
-				dispatch(logOut());
-			}, Date.now() - expirationTime);
+			const expiresIn = +expirationTime - Date.now();
+			if (expiresIn < 1000 * 60) {
+				setTimeout(() => {
+					dispatch(logOut());
+				}, expiresIn);
+			}
 		} else {
 			throw new Error('Auto-authorization was not possible.');
 		}

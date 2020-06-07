@@ -8,9 +8,11 @@ import {
 	TasksActionTypes,
 	FlatsActionTypes,
 	AuthActionTypes,
+	UsersActionTypes,
 } from './actionTypes';
 import RootState, { StoreAction } from '../storeTypes';
 import User from '../../models/user';
+import { FetchUserAction, mapApiUserDataToModel } from './users';
 
 type AuthorizeActionPayload = {
 	user: User;
@@ -25,21 +27,13 @@ type AuthorizeAction = {
 export const authorize = (
 	credentials: Credentials,
 	isLogIn: boolean
-): ThunkAction<Promise<void>, RootState, any, AuthorizeAction> => {
+): ThunkAction<Promise<void>, RootState, any, AuthorizeAction | FetchUserAction> => {
 	return async (dispatch, _getState) => {
 		const url = `/auth/${isLogIn ? 'login' : 'register'}`;
 		try {
 			const { data } = await axios.post(url, credentials);
 
-			const user = new User(
-				data.user.id,
-				data.user.emailAddress,
-				data.user.userName,
-				data.user.provider,
-				new Date(data.user.joinDate),
-				data.user.avatarUrl,
-				data.user.active
-			);
+			const user = mapApiUserDataToModel(data.user);
 
 			const expirationTime = Date.now() + data.expiresIn;
 
@@ -49,6 +43,11 @@ export const authorize = (
 					user,
 					expirationTime,
 				},
+			});
+
+			dispatch({
+				type: UsersActionTypes.SetUser,
+				payload: user,
 			});
 
 			if (data.expiresIn < 1000 * 60 * 5) {
@@ -64,28 +63,34 @@ export const authorize = (
 	};
 };
 
-export const tryAuthorize = (): ThunkAction<Promise<void>, RootState, any, AuthorizeAction> => {
+export const tryAuthorize = (): ThunkAction<Promise<void>, RootState, any, AuthorizeAction | FetchUserAction> => {
 	return async (dispatch) => {
-		const [[_, savedUser], [_2, expirationTime]] = await AsyncStorage.multiGet(['loggedUser', 'expirationTime']);
+		const [[_, savedUser], [_2, savedExpirationTime]] = await AsyncStorage.multiGet(['loggedUser', 'expirationTime']);
+		const expirationTime = savedExpirationTime ? +savedExpirationTime : 0;
+
 		if (
 			savedUser &&
 			expirationTime &&
-			new Date(+expirationTime).getTime() > Date.now()
+			new Date(expirationTime).getTime() > Date.now()
 		) {
+			const userObj = JSON.parse(savedUser) as User;
+
 			dispatch({
 				type: AUTHORIZE,
 				payload: {
-					user: JSON.parse(savedUser),
-					expirationTime: +expirationTime,
+					user: userObj,
+					expirationTime,
 				},
 			});
 
-			const expiresIn = +expirationTime - Date.now();
-			if (expiresIn < 999 * 60) {
-				setTimeout(() => {
-					dispatch(logOut());
-				}, expiresIn);
-			}
+			dispatch({
+				type: UsersActionTypes.SetUser,
+				payload: userObj,
+			});
+
+			setTimeout(() => {
+				dispatch(logOut());
+			}, Date.now() - expirationTime);
 		} else {
 			throw new Error('Auto-authorization was not possible.');
 		}

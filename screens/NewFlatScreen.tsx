@@ -188,10 +188,16 @@ const NewFlatScreen: React.FC<Props> = ({ theme, navigation }) => {
 						)}
 					</View>
 					<View style={styles.actions}>
-						<CustomButton accent onPress={() => navigation.popToTop()}>
+						<CustomButton
+							accent
+							onPress={() => navigation.popToTop()}
+							disabled={loading}
+						>
 							CANCEL
 						</CustomButton>
-						<CustomButton onPress={submitHandler}>NEXT</CustomButton>
+						<CustomButton onPress={submitHandler} disabled={loading}>
+							NEXT
+						</CustomButton>
 					</View>
 				</ScrollView>
 			</TouchableWithoutFeedback>

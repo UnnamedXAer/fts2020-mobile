@@ -123,7 +123,7 @@ const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 						{ backgroundColor: theme.colors.surface },
 					]}
 				>
-					<Header style={styles.header}>Sign Up</Header>
+					<Header style={styles.header}>Sign In</Header>
 					<View style={styles.inputContainer}>
 						<Input
 							style={styles.input}

@@ -50,12 +50,6 @@ export const authorize = (
 				payload: user,
 			});
 
-			if (data.expiresIn < 1000 * 60 * 5) {
-				setTimeout(() => {
-					dispatch(logOut());
-				}, data.expiresIn);
-			}
-
 			await AsyncStorage.multiSet([['loggedUser', JSON.stringify(user)], ['expirationTime', '' + expirationTime]]);
 		} catch (err) {
 			throw err;

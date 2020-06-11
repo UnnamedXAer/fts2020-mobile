@@ -29,12 +29,13 @@ import RootState from '../store/storeTypes';
 import User from '../models/user';
 import { NewFlatMember } from '../types/types';
 import { checkEmailAddress } from '../utils/validation';
-import InviteMembersEmailList, {
-	MembersStatus,
-} from '../components/Flat/InviteMembersEmailList';
 import { mapApiUserDataToModel, APIUser } from '../store/actions/users';
 import { UsersActionTypes } from '../store/actions/actionTypes';
 import axios from '../axios/axios';
+import { MembersStatus } from '../components/Flat/InvitationMembersEmailListItem';
+import InviteMembersEmailList from '../components/Flat/InviteMembersEmailList';
+import HttpErrorParser from '../utils/parseError';
+import NotificationCard from '../components/UI/NotificationCard';
 
 interface Props {
 	theme: Theme;
@@ -74,9 +75,11 @@ const InviteMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 	}, []);
 
 	const inputBlurHandler = () => {
-		const email = inputValue.trim().toLowerCase();
-		const emailValid = checkEmailAddress(email);
-		setInputError(!emailValid);
+		if (inputValue.length > 0) {
+			const email = inputValue.trim().toLowerCase();
+			const emailValid = checkEmailAddress(email);
+			setInputError(!emailValid);
+		}
 	};
 
 	const removeMemberHandler = (email: NewFlatMember['emailAddress']) => {
@@ -96,7 +99,7 @@ const InviteMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 
 	const getUserByEmail = useCallback(
 		async (email: NewFlatMember['emailAddress']) => {
-			let user = users.find((x) => x.emailAddress === email);
+			let user = users.find((x) => x.emailAddress.toLowerCase() === email);
 
 			if (!user) {
 				const url = `/users?emailAddress=${email}`;
@@ -145,21 +148,28 @@ const InviteMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 	);
 
 	const addUserToMembers = (user: User, status: MembersStatus) => {
-		setMembersStatus((prevState) => ({
-			...prevState,
-			[user.emailAddress]: MembersStatus.accepted,
-		}));
-		setMembersStatus((prevState) => ({
-			...prevState,
-			[user.emailAddress]: status,
-		}));
+		user.emailAddress = user.emailAddress.toLowerCase();
+		setMembersStatus((prevState) => {
+			const updatedState = { ...prevState };
+			updatedState[user.emailAddress] = MembersStatus.accepted;
+			return updatedState;
+		});
+
+		setTimeout(
+			() =>
+				setMembersStatus((prevState) => ({
+					...prevState,
+					[user.emailAddress]: status,
+				})),
+			700
+		);
 
 		setMembers((prevSate) => {
 			const idx = prevSate.findIndex((x) => x.emailAddress === user.emailAddress);
 			const updatedState = [...prevSate];
 			const updatedUser = new User(
 				user.id,
-				user.emailAddress.toLowerCase(),
+				user.emailAddress,
 				user.userName,
 				user.provider,
 				user.joinDate,
@@ -186,7 +196,9 @@ const InviteMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 			setInputError(false);
 			inputRef.current!.focus();
 		} else {
-			setInputError(true);
+			if (inputValue.length > 0) {
+				setInputError(true);
+			}
 		}
 	};
 
@@ -212,8 +224,43 @@ const InviteMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 		}
 	};
 
-	const sendInvitationsHandler = () => {
-		console.log('members', members);
+	const sendInvitationsHandler = async () => {
+		const emails: User['emailAddress'][] = [];
+		members.forEach(({ emailAddress }) => {
+			const status = membersStatus[emailAddress!];
+			if (
+				status !== MembersStatus.invalid &&
+				status !== MembersStatus.already_member &&
+				emailAddress !== loggedUser.emailAddress
+			) {
+				emails.push(emailAddress!);
+			}
+		});
+
+		if (emails.length === 0) {
+			return setError('There is no one to invite.');
+		}
+		setError(null);
+		setLoading(true);
+		try {
+			await axios.post(`/flats/${flatId}/members/invite`, {
+				members: emails,
+			});
+			if (inputRef.current) {
+				if (isNewFlat) {
+					navigation.replace('FlatDetails', { id: flatId });
+				} else {
+					navigation.pop();
+				}
+			}
+		} catch (err) {
+			if (inputRef.current) {
+				const error = new HttpErrorParser(err);
+				const msg = error.getMessage();
+				setError(msg);
+				setLoading(false);
+			}
+		}
 	};
 
 	return (
@@ -303,20 +350,36 @@ const InviteMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 							members={members}
 							formLoading={loading}
 							membersStatus={membersStatus}
-							onRemove={removeMemberHandler}
+							onEmailRemove={removeMemberHandler}
 							theme={theme}
 						/>
 					</View>
+					{error && (
+						<View style={{ width: '90%' }}>
+							<NotificationCard serverity="error">{error}</NotificationCard>
+						</View>
+					)}
 					<View style={styles.actions}>
 						<CustomButton
+							disabled={loading}
 							accent
-							onPress={() =>
-								navigation.navigate('FlatDetails', { id: flatId })
-							}
+							onPress={() => {
+								if (isNewFlat) {
+									navigation.replace('FlatDetails', { id: flatId });
+								} else {
+									navigation.pop();
+								}
+							}}
 						>
-							LATER
+							{isNewFlat ? 'LATER' : 'BACK'}
 						</CustomButton>
-						<CustomButton onPress={sendInvitationsHandler}>SEND</CustomButton>
+						<CustomButton
+							onPress={sendInvitationsHandler}
+							loading={loading}
+							disabled={loading}
+						>
+							SEND
+						</CustomButton>
 					</View>
 				</ScrollView>
 			</TouchableWithoutFeedback>
@@ -338,7 +401,7 @@ const styles = StyleSheet.create({
 	},
 	infoParagraphHelper: {
 		fontSize: 14,
-		color: '#666',
+		color: '#64b5f6',
 		marginVertical: 8,
 		textAlign: 'center',
 	},

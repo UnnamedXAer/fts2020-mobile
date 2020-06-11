@@ -1,18 +1,11 @@
 import React from 'react';
 import { StyleSheet } from 'react-native';
-import { Text, List, IconButton } from 'react-native-paper';
+import { Text, List } from 'react-native-paper';
 import { Theme } from 'react-native-paper/lib/typescript/src/types';
 import User from '../../models/user';
-
-export enum MembersStatus {
-	'loading',
-	'not_found',
-	'accepted',
-	'ok',
-	'error',
-	'invalid',
-	'already_member',
-}
+import InvitationMembersEmailListItem, {
+	MembersStatus,
+} from './InvitationMembersEmailListItem';
 
 interface Props {
 	emails: User['emailAddress'][];
@@ -22,7 +15,7 @@ interface Props {
 		[key: string]: MembersStatus;
 	};
 	formLoading: boolean;
-	onRemove: (email: string) => void;
+	onEmailRemove: (email: string) => void;
 	theme: Theme;
 }
 
@@ -32,21 +25,25 @@ const InviteMembersEmailList: React.FC<Props> = ({
 	loggedUser,
 	members,
 	membersStatus,
-	onRemove,
+	onEmailRemove,
 	theme,
 }) => {
 	const colors = theme.colors;
 
 	const items = emails.map((email) => {
 		const member = members.find((x) => x.emailAddress === email);
+		const isLoggedUser = loggedUser.id === member?.id;
 
 		return (
-			<List.Item
+			<InvitationMembersEmailListItem
 				key={email}
-				title={email}
-				description={member?.userName}
-				left={() => <List.Icon color="#000" icon="folder" />}
-				right={() => <IconButton color={colors.placeholder} icon="close" />}
+				colors={colors}
+				email={email}
+				member={member}
+				isLoggedUser={isLoggedUser}
+				memberStatus={membersStatus[email]}
+				formLoading={formLoading}
+				onRemove={onEmailRemove}
 			/>
 		);
 	});

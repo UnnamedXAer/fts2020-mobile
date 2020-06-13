@@ -18,6 +18,9 @@ import TaskDetailsScreen from '../screens/TaskDetailsScreen';
 import NewFlatInfoScreen from '../screens/NewFlatInfoScreen';
 import NewFlatScreen from '../screens/NewFlatScreen';
 import InviteMembersScreen from '../screens/InviteMembersScreen';
+import NewTaskNameScreen from '../screens/NewTask/NewTaskNameScreen';
+import NewTaskTimeScreen from '../screens/NewTask/NewTaskTimeScreen';
+import NewTaskMembersScreen from '../screens/NewTask/NewTaskMembersScreen';
 
 const RootStack = createStackNavigator<RootStackParamList>();
 const RootStackNavigator = () => {
@@ -57,6 +60,21 @@ const RootStackNavigator = () => {
 				name="TaskDetails"
 				options={{ title: 'View Task' }}
 				component={TaskDetailsScreen}
+			/>
+			<RootStack.Screen
+				name="NewTaskName"
+				options={{ title: 'New Task' }}
+				component={NewTaskNameScreen}
+			/>
+			<RootStack.Screen
+				name="NewTaskTime"
+				options={{ title: 'New Task' }}
+				component={NewTaskTimeScreen}
+			/>
+			<RootStack.Screen
+				name="NewTaskMembers"
+				options={{ title: 'New Task' }}
+				component={NewTaskMembersScreen}
 			/>
 		</RootStack.Navigator>
 	);

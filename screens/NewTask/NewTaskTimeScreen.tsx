@@ -1,0 +1,143 @@
+import React, { useRef, useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import {
+	StyleSheet,
+	View,
+	ScrollView,
+	KeyboardAvoidingView,
+	TouchableWithoutFeedback,
+	Keyboard,
+} from 'react-native';
+import { withTheme } from 'react-native-paper';
+import { Theme } from 'react-native-paper/lib/typescript/src/types';
+import { NewTaskTimeScreenNavigationProps } from '../../types/navigationTypes';
+import { StateError } from '../../store/ReactTypes/customReactTypes';
+import { validateFlatFields } from '../../utils/validation';
+import { TaskData } from '../../models/task';
+import HttpErrorParser from '../../utils/parseError';
+import Header from '../../components/UI/Header';
+import NotificationCard from '../../components/UI/NotificationCard';
+import CustomButton from '../../components/UI/CustomButton';
+
+interface Props {
+	theme: Theme;
+	navigation: NewTaskTimeScreenNavigationProps;
+}
+
+const NewTaskTimeScreen: React.FC<Props> = ({ theme, navigation }) => {
+	const dispatch = useDispatch();
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState<StateError>(null);
+	const isMounted = useRef(true);
+	useEffect(() => {
+		isMounted.current = true;
+		return () => {
+			isMounted.current = false;
+		};
+	}, []);
+
+	const submitHandler = async () => {
+		setError(null);
+		let isFormValid = true;
+
+		if (!isFormValid) {
+			setError('Please correct the form.');
+			return;
+		}
+		setLoading(true);
+
+		// const newTask = new TaskData({
+		// 	description: formState.values.description,
+		// 	name: formState.values.name,
+		// });
+
+		// try {
+		// 	await dispatch(createTask(newTask, tmpTaskId));
+		// 	if (isMounted.current) {
+		// 		navigation.pop();
+		// 	}
+		// } catch (err) {
+		// 	if (isMounted.current) {
+		// 		const errorData = new HttpErrorParser(err);
+		// 		const fieldsErrors = errorData.getFieldsErrors();
+		// 		fieldsErrors.forEach((x) =>
+		// 			dispatchForm({
+		// 				type: FormActionTypes.SetError,
+		// 				fieldId: x.param,
+		// 				error: x.msg,
+		// 			})
+		// 		);
+
+		// 		setError(errorData.getMessage());
+		// 		setLoading(false);
+		// 	}
+		// }
+	};
+
+	return (
+		<KeyboardAvoidingView
+			style={styles.keyboardAvoidingView}
+			behavior="height"
+			keyboardVerticalOffset={100}
+		>
+			<TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+				<ScrollView
+					contentContainerStyle={[
+						styles.screen,
+						{ backgroundColor: theme.colors.surface },
+					]}
+				>
+					<Header style={styles.header}>Add Task - Time</Header>
+					<View style={styles.inputContainer}>
+						{error && (
+							<NotificationCard serverity="error">{error}</NotificationCard>
+						)}
+					</View>
+					<View style={styles.actions}>
+						<CustomButton
+							accent
+							onPress={() => navigation.popToTop()}
+							disabled={loading}
+						>
+							CANCEL
+						</CustomButton>
+						<CustomButton onPress={submitHandler} disabled={loading}>
+							NEXT
+						</CustomButton>
+					</View>
+				</ScrollView>
+			</TouchableWithoutFeedback>
+		</KeyboardAvoidingView>
+	);
+};
+
+const styles = StyleSheet.create({
+	keyboardAvoidingView: {
+		flex: 1,
+	},
+	screen: {
+		flexDirection: 'column',
+		alignItems: 'center',
+	},
+	header: {
+		paddingTop: 16,
+		fontSize: 44,
+	},
+	infoParagraph: {
+		fontSize: 20,
+		marginVertical: 8,
+	},
+	inputContainer: {
+		width: '90%',
+		maxWidth: 400,
+		marginVertical: 4,
+	},
+	input: {
+		fontSize: 16,
+	},
+	actions: {
+		flexDirection: 'row',
+		alignItems: 'flex-end',
+	},
+});
+export default withTheme(NewTaskTimeScreen);

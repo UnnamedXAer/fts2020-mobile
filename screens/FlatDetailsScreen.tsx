@@ -241,6 +241,14 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 							}),
 						label: 'Invite a new member',
 					},
+					{
+						icon: 'table-plus',
+						onPress: () =>
+							navigation.navigate('NewTaskName', {
+								flatId: id,
+							}),
+						label: 'Add Task',
+					},
 				]}
 				onStateChange={({ open }) => {
 					setFabOpen(open);

@@ -1,5 +1,6 @@
 import { RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { TaskPeriodUnit } from '../models/task';
 
 export type RootStackParamList = {
 	Flats: undefined;
@@ -11,7 +12,24 @@ export type RootStackParamList = {
 	};
 	NewFlatInfo: undefined;
 	NewFlat: undefined;
-	InviteMembers: { flatId: number, isNewFlat: boolean };
+	InviteMembers: { flatId: number; isNewFlat: boolean };
+	NewTaskName: {
+		flatId: number;
+	};
+	NewTaskTime: {
+		flatId: number;
+		name: string;
+		description: string;
+	};
+	NewTaskMembers: {
+		flatId: number;
+		name: string;
+		description: string;
+		periodUnit: TaskPeriodUnit;
+		periodValue: number;
+		startDate: Date;
+		endDate: Date;
+	};
 };
 
 export type FlatDetailsScreenRouteProps = RouteProp<RootStackParamList, 'FlatDetails'>;
@@ -45,4 +63,25 @@ export type TaskDetailsScreenRouteProps = RouteProp<RootStackParamList, 'TaskDet
 export type TaskDetailsScreenNavigationProps = StackNavigationProp<
 	RootStackParamList,
 	'TaskDetails'
+>;
+
+export type NewTaskNameScreenRouteProps = RouteProp<RootStackParamList, 'NewTaskName'>;
+export type NewTaskNameScreenNavigationProps = StackNavigationProp<
+	RootStackParamList,
+	'NewTaskName'
+>;
+
+export type NewTaskTimeScreenRouteProps = RouteProp<RootStackParamList, 'NewTaskTime'>;
+export type NewTaskTimeScreenNavigationProps = StackNavigationProp<
+	RootStackParamList,
+	'NewTaskTime'
+>;
+
+export type NewTaskMembersScreenRouteProps = RouteProp<
+	RootStackParamList,
+	'NewTaskMembers'
+>;
+export type NewTaskMembersScreenNavigationProps = StackNavigationProp<
+	RootStackParamList,
+	'NewTaskMembers'
 >;

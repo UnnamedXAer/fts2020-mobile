@@ -84,3 +84,37 @@ export class UserTask {
 		this.active = active;
 	}
 }
+
+
+export class TaskData {
+	flatId: number
+	startDate: Date
+	endDate: Date
+	timePeriodUnit: TaskPeriodUnit
+	timePeriodValue: number
+	members: number[]
+	description: string
+	name: string
+
+	constructor(params: TaskData = {} as TaskData) {
+		const {
+			flatId,
+			startDate,
+			endDate,
+			timePeriodUnit,
+			timePeriodValue,
+			members,
+			description,
+			name,
+		} = params;
+
+		this.flatId = flatId;
+		this.name = name;
+		this.description = description;
+		this.startDate = startDate;
+		this.endDate = endDate;
+		this.timePeriodUnit = timePeriodUnit;
+		this.timePeriodValue = timePeriodValue;
+		this.members = members;
+	}
+}

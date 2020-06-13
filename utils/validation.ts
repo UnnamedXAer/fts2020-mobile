@@ -132,8 +132,9 @@ export function validateFlatFields(
             break;
     }
     return error;
-
 }
+
+export function validateTaskFields() { }
 
 function testImage(URL: string) {
     return new Promise((resolve, reject) => {

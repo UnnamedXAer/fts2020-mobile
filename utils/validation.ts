@@ -134,7 +134,43 @@ export function validateFlatFields(
     return error;
 }
 
-export function validateTaskFields() { }
+export function validateTaskFields(
+    fieldId: NewFlatFormFields,
+    formValues: { [key in NewFlatFormFields]: string },
+): StateError {
+    let error = null;
+    switch (fieldId) {
+        case 'name':
+            const notAllowedUserNameValues = [
+                'admin',
+                'administrator',
+                'moderator',
+                'null',
+                'undefined',
+                'mod'
+            ];
+            if (formValues[fieldId].length < 2) {
+                error = 'The Name must be minimum 2 characters long.';
+            }
+            else if (formValues[fieldId].length > 50) {
+                error = 'The Name must be max 50 characters long.';
+            }
+            else if (
+                notAllowedUserNameValues.includes(fieldId)
+            ) {
+                error = 'This value is not allowed as Name.';
+            }
+            break;
+        case 'description':
+            if (formValues[fieldId].length > 500) {
+                error = 'The Description can be max 500 characters long.';
+            }
+            break;
+        default:
+            break;
+    }
+    return error;
+}
 
 function testImage(URL: string) {
     return new Promise((resolve, reject) => {

@@ -34,7 +34,7 @@ const Stepper: React.FC<Props> = ({ steps, currentStep, showTitle }) => {
 				? 'prevSteps'
 				: 'nextSteps';
 		stepsElements.push(
-			<>
+			<React.Fragment key={i}>
 				<View style={[styles.step, styles[stepStyleName]]}>
 					<Text style={[styles.stepNumber, styles[stepStyleName + 'Number']]}>
 						{i + 1}
@@ -48,7 +48,7 @@ const Stepper: React.FC<Props> = ({ steps, currentStep, showTitle }) => {
 						}}
 					/>
 				)}
-			</>
+			</React.Fragment>
 		);
 	}
 

@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
 	StyleSheet,
 	View,
@@ -10,24 +10,32 @@ import {
 } from 'react-native';
 import { withTheme } from 'react-native-paper';
 import { Theme } from 'react-native-paper/lib/typescript/src/types';
-import { NewTaskMembersScreenNavigationProps } from '../../types/navigationTypes';
+import {
+	NewTaskMembersScreenNavigationProps,
+	NewTaskMembersScreenRouteProps,
+} from '../../types/navigationTypes';
 import { StateError } from '../../store/ReactTypes/customReactTypes';
 import { TaskData } from '../../models/task';
 import HttpErrorParser from '../../utils/parseError';
 import Header from '../../components/UI/Header';
 import NotificationCard from '../../components/UI/NotificationCard';
 import CustomButton from '../../components/UI/CustomButton';
+import RootState from '../../store/storeTypes';
 
 interface Props {
 	theme: Theme;
 	navigation: NewTaskMembersScreenNavigationProps;
+	route: NewTaskMembersScreenRouteProps;
 }
 
-const NewTaskMembersScreen: React.FC<Props> = ({ theme, navigation }) => {
+const NewTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 	const dispatch = useDispatch();
 
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<StateError>(null);
+	const task = useSelector(
+		(state: RootState) => state.tasks.tasks.find((x) => x.id === route.params.id)!
+	);
 
 	const isMounted = useRef(true);
 	useEffect(() => {

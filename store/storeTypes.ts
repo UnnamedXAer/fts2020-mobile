@@ -29,9 +29,10 @@ export type FlatsState = {
 
 export type TasksState = {
 	tasks: Task[];
-	tasksLoadTimes: { [key: number]: number }
-	userTasks: UserTask[]
+	tasksLoadTimes: { [key: number]: number };
+	userTasks: UserTask[];
 	userTasksLoadTime: number;
+	createdTasksTmpIds: { [key: string]: number };
 };
 
 export type PeriodsState = {

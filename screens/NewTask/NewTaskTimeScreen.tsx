@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
 	StyleSheet,
 	View,
@@ -7,13 +7,18 @@ import {
 	KeyboardAvoidingView,
 	TouchableWithoutFeedback,
 	Keyboard,
+	TouchableOpacity,
+	Task,
 } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { withTheme, HelperText, TextInput } from 'react-native-paper';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { Theme } from 'react-native-paper/lib/typescript/src/types';
-import { NewTaskTimeScreenNavigationProps } from '../../types/navigationTypes';
+import moment from 'moment';
+import {
+	NewTaskTimeScreenNavigationProps,
+	NewTaskTimeScreenRouteProps,
+} from '../../types/navigationTypes';
 import { StateError } from '../../store/ReactTypes/customReactTypes';
-import { validateFlatFields } from '../../utils/validation';
 import { TaskData, TaskPeriodUnit } from '../../models/task';
 import HttpErrorParser from '../../utils/parseError';
 import Header from '../../components/UI/Header';
@@ -21,17 +26,20 @@ import NotificationCard from '../../components/UI/NotificationCard';
 import CustomButton from '../../components/UI/CustomButton';
 import Stepper from '../../components/UI/Stepper';
 import Picker from '../../components/UI/Picker';
-import moment from 'moment';
+import { getRandomInt } from '../../utils/random';
+import { createTask } from '../../store/actions/tasks';
+import RootState from '../../store/storeTypes';
 
 interface Props {
 	theme: Theme;
 	navigation: NewTaskTimeScreenNavigationProps;
+	route: NewTaskTimeScreenRouteProps;
 }
 
 const defaultStartDay = moment().startOf('day').toDate();
-const defaultEndDay = moment(defaultStartDay).add('months', 6).toDate();
+const defaultEndDay = moment(defaultStartDay).add(6, 'months').toDate();
 
-const NewTaskTimeScreen: React.FC<Props> = ({ theme, navigation }) => {
+const NewTaskTimeScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 	const dispatch = useDispatch();
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<StateError>(null);
@@ -39,10 +47,16 @@ const NewTaskTimeScreen: React.FC<Props> = ({ theme, navigation }) => {
 	const [periodValue, setPeriodValue] = useState('1');
 	const [periodValueError, setPeriodValueError] = useState<StateError>(null);
 	const [periodValueTouched, setPeriodValueTouched] = useState(false);
-	const [showDatePicker, setShowDatePicker] = useState(false);
+	const [datePickerField, setDatePickerField] = useState<
+		'startDate' | 'endDate' | null
+	>(null);
 	const [startDate, setStartDate] = useState(defaultStartDay);
 	const [endDate, setEndDate] = useState(defaultEndDay);
 	const [datesError, setDatesError] = useState<StateError>(null);
+	const [tmpId] = useState(String.fromCharCode(getRandomInt(97, 123)) + Date.now());
+	const newCreatedTaskId = useSelector(
+		(state: RootState) => state.tasks.createdTasksTmpIds[tmpId]
+	);
 
 	const isMounted = useRef(true);
 	useEffect(() => {
@@ -51,6 +65,13 @@ const NewTaskTimeScreen: React.FC<Props> = ({ theme, navigation }) => {
 			isMounted.current = false;
 		};
 	}, []);
+
+	useEffect(() => {
+		if (newCreatedTaskId) {
+			navigation.pop();
+			navigation.replace('NewTaskMembers', { id: newCreatedTaskId });
+		}
+	}, [newCreatedTaskId, navigation]);
 
 	const periodValueTextChangeHandler = (text: string) => {
 		const sanitizedVal = text.replace(/[^0-9]/g, '');
@@ -68,17 +89,25 @@ const NewTaskTimeScreen: React.FC<Props> = ({ theme, navigation }) => {
 		} else setPeriodValueError(null);
 	};
 
-	const dateChangeHandler = (date: Date, fieldName: 'startDate' | 'endDate') => {
+	const dateChangeHandler = (
+		date: Date | undefined,
+		fieldName: 'startDate' | 'endDate'
+	) => {
+		setDatePickerField(null);
 		let datesOk = true;
-		if (fieldName === 'startDate') {
-			setStartDate(date);
-			datesOk = date < endDate;
-		} else {
-			setEndDate(date);
-			datesOk = date > startDate;
-		}
-		if (datesOk) {
-			setDatesError('"End Date" must be greater than "Start Date"');
+		if (date) {
+			if (fieldName === 'startDate') {
+				setStartDate(date);
+				datesOk = date < endDate;
+			} else if (fieldName === 'endDate') {
+				setEndDate(date);
+				datesOk = date > startDate;
+			} else {
+				datesOk = startDate < endDate;
+			}
+			setDatesError(
+				datesOk ? null : '"End Date" must be greater than "Start Date"'
+			);
 		}
 	};
 
@@ -92,119 +121,148 @@ const NewTaskTimeScreen: React.FC<Props> = ({ theme, navigation }) => {
 		}
 		setLoading(true);
 
-		// const newTask = new TaskData({
-		// 	description: formState.values.description,
-		// 	name: formState.values.name,
-		// });
+		const taskData = {
+			flatId: route.params.flatId,
+			description: route.params.description,
+			name: route.params.name,
+			timePeriodUnit: periodUnit,
+			timePeriodValue: +periodValue,
+			startDate,
+			endDate,
+		} as TaskData;
 
-		// try {
-		// 	await dispatch(createTask(newTask, tmpTaskId));
-		// 	if (isMounted.current) {
-		// 		navigation.pop();
-		// 	}
-		// } catch (err) {
-		// 	if (isMounted.current) {
-		// 		const errorData = new HttpErrorParser(err);
-		// 		const fieldsErrors = errorData.getFieldsErrors();
-		// 		fieldsErrors.forEach((x) =>
-		// 			dispatchForm({
-		// 				type: FormActionTypes.SetError,
-		// 				fieldId: x.param,
-		// 				error: x.msg,
-		// 			})
-		// 		);
+		try {
+			await dispatch(createTask(taskData, tmpId));
+		} catch (err) {
+			if (isMounted.current) {
+				const errorData = new HttpErrorParser(err);
+				const fieldsErrors = errorData.getFieldsErrors();
+				let msg = errorData.getMessage();
 
-		// 		setError(errorData.getMessage());
-		// 		setLoading(false);
-		// 	}
-		// }
+				fieldsErrors.forEach((x) => {
+					const field =
+						x.param === 'timePeriodValue'
+							? 'Period duraion value'
+							: x.param === 'timePeriodUnit'
+							? 'Period duraion unit'
+							: x.param === 'name'
+							? 'Name'
+							: 'Description';
+
+					msg += `\n${field}: ${x.msg}`;
+				});
+
+				setError(msg);
+			}
+		}
+		isMounted.current && setLoading(false);
 	};
-
 	return (
 		<KeyboardAvoidingView
 			style={styles.keyboardAvoidingView}
 			behavior="height"
 			keyboardVerticalOffset={100}
 		>
-			{/* <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}> */}
-			<ScrollView
-				contentContainerStyle={[
-					styles.screen,
-					{ backgroundColor: theme.colors.surface },
-				]}
-			>
-				<Header style={styles.header}>Add Task - Time</Header>
-				<Stepper steps={3} currentStep={2} />
-				<View style={styles.inputContainer}>
-					<Picker
-						options={[
-							{ label: 'Day', value: TaskPeriodUnit.DAY },
-							{ label: 'Week', value: TaskPeriodUnit.WEEK },
-							{ label: 'Month', value: TaskPeriodUnit.MONTH },
-						]}
-						selectedValue={periodUnit}
-						onChange={setPeriodUnit}
-						disabled={loading}
-						label="Period duration unit"
-					/>
-				</View>
-				<View style={styles.inputContainer}>
-					<TextInput
-						label="Period duration value"
-						mode="outlined"
-						value={periodValue}
-						keyboardType="numeric"
-						onChangeText={periodValueTextChangeHandler}
-						error={Boolean(periodValueError)}
-						onBlur={periodValueBlurHandler}
-					/>
-					<HelperText type="error" visible={Boolean(periodValueError)}>
-						{periodValueError}
-					</HelperText>
-				</View>
-				<View style={styles.inputContainer}>
-					<TextInput
-						label="Start date"
-						mode="outlined"
-						value={moment(startDate).format('LL')}
-						error={Boolean(datesError)}
-					/>
-					<TextInput
-						label="End date"
-						mode="outlined"
-						value={moment(endDate).format('LL')}
-						error={Boolean(datesError)}
-					/>
-					<HelperText type="error" visible={Boolean(datesError)}>
-						{datesError}
-					</HelperText>
-				</View>
-				<View style={styles.inputContainer}>
-					{error && (
-						<NotificationCard serverity="error">{error}</NotificationCard>
+			<TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+				<ScrollView
+					contentContainerStyle={[
+						styles.screen,
+						{ backgroundColor: theme.colors.surface },
+					]}
+				>
+					<Header style={styles.header}>Add Task - Time</Header>
+					<Stepper steps={3} currentStep={2} />
+					<View style={styles.inputContainer}>
+						<Picker
+							options={[
+								{ label: 'Day', value: TaskPeriodUnit.DAY },
+								{ label: 'Week', value: TaskPeriodUnit.WEEK },
+								{ label: 'Month', value: TaskPeriodUnit.MONTH },
+							]}
+							selectedValue={periodUnit}
+							onChange={setPeriodUnit}
+							disabled={loading}
+							label="Period duration unit"
+						/>
+					</View>
+					<View style={styles.inputContainer}>
+						<TextInput
+							label="Period duration value"
+							mode="outlined"
+							value={periodValue}
+							keyboardType="numeric"
+							onChangeText={periodValueTextChangeHandler}
+							error={Boolean(periodValueError)}
+							onBlur={periodValueBlurHandler}
+						/>
+						<HelperText type="error" visible={Boolean(periodValueError)}>
+							{periodValueError}
+						</HelperText>
+					</View>
+					<View style={styles.inputContainer}>
+						<TouchableOpacity
+							onPress={() => {
+								setDatePickerField('startDate');
+							}}
+						>
+							<TextInput
+								label="Start date"
+								mode="outlined"
+								value={moment(startDate).format('LL')}
+								error={Boolean(datesError)}
+								editable={false}
+							/>
+						</TouchableOpacity>
+					</View>
+					<View style={styles.inputContainer}>
+						<TouchableOpacity
+							onPress={() => {
+								setDatePickerField('endDate');
+							}}
+						>
+							<TextInput
+								label="End date"
+								mode="outlined"
+								value={moment(endDate).format('LL')}
+								error={Boolean(datesError)}
+								editable={false}
+							/>
+						</TouchableOpacity>
+						<HelperText type="error" visible={Boolean(datesError)}>
+							{datesError}
+						</HelperText>
+					</View>
+					<View style={styles.inputContainer}>
+						{error && (
+							<NotificationCard serverity="error">{error}</NotificationCard>
+						)}
+					</View>
+					<View style={styles.actions}>
+						<CustomButton
+							accent
+							onPress={() => navigation.popToTop()}
+							disabled={loading}
+						>
+							CANCEL
+						</CustomButton>
+						<CustomButton onPress={submitHandler} disabled={loading}>
+							CREATE
+						</CustomButton>
+					</View>
+					{datePickerField !== null && (
+						<DateTimePicker
+							display="default"
+							is24Hour
+							value={datePickerField === 'startDate' ? startDate : endDate}
+							minimumDate={defaultStartDay}
+							mode="date"
+							onChange={(ev, date) =>
+								dateChangeHandler(date, datePickerField)
+							}
+						/>
 					)}
-				</View>
-				<View style={styles.actions}>
-					<CustomButton
-						accent
-						onPress={() => navigation.popToTop()}
-						disabled={loading}
-					>
-						CANCEL
-					</CustomButton>
-					<CustomButton onPress={submitHandler} disabled={loading}>
-						NEXT
-					</CustomButton>
-				</View>
-				{showDatePicker && (
-					<DateTimePicker
-						value={new Date()}
-						minimumDate={new Date()}
-						mode="date"
-					/>
-				)}
-			</ScrollView>
-			{/* </TouchableWithoutFeedback> */}
+				</ScrollView>
+			</TouchableWithoutFeedback>
 		</KeyboardAvoidingView>
 	);
 };

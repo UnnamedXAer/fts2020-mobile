@@ -22,13 +22,7 @@ export type RootStackParamList = {
 		description: string;
 	};
 	NewTaskMembers: {
-		flatId: number;
-		name: string;
-		description: string;
-		periodUnit: TaskPeriodUnit;
-		periodValue: number;
-		startDate: Date;
-		endDate: Date;
+		id: number;
 	};
 };
 

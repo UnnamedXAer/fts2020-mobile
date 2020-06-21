@@ -92,7 +92,7 @@ export class TaskData {
 	endDate: Date
 	timePeriodUnit: TaskPeriodUnit
 	timePeriodValue: number
-	members: number[]
+	members?: number[]
 	description: string
 	name: string
 

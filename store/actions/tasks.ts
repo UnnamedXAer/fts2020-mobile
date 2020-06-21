@@ -1,6 +1,6 @@
 import axios from '../../axios/axios';
 import { TasksActionTypes } from './actionTypes';
-import Task, { TaskPeriodUnit, UserTask } from '../../models/task';
+import Task, { TaskPeriodUnit, UserTask, TaskData } from '../../models/task';
 import { ThunkAction } from 'redux-thunk';
 import RootState, { StoreAction } from '../storeTypes';
 import User from '../../models/user';
@@ -49,22 +49,26 @@ type APIUserTask = {
 	active?: boolean;
 };
 
+export type CreateTaskActionPayload = { task: Task, tmpId: string }
+
 export const createTask = (
-	task: Task
-): ThunkAction<Promise<void>, RootState, any, StoreAction<Task, string>> => {
+	task: TaskData,
+	tmpId: string
+): ThunkAction<Promise<void>, RootState, any, StoreAction<CreateTaskActionPayload, string>> => {
 	return async (dispatch) => {
 		const url = `/flats/${task.flatId}/tasks`;
 		try {
 			const requestPayload: APITask = {
 				title: task.name!,
 				description: task.description,
-				members: task.members!.map((x) => x.id),
+				// members: task.members!.map((x) => x.id),
 				flatId: task.flatId!,
 				startDate: task.startDate?.toISOString(),
 				endDate: task.endDate?.toISOString(),
 				timePeriodUnit: task.timePeriodUnit,
 				timePeriodValue: task.timePeriodValue,
 			};
+
 			const { data } = await axios.post<APITask>(url, requestPayload);
 			const createdTask = new Task({
 				id: data.id,
@@ -80,10 +84,9 @@ export const createTask = (
 			});
 			dispatch({
 				type: TasksActionTypes.Add,
-				payload: createdTask,
+				payload: { task: createdTask, tmpId }
 			});
 		} catch (err) {
-			console.log(err);
 			throw err;
 		}
 	};

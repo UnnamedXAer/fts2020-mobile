@@ -73,7 +73,9 @@ const RootStackNavigator = () => {
 			/>
 			<RootStack.Screen
 				name="NewTaskMembers"
-				options={{ title: 'New Task' }}
+				options={(props) => ({
+					title: props.route.params.newTask ? 'New Task' : 'Update Task',
+				})}
 				component={NewTaskMembersScreen}
 			/>
 		</RootStack.Navigator>

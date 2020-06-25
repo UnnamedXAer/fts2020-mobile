@@ -69,7 +69,7 @@ const NewTaskTimeScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 	useEffect(() => {
 		if (newCreatedTaskId) {
 			navigation.pop();
-			navigation.replace('NewTaskMembers', { id: newCreatedTaskId });
+			navigation.replace('NewTaskMembers', { id: newCreatedTaskId, newTask: true });
 		}
 	}, [newCreatedTaskId, navigation]);
 
@@ -245,7 +245,7 @@ const NewTaskTimeScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 						>
 							CANCEL
 						</CustomButton>
-						<CustomButton onPress={submitHandler} disabled={loading}>
+						<CustomButton onPress={submitHandler} loading={loading}>
 							CREATE
 						</CustomButton>
 					</View>

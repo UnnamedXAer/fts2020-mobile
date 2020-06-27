@@ -4,7 +4,7 @@ import Task, { TaskPeriodUnit, UserTask, TaskData } from '../../models/task';
 import { ThunkAction } from 'redux-thunk';
 import RootState, { StoreAction } from '../storeTypes';
 import User from '../../models/user';
-import { APIUser } from './users';
+import { APIUser, mapApiUserDataToModel } from './users';
 
 type FetchFlatTasksAction = {
 	type: TasksActionTypes.SetFlatTasks;
@@ -22,6 +22,11 @@ type FetchUserTasksAction = {
 type FetchTaskAction = {
 	type: TasksActionTypes.SetTask;
 	payload: Task;
+};
+
+type SetTaskMembersAction = {
+	type: TasksActionTypes.SetMembers;
+	payload: { members: User[]; taskId: number };
 };
 
 type APITask = {
@@ -61,27 +66,14 @@ export const createTask = (
 			const requestPayload: APITask = {
 				title: task.name!,
 				description: task.description,
-				// members: task.members!.map((x) => x.id),
 				flatId: task.flatId!,
 				startDate: task.startDate?.toISOString(),
 				endDate: task.endDate?.toISOString(),
 				timePeriodUnit: task.timePeriodUnit,
 				timePeriodValue: task.timePeriodValue,
 			};
-
 			const { data } = await axios.post<APITask>(url, requestPayload);
-			const createdTask = new Task({
-				id: data.id,
-				name: data.title,
-				description: data.description,
-				createAt: new Date(data.createAt!),
-				flatId: data.flatId,
-				active: data.active,
-				startDate: new Date(data.startDate!),
-				endDate: new Date(data.endDate!),
-				timePeriodUnit: data.timePeriodUnit,
-				timePeriodValue: data.timePeriodValue,
-			});
+			const createdTask = mapApiTaskDataToModel(data);
 			dispatch({
 				type: TasksActionTypes.Add,
 				payload: { task: createdTask, tmpId }
@@ -99,19 +91,7 @@ export const fetchTask = (
 		const url = `/tasks/${id}`;
 		try {
 			const { data } = await axios.get<APITask>(url);
-			const task = new Task({
-				id: data.id,
-				flatId: data.flatId,
-				name: data.title,
-				description: data.description,
-				startDate: new Date(data.startDate!),
-				endDate: new Date(data.endDate!),
-				timePeriodUnit: data.timePeriodUnit,
-				timePeriodValue: data.timePeriodValue,
-				active: data.active,
-				createAt: new Date(data.createAt!),
-				createBy: data.createBy,
-			});
+			const task = mapApiTaskDataToModel(data);
 			dispatch({
 				type: TasksActionTypes.SetTask,
 				payload: task,
@@ -122,6 +102,7 @@ export const fetchTask = (
 	};
 };
 
+
 export const fetchFlatTasks = (
 	id: number
 ): ThunkAction<Promise<void>, RootState, any, FetchFlatTasksAction> => {
@@ -129,22 +110,8 @@ export const fetchFlatTasks = (
 		const url = `/flats/${id}/tasks`;
 		try {
 			const { data } = await axios.get<APITask[]>(url);
-			const tasks = data.map(
-				(x) =>
-					new Task({
-						id: x.id,
-						flatId: x.flatId,
-						name: x.title,
-						description: x.description,
-						startDate: new Date(x.startDate!),
-						endDate: new Date(x.endDate!),
-						timePeriodUnit: x.timePeriodUnit,
-						timePeriodValue: x.timePeriodValue,
-						active: x.active,
-						createAt: new Date(x.createAt!),
-						createBy: x.createBy,
-					})
-			);
+			const tasks = data.map(mapApiTaskDataToModel);
+
 			dispatch({
 				type: TasksActionTypes.SetFlatTasks,
 				payload: {
@@ -168,18 +135,7 @@ export const fetchUserTasks = (): ThunkAction<
 		const url = `/tasks`;
 		try {
 			const { data } = await axios.get<APIUserTask[]>(url);
-			const tasks = data.map(
-				(x) =>
-					new UserTask({
-						id: x.id,
-						flatId: x.flatId,
-						name: x.title,
-						flatName: x.flatName,
-						timePeriodUnit: x.timePeriodUnit,
-						timePeriodValue: x.timePeriodValue,
-						active: x.active,
-					})
-			);
+			const tasks = data.map(mapApiUserTaskDataToModel);
 
 			dispatch({
 				type: TasksActionTypes.SetUserTasks,
@@ -193,31 +149,12 @@ export const fetchUserTasks = (): ThunkAction<
 
 export const fetchTaskMembers = (
 	taskId: number
-): ThunkAction<
-	Promise<void>,
-	RootState,
-	any,
-	StoreAction<
-		{ taskId: number; members: User[] },
-		TasksActionTypes.SetMembers
-	>
-> => {
+): ThunkAction<Promise<void>, RootState, any, SetTaskMembersAction> => {
 	return async (dispatch) => {
 		const url = `/tasks/${taskId}/members`;
 		try {
 			const { data } = await axios.get<APIUser[]>(url);
-			const members = data.map(
-				(user) =>
-					new User(
-						user.id,
-						user.emailAddress,
-						user.userName,
-						user.provider,
-						new Date(user.joinDate),
-						user.avatarUrl,
-						user.active
-					)
-			);
+			const members = data.map(mapApiUserDataToModel);
 			dispatch({
 				type: TasksActionTypes.SetMembers,
 				payload: {
@@ -243,17 +180,9 @@ export const fetchTaskOwner = (
 	return async (dispatch) => {
 		const url = `/users/${userId}`;
 		try {
-			const { data } = await axios.get(url);
+			const { data } = await axios.get<APIUser>(url);
 
-			const user = new User(
-				data.id,
-				data.emailAddress,
-				data.userName,
-				data.provider,
-				new Date(data.joinDate),
-				data.avatarUrl,
-				data.active
-			);
+			const user = mapApiUserDataToModel(data);
 
 			dispatch({
 				type: TasksActionTypes.SetOwner,
@@ -277,7 +206,7 @@ export const updateTask = (
 	StoreAction<Partial<Task>, string>
 > => {
 	return async (dispatch) => {
-		const url = `/flats/tasks/${task.id}`;
+		const url = `/tasks/${task.id}`;
 		try {
 			const requestPayload: Partial<APITask> = {
 				title: task.name!,
@@ -287,18 +216,7 @@ export const updateTask = (
 				active: task.active,
 			};
 			const { data } = await axios.patch<APITask>(url, requestPayload);
-			const updatedTask = new Task({
-				id: data.id,
-				name: data.title,
-				description: data.description,
-				createAt: new Date(data.createAt!),
-				flatId: data.flatId,
-				active: data.active,
-				startDate: new Date(data.startDate!),
-				endDate: new Date(data.endDate!),
-				timePeriodUnit: data.timePeriodUnit,
-				timePeriodValue: data.timePeriodValue,
-			});
+			const updatedTask = mapApiTaskDataToModel(data);
 			dispatch({
 				type: TasksActionTypes.SetTask,
 				payload: updatedTask,
@@ -308,3 +226,29 @@ export const updateTask = (
 		}
 	};
 };
+
+const mapApiTaskDataToModel = (data: APITask) =>
+	new Task({
+		id: data.id,
+		flatId: data.flatId,
+		name: data.title,
+		description: data.description,
+		startDate: new Date(data.startDate!),
+		endDate: new Date(data.endDate!),
+		timePeriodUnit: data.timePeriodUnit,
+		timePeriodValue: data.timePeriodValue,
+		active: data.active,
+		createAt: new Date(data.createAt!),
+		createBy: data.createBy,
+	});
+
+const mapApiUserTaskDataToModel = (data: APIUserTask) =>
+	new UserTask({
+		id: data.id,
+		flatId: data.flatId,
+		name: data.title,
+		flatName: data.flatName,
+		timePeriodUnit: data.timePeriodUnit,
+		timePeriodValue: data.timePeriodValue,
+		active: data.active,
+	});

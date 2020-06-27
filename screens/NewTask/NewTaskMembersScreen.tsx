@@ -23,6 +23,7 @@ import CustomButton from '../../components/UI/CustomButton';
 import RootState from '../../store/storeTypes';
 import { Item } from 'react-native-paper/lib/typescript/src/components/Drawer/Drawer';
 import User from '../../models/user';
+import Stepper from '../../components/UI/Stepper';
 
 interface Props {
 	theme: Theme;
@@ -82,6 +83,7 @@ const NewTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => 
 						{ backgroundColor: theme.colors.surface },
 					]}
 				>
+					<Stepper steps={3} currentStep={2} />
 					<Header style={styles.header}>Set Task - Members</Header>
 					<View style={styles.inputContainer}>
 						<List.Section title="Flat members">

@@ -170,8 +170,8 @@ const NewTaskTimeScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 						{ backgroundColor: theme.colors.surface },
 					]}
 				>
-					<Header style={styles.header}>Add Task - Time</Header>
 					<Stepper steps={3} currentStep={2} />
+					<Header style={styles.header}>Add Task - Time</Header>
 					<View style={styles.inputContainer}>
 						<Picker
 							options={[

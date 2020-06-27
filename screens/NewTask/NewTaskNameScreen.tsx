@@ -15,17 +15,19 @@ import Header from '../../components/UI/Header';
 import useForm, { createInitialState, FormActionTypes } from '../../hooks/useForm';
 import { StateError } from '../../store/ReactTypes/customReactTypes';
 import { validateTaskFields } from '../../utils/validation';
-import { TaskData } from '../../models/task';
-import { createTask } from '../../store/actions/tasks';
-import HttpErrorParser from '../../utils/parseError';
 import Input from '../../components/UI/Input';
 import NotificationCard from '../../components/UI/NotificationCard';
 import CustomButton from '../../components/UI/CustomButton';
 import Stepper from '../../components/UI/Stepper';
+import {
+	NewTaskNameScreenNavigationProps,
+	NewTaskNameScreenRouteProps,
+} from '../../types/navigationTypes';
 
 interface Props {
 	theme: Theme;
 	navigation: NewTaskNameScreenNavigationProps;
+	route: NewTaskNameScreenRouteProps;
 }
 
 const newTaskFormFields = ['name', 'description'] as const;

@@ -8,7 +8,8 @@ import {
 	TouchableWithoutFeedback,
 	Keyboard,
 } from 'react-native';
-import { withTheme, List, Avatar, IconButton, Chip, Text } from 'react-native-paper';
+import { withTheme, Avatar, Chip, Text, IconButton, Colors } from 'react-native-paper';
+import Toast from 'react-native-simple-toast';
 import { Theme } from 'react-native-paper/lib/typescript/src/types';
 import {
 	NewTaskMembersScreenNavigationProps,
@@ -42,6 +43,8 @@ const NewTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => 
 			state.flats.flats.find((x) => x.id === task.flatId)!.members!
 	);
 	const [addedMembers, setAddedMembers] = useState([...flatMembers!]);
+	const [selectedFlatMembers, setSelectedFlatMembers] = useState<User[]>([]);
+	const [selectedAddedMembers, setSelectedAddedMembers] = useState<User[]>([]);
 
 	const isMounted = useRef(true);
 	useEffect(() => {
@@ -64,8 +67,7 @@ const NewTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => 
 	const submitHandler = async () => {
 		setError(null);
 		let isFormValid = true;
-
-		
+		console.log(addedMembers.map((x) => x.emailAddress));
 	};
 
 	return (
@@ -84,64 +86,98 @@ const NewTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => 
 					<Stepper steps={3} currentStep={2} />
 					<Header style={styles.header}>Set Task - Members</Header>
 					<View style={styles.inputContainer}>
-						<List.Section title="Unassigned flat members">
-							{flatMembers.length !== addedMembers.length ? (
-								flatMembers
-									.filter((x) => !addedMembers.includes(x))
-									.map((member) => (
-										<List.Item
-											key={member.id}
-											title={member.emailAddress}
-											description={member.userName}
-											left={() =>
-												member.avatarUrl ? (
-													<Avatar.Image
-														size={48}
-														style={{
-															width: 48,
-															height: 48,
-															marginHorizontal: 0,
-														}}
-														source={{ uri: member.avatarUrl }}
-													/>
-												) : (
-													<Avatar.Icon
-														color={theme.colors.primary}
-														icon="account-outline"
-														size={48}
-														theme={{
-															colors: {
-																primary:
-																	theme.colors
-																		.background,
-															},
-														}}
-														style={{
-															width: 48,
-															height: 48,
-															marginHorizontal: 0,
-														}}
-													/>
-												)
-											}
-											right={() => (
-												<IconButton
-													color={theme.colors.placeholder}
-													icon="plus"
-													disabled={loading}
-													onPress={() => {
-														addMemberHandler(member.id);
-													}}
+						<Text>Flat members</Text>
+					</View>
+					<View style={[styles.inputContainer, styles.addedMembers]}>
+						{flatMembers.length !== addedMembers.length ? (
+							flatMembers
+								.filter((x) => !addedMembers.includes(x))
+								.map((member) => (
+									<Chip
+										key={member.id}
+										style={styles.chip}
+										textStyle={
+											member.id === task.createBy
+												? { color: theme.colors.placeholder }
+												: void 0
+										}
+										avatar={
+											member.avatarUrl ? (
+												<Avatar.Image
+													source={{ uri: member.avatarUrl }}
+													size={24}
 												/>
-											)}
-										/>
-									))
-							) : (
-								<NotificationCard serverity="info">
-									All members are assigned to task.
-								</NotificationCard>
-							)}
-						</List.Section>
+											) : (
+												<Avatar.Icon
+													icon="account-outline"
+													size={24}
+												/>
+											)
+										}
+										mode="flat"
+										selected={selectedFlatMembers.includes(member)}
+										onPress={() =>
+											setSelectedFlatMembers((prevState) => {
+												if (prevState.includes(member)) {
+													return prevState.filter(
+														(x) => x.id !== member.id
+													);
+												} else {
+													return prevState.concat(member);
+												}
+											})
+										}
+									>
+										{member.id === task.createBy && '[You] '}
+										{member.emailAddress}
+									</Chip>
+								))
+						) : (
+							<NotificationCard serverity="success">
+								All flat members are assigned to task.
+							</NotificationCard>
+						)}
+					</View>
+					<View style={[styles.inputContainer, styles.membersActions]}>
+						<IconButton
+							icon="arrow-up-bold-outline"
+							color={
+								selectedAddedMembers.length === 0
+									? Colors.orange200
+									: theme.colors.accent
+							}
+							onPress={
+								selectedAddedMembers.length === 0
+									? () => Toast.show('Select members to remove')
+									: () => {
+											setAddedMembers((prevState) =>
+												prevState.filter(
+													(x) =>
+														!selectedAddedMembers.includes(x)
+												)
+											);
+											setSelectedAddedMembers([]);
+									  }
+							}
+						></IconButton>
+						<IconButton
+							icon="arrow-down-bold-outline"
+							color={
+								selectedFlatMembers.length === 0
+									? Colors.teal200
+									: theme.colors.primary
+							}
+							onPress={
+								selectedFlatMembers.length === 0
+									? () => Toast.show('Select flat members to assign.')
+									: () => {
+											setAddedMembers((prevState) =>
+												prevState.concat(selectedFlatMembers)
+											);
+											setSelectedFlatMembers([]);
+									  }
+							}
+						></IconButton>
 					</View>
 					<View style={styles.inputContainer}>
 						<Text>Assigned people</Text>
@@ -167,10 +203,23 @@ const NewTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => 
 									)
 								}
 								mode="flat"
-								onClose={
+								selected={selectedAddedMembers.includes(member)}
+								onPress={
 									member.id !== task.createBy
-										? () => removeMemberHandler(member.id)
-										: void 0
+										? () =>
+												setSelectedAddedMembers((prevState) => {
+													if (prevState.includes(member)) {
+														return prevState.filter(
+															(x) => x.id !== member.id
+														);
+													} else {
+														return prevState.concat(member);
+													}
+												})
+										: () =>
+												Toast.show(
+													'You are too important to not include!'
+												)
 								}
 							>
 								{member.id === task.createBy && '[You] '}
@@ -221,6 +270,11 @@ const styles = StyleSheet.create({
 		width: '90%',
 		maxWidth: 400,
 		marginVertical: 4,
+	},
+	membersActions: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'space-evenly',
 	},
 	addedMembers: {
 		flexWrap: 'wrap',

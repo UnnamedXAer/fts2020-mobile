@@ -227,6 +227,25 @@ export const updateTask = (
 	};
 };
 
+export const updatedTaskMembers = (
+	taskId: number,
+	members: number[]
+): ThunkAction<Promise<void>, RootState, any, SetTaskMembersAction> => {
+	return async (dispatch) => {
+		const url = `/tasks/${taskId}/members`;
+		try {
+			const { data } = await axios.put<APIUser[]>(url, { members });
+			const taskMembers = data.map(mapApiUserDataToModel);
+			dispatch({
+				type: TasksActionTypes.SetMembers,
+				payload: { taskId, members: taskMembers },
+			});
+		} catch (err) {
+			throw err;
+		}
+	};
+};
+
 const mapApiTaskDataToModel = (data: APITask) =>
 	new Task({
 		id: data.id,

@@ -23,6 +23,8 @@ import CustomButton from '../../components/UI/CustomButton';
 import RootState from '../../store/storeTypes';
 import User from '../../models/user';
 import Stepper from '../../components/UI/Stepper';
+import { updatedTaskMembers } from '../../store/actions/tasks';
+import { clearTaskPeriods } from '../../store/actions/periods';
 
 interface Props {
 	theme: Theme;
@@ -54,20 +56,75 @@ const NewTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => 
 		};
 	}, []);
 
-	const removeMemberHandler = async (id: User['id']) => {
-		setAddedMembers((prevState) => prevState.filter((x) => x.id !== id));
+	const addMembersHandler = () => {
+		if (selectedFlatMembers.length === 0) {
+			Toast.show('Select flat members to assign.');
+		} else {
+			setAddedMembers((prevState) => prevState.concat(selectedFlatMembers));
+			setSelectedFlatMembers([]);
+		}
 	};
 
-	const addMemberHandler = async (id: User['id']) => {
-		setAddedMembers((prevState) =>
-			prevState.concat(flatMembers.find((x) => x.id === id)!)
-		);
+	const removeMembersHandler = () => {
+		if (selectedAddedMembers.length === 0) {
+			Toast.show('Select members to remove');
+		} else {
+			setAddedMembers((prevState) =>
+				prevState.filter((x) => !selectedAddedMembers.includes(x))
+			);
+			setSelectedAddedMembers([]);
+		}
+	};
+
+	const selectAddedMemberHandler = (member: User) => {
+		if (member.id !== task.createBy) {
+			setSelectedAddedMembers((prevState) => {
+				if (prevState.includes(member)) {
+					return prevState.filter((x) => x.id !== member.id);
+				} else {
+					return prevState.concat(member);
+				}
+			});
+		} else {
+			Toast.show('You are too important to not include you!');
+		}
+	};
+
+	const selectFlatMemberHandler = (member: User) => {
+		setSelectedFlatMembers((prevState) => {
+			if (prevState.includes(member)) {
+				return prevState.filter((x) => x.id !== member.id);
+			} else {
+				return prevState.concat(member);
+			}
+		});
 	};
 
 	const submitHandler = async () => {
+		const taskId = task.id!;
+
+		setLoading(true);
 		setError(null);
-		let isFormValid = true;
-		console.log(addedMembers.map((x) => x.emailAddress));
+		const updatedMembers = addedMembers!.map((x) => x.id);
+
+		try {
+			await dispatch(updatedTaskMembers(taskId, updatedMembers));
+			dispatch(clearTaskPeriods(taskId));
+			isMounted.current && navigation.replace('TaskDetails', { id: taskId });
+		} catch (err) {
+			if (isMounted.current) {
+				const httpError = new HttpErrorParser(err);
+				const errCode = httpError.getCode();
+				let msg: string;
+				if (errCode === 422) {
+					msg = 'Sorry, something went wrong. Please try again later.';
+				} else {
+					msg = httpError.getMessage();
+				}
+				setError(msg);
+				setLoading(false);
+			}
+		}
 	};
 
 	return (
@@ -116,17 +173,7 @@ const NewTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => 
 										}
 										mode="flat"
 										selected={selectedFlatMembers.includes(member)}
-										onPress={() =>
-											setSelectedFlatMembers((prevState) => {
-												if (prevState.includes(member)) {
-													return prevState.filter(
-														(x) => x.id !== member.id
-													);
-												} else {
-													return prevState.concat(member);
-												}
-											})
-										}
+										onPress={() => selectFlatMemberHandler(member)}
 									>
 										{member.id === task.createBy && '[You] '}
 										{member.emailAddress}
@@ -146,19 +193,7 @@ const NewTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => 
 									? Colors.orange200
 									: theme.colors.accent
 							}
-							onPress={
-								selectedAddedMembers.length === 0
-									? () => Toast.show('Select members to remove')
-									: () => {
-											setAddedMembers((prevState) =>
-												prevState.filter(
-													(x) =>
-														!selectedAddedMembers.includes(x)
-												)
-											);
-											setSelectedAddedMembers([]);
-									  }
-							}
+							onPress={removeMembersHandler}
 						></IconButton>
 						<IconButton
 							icon="arrow-down-bold-outline"
@@ -167,20 +202,20 @@ const NewTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => 
 									? Colors.teal200
 									: theme.colors.primary
 							}
-							onPress={
-								selectedFlatMembers.length === 0
-									? () => Toast.show('Select flat members to assign.')
-									: () => {
-											setAddedMembers((prevState) =>
-												prevState.concat(selectedFlatMembers)
-											);
-											setSelectedFlatMembers([]);
-									  }
-							}
+							onPress={addMembersHandler}
 						></IconButton>
 					</View>
-					<View style={styles.inputContainer}>
+					<View
+						style={[styles.inputContainer, styles.assignedTitleInfoContainer]}
+					>
 						<Text>Assigned people</Text>
+						<Text style={styles.assignedTitleInfo}>
+							(
+							{addedMembers.length === 1
+								? 'Only you'
+								: `You and ${addedMembers.length - 1} more`}
+							)
+						</Text>
 					</View>
 					<View style={[styles.inputContainer, styles.addedMembers]}>
 						{addedMembers.map((member) => (
@@ -204,23 +239,7 @@ const NewTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => 
 								}
 								mode="flat"
 								selected={selectedAddedMembers.includes(member)}
-								onPress={
-									member.id !== task.createBy
-										? () =>
-												setSelectedAddedMembers((prevState) => {
-													if (prevState.includes(member)) {
-														return prevState.filter(
-															(x) => x.id !== member.id
-														);
-													} else {
-														return prevState.concat(member);
-													}
-												})
-										: () =>
-												Toast.show(
-													'You are too important to not include!'
-												)
-								}
+								onPress={() => selectAddedMemberHandler(member)}
 							>
 								{member.id === task.createBy && '[You] '}
 								{member.emailAddress}
@@ -235,12 +254,17 @@ const NewTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => 
 					<View style={styles.actions}>
 						<CustomButton
 							accent
-							onPress={() => navigation.popToTop()}
+							onPress={() => {
+								if (route.params.newTask) {
+									navigation.popToTop();
+								}
+								navigation.navigate('TaskDetails', { id: task.id! });
+							}}
 							disabled={loading}
 						>
 							{route.params.newTask ? 'LATER' : 'CANCEL'}
 						</CustomButton>
-						<CustomButton onPress={submitHandler} disabled={loading}>
+						<CustomButton onPress={submitHandler} loading={loading}>
 							{route.params.newTask ? 'COMPLETE' : 'UPDATE'}
 						</CustomButton>
 					</View>
@@ -275,6 +299,16 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		alignItems: 'center',
 		justifyContent: 'space-evenly',
+	},
+	assignedTitleInfoContainer: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+	},
+	assignedTitleInfo: {
+		marginStart: 8,
+		color: '#64b5f6',
+		fontSize: 12,
 	},
 	addedMembers: {
 		flexWrap: 'wrap',

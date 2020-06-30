@@ -1,5 +1,5 @@
 import { PeriodsState, AppReducer, SimpleReducer } from '../storeTypes';
-import { TaskPeriodsTypes } from '../actions/actionTypes';
+import { TaskPeriodsActionTypes } from '../actions/actionTypes';
 import {
 	SetTaskPeriodsActionPayload,
 	CompletePeriodActionPayload,
@@ -43,15 +43,38 @@ const completePeriod: SimpleReducer<
 	};
 };
 
-const reducer: AppReducer<PeriodsState, TaskPeriodsTypes> = (
+const clearTaskPeriods: SimpleReducer<PeriodsState, { taskId: number }> = (
+	state,
+	action
+) => {
+	const updatedPeriods = { ...state.taskPeriods };
+	delete updatedPeriods[action.payload.taskId];
+
+	return {
+		...state,
+		taskPeriods: updatedPeriods,
+	};
+};
+
+const clearState: SimpleReducer<PeriodsState, undefined> = (state, action) => {
+	return {
+		...initialState,
+	};
+};
+
+const reducer: AppReducer<PeriodsState, TaskPeriodsActionTypes> = (
 	state = initialState,
 	action
 ) => {
 	switch (action.type) {
-		case TaskPeriodsTypes.SetTaskPeriods:
+		case TaskPeriodsActionTypes.SetTaskPeriods:
 			return setTaskPeriods(state, action);
-		case TaskPeriodsTypes.CompletePeriod:
+		case TaskPeriodsActionTypes.CompletePeriod:
 			return completePeriod(state, action);
+		case TaskPeriodsActionTypes.ClearTaskPeriods:
+			return clearTaskPeriods(state, action);
+		case TaskPeriodsActionTypes.ClearState:
+			return clearState(state, action);
 		default:
 			return state;
 	}

@@ -23,9 +23,11 @@ export enum TasksActionTypes {
 	ClearState = 'TASK_CLEAR_STATE',
 }
 
-export enum TaskPeriodsTypes {
-	SetTaskPeriods = 'PERIOD_SET_TASK_PERIODS',
-	CompletePeriod = 'PERIOD_COMPLETE'
+export enum TaskPeriodsActionTypes {
+	SetTaskPeriods = 'PERIODS_SET_TASK_PERIODS',
+	CompletePeriod = 'PERIODS_COMPLETE_PERIOD',
+	ClearTaskPeriods = 'PERIODS_CLEAR_TASK_PERIODS',
+	ClearState = 'PERIODS_CLEAR_STATE',
 }
 
 export enum UsersActionTypes {

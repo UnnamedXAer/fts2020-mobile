@@ -134,7 +134,7 @@ const NewTaskNameScreen: React.FC<Props> = ({ theme, route, navigation }) => {
 					<View style={styles.inputContainer}>
 						<Input
 							style={[styles.input, { maxHeight: 87.3 }]}
-							name="Desciption"
+							name="description"
 							label="Description"
 							keyboardType="default"
 							returnKeyType="done"

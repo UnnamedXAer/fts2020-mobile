@@ -20,7 +20,7 @@ import NewFlatScreen from '../screens/NewFlatScreen';
 import InviteMembersScreen from '../screens/InviteMembersScreen';
 import NewTaskNameScreen from '../screens/NewTask/NewTaskNameScreen';
 import NewTaskTimeScreen from '../screens/NewTask/NewTaskTimeScreen';
-import NewTaskMembersScreen from '../screens/NewTask/NewTaskMembersScreen';
+import NewTaskMembersScreen from '../screens/TaskMembersUpdateScreen';
 
 const RootStack = createStackNavigator<RootStackParamList>();
 const RootStackNavigator = () => {

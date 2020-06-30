@@ -23,7 +23,7 @@ export type RootStackParamList = {
 	};
 	NewTaskMembers: {
 		id: number;
-		newTask?: boolean;
+		newTask: boolean;
 	};
 };
 

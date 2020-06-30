@@ -11,6 +11,7 @@ import {
 	Text,
 	List,
 	Avatar,
+	FAB,
 } from 'react-native-paper';
 import { Placeholder, PlaceholderLine, Shine } from 'rn-placeholder';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -43,6 +44,7 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 	const task = useSelector(
 		(state: RootState) => state.tasks.tasks.find((x) => x.id === route.params.id)!
 	);
+	const [fabOpen, setFabOpen] = useState(false);
 	const flat = useSelector((state: RootState) =>
 		state.flats.flats.find((x) => x.id === task.flatId!)
 	);
@@ -148,114 +150,145 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 	};
 
 	return (
-		<ScrollView style={styles.screen}>
-			<Headline style={{ alignSelf: 'center', paddingTop: 24 }}>
-				{task.name}
-			</Headline>
+		<>
+			<ScrollView style={styles.screen}>
+				<Headline style={{ alignSelf: 'center', paddingTop: 24 }}>
+					{task.name}
+				</Headline>
 
-			<View style={[styles.section, styles.infoContainer]}>
-				<View style={styles.avatarContainer}>
+				<View style={[styles.section, styles.infoContainer]}>
+					<View style={styles.avatarContainer}>
+						<View
+							style={[
+								{ backgroundColor: theme.colors.disabled },
+								styles.avatar,
+							]}
+						>
+							<MaterialCommunityIcons
+								name="all-inclusive"
+								size={40}
+								color={theme.colors.background}
+							/>
+						</View>
+					</View>
 					<View
-						style={[
-							{ backgroundColor: theme.colors.disabled },
-							styles.avatar,
-						]}
+						style={{
+							minWidth: (() => {
+								const x = dimensions.width - 32 - 16 - 64;
+								return x;
+							})(),
+
+							marginStart: 8,
+							justifyContent: 'center',
+						}}
 					>
-						<MaterialCommunityIcons
-							name="all-inclusive"
-							size={40}
-							color={theme.colors.background}
-						/>
+						{task.owner ? (
+							<>
+								<View
+									style={{
+										flexDirection: 'row',
+										flexWrap: 'wrap',
+										justifyContent: 'flex-start',
+									}}
+								>
+									<Text>Created by </Text>
+									<Link
+										onPress={() => peronTouchChanger(task.owner!.id)}
+									>
+										{task.owner.emailAddress}
+									</Link>
+								</View>
+								<Text>
+									Created at {moment(task.createAt).format('ll')}
+								</Text>
+							</>
+						) : (
+							<Placeholder Animation={Shine}>
+								<PlaceholderLine height={16} />
+								<PlaceholderLine height={16} />
+							</Placeholder>
+						)}
 					</View>
 				</View>
-				<View
-					style={{
-						minWidth: (() => {
-							const x = dimensions.width - 32 - 16 - 64;
-							return x;
-						})(),
-
-						marginStart: 8,
-						justifyContent: 'center',
-					}}
-				>
-					{task.owner ? (
-						<>
-							<View
-								style={{
-									flexDirection: 'row',
-									flexWrap: 'wrap',
-									justifyContent: 'flex-start',
-								}}
-							>
-								<Text>Created by </Text>
-								<Link onPress={() => peronTouchChanger(task.owner!.id)}>
-									{task.owner.emailAddress}
-								</Link>
-							</View>
-							<Text>Created at {moment(task.createAt).format('ll')}</Text>
-						</>
+				<Divider style={styles.divider} />
+				<View style={styles.section}>
+					<Title>Description</Title>
+					<Paragraph>{task.description}</Paragraph>
+				</View>
+				<Divider style={styles.divider} />
+				<View style={styles.section}>
+					<Title>Members</Title>
+					{task.members ? (
+						task.members.map((member) => {
+							return (
+								<List.Item
+									key={member.id}
+									title={member.emailAddress}
+									description={member.userName}
+									left={(props) =>
+										member.avatarUrl ? (
+											<Avatar.Image
+												source={{
+													uri: member.avatarUrl,
+												}}
+												size={48}
+											/>
+										) : (
+											<Avatar.Icon
+												icon="account-outline"
+												size={48}
+												theme={{
+													colors: {
+														primary: theme.colors.disabled,
+													},
+												}}
+											/>
+										)
+									}
+									rippleColor={theme.colors.primary}
+									onPress={() => memberSelectHandler(member.id)}
+								/>
+							);
+						})
 					) : (
 						<Placeholder Animation={Shine}>
-							<PlaceholderLine height={16} />
-							<PlaceholderLine height={16} />
+							<PlaceholderLine height={40} />
+							<PlaceholderLine height={40} />
 						</Placeholder>
 					)}
 				</View>
-			</View>
-			<Divider style={styles.divider} />
-			<View style={styles.section}>
-				<Title>Description</Title>
-				<Paragraph>{task.description}</Paragraph>
-			</View>
-			<Divider style={styles.divider} />
-			<View style={styles.section}>
-				<Title>Members</Title>
-				{task.members ? (
-					task.members.map((member) => {
-						return (
-							<List.Item
-								key={member.id}
-								title={member.emailAddress}
-								description={member.userName}
-								left={(props) =>
-									member.avatarUrl ? (
-										<Avatar.Image
-											source={{
-												uri: member.avatarUrl,
-											}}
-											size={48}
-										/>
-									) : (
-										<Avatar.Icon
-											icon="account-outline"
-											size={48}
-											theme={{
-												colors: {
-													primary: theme.colors.disabled,
-												},
-											}}
-										/>
-									)
-								}
-								rippleColor={theme.colors.primary}
-								onPress={() => memberSelectHandler(member.id)}
-							/>
-						);
-					})
-				) : (
-					<Placeholder Animation={Shine}>
-						<PlaceholderLine height={40} />
-						<PlaceholderLine height={40} />
-					</Placeholder>
-				)}
-			</View>
-			<Divider style={styles.divider} />
-			<View style={styles.section}>
-				<Title>Periods</Title>
-				<PeriodsTable periods={periods} />
-			</View>
-		</ScrollView>
+				<Divider style={styles.divider} />
+				<View style={styles.section}>
+					<Title>Periods</Title>
+					<PeriodsTable periods={periods} />
+				</View>
+			</ScrollView>
+			<FAB.Group
+				visible={Boolean(task.members && task.owner)}
+				open={fabOpen}
+				color="white"
+				icon={fabOpen ? 'close' : 'plus'}
+				actions={[
+					{
+						icon: 'account-multiple-plus',
+						onPress: () =>
+							navigation.navigate('NewTaskMembers', {
+								newTask: false,
+								id: id,
+							}),
+						label: 'Update members',
+					},
+				]}
+				onStateChange={({ open }) => {
+					setFabOpen(open);
+				}}
+				// onPress={() => {
+				// 	if (fabOpen) {
+				// 		// do something if the speed dial is open
+				// 	}
+				// }}
+			/>
+		</>
 	);
 };
 

@@ -14,17 +14,17 @@ import { Theme } from 'react-native-paper/lib/typescript/src/types';
 import {
 	NewTaskMembersScreenNavigationProps,
 	NewTaskMembersScreenRouteProps,
-} from '../../types/navigationTypes';
-import { StateError } from '../../store/ReactTypes/customReactTypes';
-import HttpErrorParser from '../../utils/parseError';
-import Header from '../../components/UI/Header';
-import NotificationCard from '../../components/UI/NotificationCard';
-import CustomButton from '../../components/UI/CustomButton';
-import RootState from '../../store/storeTypes';
-import User from '../../models/user';
-import Stepper from '../../components/UI/Stepper';
-import { updatedTaskMembers } from '../../store/actions/tasks';
-import { clearTaskPeriods } from '../../store/actions/periods';
+} from '../types/navigationTypes';
+import { StateError } from '../store/ReactTypes/customReactTypes';
+import HttpErrorParser from '../utils/parseError';
+import Header from '../components/UI/Header';
+import NotificationCard from '../components/UI/NotificationCard';
+import CustomButton from '../components/UI/CustomButton';
+import RootState from '../store/storeTypes';
+import User from '../models/user';
+import Stepper from '../components/UI/Stepper';
+import { updatedTaskMembers } from '../store/actions/tasks';
+import { clearTaskPeriods } from '../store/actions/periods';
 
 interface Props {
 	theme: Theme;
@@ -33,6 +33,7 @@ interface Props {
 }
 
 const NewTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => {
+	const isNewTask = route.params.newTask;
 	const dispatch = useDispatch();
 
 	const [loading, setLoading] = useState(false);
@@ -44,7 +45,10 @@ const NewTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => 
 		(state: RootState) =>
 			state.flats.flats.find((x) => x.id === task.flatId)!.members!
 	);
-	const [addedMembers, setAddedMembers] = useState([...flatMembers!]);
+
+	const [addedMembers, setAddedMembers] = useState(
+		isNewTask ? [...flatMembers!] : [...task.members!]
+	);
 	const [selectedFlatMembers, setSelectedFlatMembers] = useState<User[]>([]);
 	const [selectedAddedMembers, setSelectedAddedMembers] = useState<User[]>([]);
 
@@ -110,7 +114,13 @@ const NewTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => 
 		try {
 			await dispatch(updatedTaskMembers(taskId, updatedMembers));
 			dispatch(clearTaskPeriods(taskId));
-			isMounted.current && navigation.replace('TaskDetails', { id: taskId });
+			if (isMounted.current) {
+				if (isNewTask) {
+					navigation.replace('TaskDetails', { id: taskId });
+				} else {
+					navigation.goBack();
+				}
+			}
 		} catch (err) {
 			if (isMounted.current) {
 				const httpError = new HttpErrorParser(err);
@@ -141,14 +151,21 @@ const NewTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => 
 					]}
 				>
 					<Stepper steps={3} currentStep={2} />
-					<Header style={styles.header}>Set Task - Members</Header>
+					<Header style={styles.header}>
+						{isNewTask ? 'Set' : 'Update'} Task - Members
+					</Header>
 					<View style={styles.inputContainer}>
-						<Text>Flat members</Text>
+						<Text>Unassigned flat members</Text>
 					</View>
-					<View style={[styles.inputContainer, styles.addedMembers]}>
+					<View style={[styles.inputContainer, styles.membersContainer]}>
 						{flatMembers.length !== addedMembers.length ? (
 							flatMembers
-								.filter((x) => !addedMembers.includes(x))
+								.filter(
+									(x) =>
+										addedMembers.findIndex(
+											(addedMember) => addedMember.id === x.id
+										) === -1
+								)
 								.map((member) => (
 									<Chip
 										key={member.id}
@@ -217,7 +234,7 @@ const NewTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => 
 							)
 						</Text>
 					</View>
-					<View style={[styles.inputContainer, styles.addedMembers]}>
+					<View style={[styles.inputContainer, styles.membersContainer]}>
 						{addedMembers.map((member) => (
 							<Chip
 								key={member.id}
@@ -255,17 +272,19 @@ const NewTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => 
 						<CustomButton
 							accent
 							onPress={() => {
-								if (route.params.newTask) {
+								if (isNewTask) {
 									navigation.popToTop();
+									navigation.navigate('TaskDetails', { id: task.id! });
+								} else {
+									navigation.goBack();
 								}
-								navigation.navigate('TaskDetails', { id: task.id! });
 							}}
 							disabled={loading}
 						>
-							{route.params.newTask ? 'LATER' : 'CANCEL'}
+							{isNewTask ? 'LATER' : 'CANCEL'}
 						</CustomButton>
 						<CustomButton onPress={submitHandler} loading={loading}>
-							{route.params.newTask ? 'COMPLETE' : 'UPDATE'}
+							{isNewTask ? 'COMPLETE' : 'UPDATE'}
 						</CustomButton>
 					</View>
 				</ScrollView>
@@ -310,7 +329,7 @@ const styles = StyleSheet.create({
 		color: '#64b5f6',
 		fontSize: 12,
 	},
-	addedMembers: {
+	membersContainer: {
 		flexWrap: 'wrap',
 		flexDirection: 'row',
 	},

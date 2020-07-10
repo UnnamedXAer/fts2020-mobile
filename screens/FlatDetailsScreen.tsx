@@ -1,41 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import moment from 'moment';
-import { StyleSheet, View, Dimensions } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import {
-	Paragraph,
-	Title,
-	Headline,
-	useTheme,
-	Divider,
-	Text,
-	List,
-	Avatar,
-	FAB,
-} from 'react-native-paper';
-import { Placeholder, PlaceholderLine, Shine } from 'rn-placeholder';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Title, FAB, Divider } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
 import RootState from '../store/storeTypes';
 import { StateError } from '../store/ReactTypes/customReactTypes';
 import { fetchFlatOwner, fetchFlatMembers } from '../store/actions/flats';
-import Link from '../components/UI/Link';
 import FlatTasksList from '../components/Flat/FlatTasksList';
 import {
 	FlatDetailsScreenRouteProps,
 	FlatDetailsScreenNavigationProps,
 } from '../types/navigationTypes';
 import { FABAction } from '../types/types';
+import DetailsScreenInfo from '../components/DetailsScreeenInfo/DetailsScreenInfo';
 
 interface Props {
 	route: FlatDetailsScreenRouteProps;
 	navigation: FlatDetailsScreenNavigationProps;
 }
 
-const dimensions = Dimensions.get('screen');
-
 const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
-	const theme = useTheme();
 	const dispatch = useDispatch();
 	const [fabOpen, setFabOpen] = useState(false);
 	const id = route.params.id;
@@ -106,7 +90,7 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 		}
 	}, [flat, dispatch, loadingElements, elementsErrors]);
 
-	const personClickHandler = (id: number) => {
+	const ownerPressHandler = (id: number) => {
 		// navigate
 	};
 
@@ -177,121 +161,19 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 	return (
 		<>
 			<ScrollView style={styles.screen}>
-				<View
-					style={{
-						flexDirection: 'row',
-						paddingTop: 24,
-						justifyContent: 'center',
-					}}
-				>
-					{!flat.active && (
-						<Headline style={{ color: theme.colors.placeholder }}>
-							[Inactive]{' '}
-						</Headline>
-					)}
-					<Headline>{flat.name}</Headline>
-				</View>
-
-				<View style={[styles.section, styles.infoContainer]}>
-					<View style={styles.avatarContainer}>
-						<View
-							style={[
-								{ backgroundColor: theme.colors.disabled },
-								styles.avatar,
-							]}
-						>
-							<MaterialCommunityIcons
-								name="home-city-outline"
-								size={40}
-								color={theme.colors.background}
-							/>
-						</View>
-					</View>
-					<View
-						style={{
-							minWidth: (() => {
-								const x = dimensions.width - 32 - 16 - 64;
-								return x;
-							})(),
-
-							marginStart: 8,
-							justifyContent: 'center',
-						}}
-					>
-						{flat.owner ? (
-							<>
-								<View
-									style={{
-										flexDirection: 'row',
-										flexWrap: 'wrap',
-										justifyContent: 'flex-start',
-									}}
-								>
-									<Text>Created by </Text>
-									<Link
-										onPress={() => personClickHandler(flat.owner!.id)}
-									>
-										{flat.owner.emailAddress}
-									</Link>
-								</View>
-								<Text>
-									Created at {moment(flat.createAt).format('ll')}
-								</Text>
-							</>
-						) : (
-							<Placeholder Animation={Shine}>
-								<PlaceholderLine height={16} />
-								<PlaceholderLine height={16} />
-							</Placeholder>
-						)}
-					</View>
-				</View>
-				<Divider style={styles.divider} />
+				<DetailsScreenInfo
+					name={flat.name}
+					description={flat.description}
+					iconName="home-city-outline"
+					active={flat.active!}
+					createAt={flat.createAt!}
+					owner={flat.owner}
+					members={flat.members}
+					onOwnerPress={ownerPressHandler}
+					onMemberSelect={memberSelectHandler}
+				/>
 				<View style={styles.section}>
-					<Title>Description</Title>
-					<Paragraph>{flat.description}</Paragraph>
-				</View>
-				<Divider style={styles.divider} />
-				<View style={styles.section}>
-					<Title>Members</Title>
-					{flat.members ? (
-						flat.members.map((member) => {
-							return (
-								<List.Item
-									key={member.id}
-									title={member.emailAddress}
-									description={member.userName}
-									left={(props) =>
-										member.avatarUrl ? (
-											<Avatar.Image
-												source={{
-													uri: member.avatarUrl,
-												}}
-												size={48}
-											/>
-										) : (
-											<Avatar.Icon
-												icon="account-outline"
-												size={48}
-												theme={{
-													colors: {
-														primary: theme.colors.disabled,
-													},
-												}}
-											/>
-										)
-									}
-									rippleColor={theme.colors.primary}
-									onPress={() => memberSelectHandler(member.id)}
-								/>
-							);
-						})
-					) : (
-						<Placeholder Animation={Shine}>
-							<PlaceholderLine height={40} />
-							<PlaceholderLine height={40} />
-						</Placeholder>
-					)}
+					<Title>Invitations</Title>
 				</View>
 				<Divider style={styles.divider} />
 				<View style={styles.section}>
@@ -308,11 +190,6 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 				onStateChange={({ open }) => {
 					setFabOpen(open);
 				}}
-				onPress={() => {
-					if (fabOpen) {
-						// do something if the speed dial is open
-					}
-				}}
 			/>
 		</>
 	);
@@ -325,26 +202,6 @@ const styles = StyleSheet.create({
 	section: {
 		paddingHorizontal: 8,
 		paddingBottom: 8,
-	},
-	infoContainer: {
-		paddingVertical: 8,
-		justifyContent: 'center',
-		flexWrap: 'wrap',
-		flexDirection: 'row',
-	},
-	avatarContainer: {
-		marginVertical: 8,
-		height: 64,
-		width: 64,
-		borderRadius: 32,
-		backgroundColor: 'white',
-		overflow: 'hidden',
-	},
-	avatar: {
-		width: '100%',
-		height: '100%',
-		justifyContent: 'center',
-		alignItems: 'center',
 	},
 	divider: {
 		marginHorizontal: 16,

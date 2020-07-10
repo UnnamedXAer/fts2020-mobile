@@ -1,26 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import moment from 'moment';
-import { StyleSheet, View, Dimensions } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import {
-	Paragraph,
-	Title,
-	Headline,
-	useTheme,
-	Divider,
-	Text,
-	List,
-	Avatar,
-	FAB,
-} from 'react-native-paper';
-import { Placeholder, PlaceholderLine, Shine } from 'rn-placeholder';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Title, FAB } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
 import RootState from '../store/storeTypes';
 import { StateError } from '../store/ReactTypes/customReactTypes';
-import { fetchFlatOwner, fetchFlatMembers } from '../store/actions/flats';
-import Link from '../components/UI/Link';
-import FlatTasksList from '../components/Flat/FlatTasksList';
 import {
 	TaskDetailsScreenRouteProps,
 	TaskDetailsScreenNavigationProps,
@@ -29,25 +13,24 @@ import { fetchTaskOwner, fetchTaskMembers } from '../store/actions/tasks';
 import PeriodsTable from '../components/Task/PeriodsTable';
 import HttpErrorParser from '../utils/parseError';
 import { fetchTaskPeriods } from '../store/actions/periods';
+import DetailsScreenInfo from '../components/DetailsScreeenInfo/DetailsScreenInfo';
 
 interface Props {
 	route: TaskDetailsScreenRouteProps;
 	navigation: TaskDetailsScreenNavigationProps;
 }
 
-const dimensions = Dimensions.get('screen');
-
 const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
-	const theme = useTheme();
 	const dispatch = useDispatch();
 	const id = route.params.id;
 	const task = useSelector(
 		(state: RootState) => state.tasks.tasks.find((x) => x.id === route.params.id)!
 	);
-	const [fabOpen, setFabOpen] = useState(false);
 	const flat = useSelector((state: RootState) =>
 		state.flats.flats.find((x) => x.id === task.flatId!)
 	);
+	const loggedUser = useSelector((state: RootState) => state.auth.user!);
+	const [fabOpen, setFabOpen] = useState(false);
 	const periods = useSelector((state: RootState) => state.periods.taskPeriods[id]);
 	const [loadingElements, setLoadingElements] = useState({
 		owner: !!task.owner,
@@ -141,7 +124,7 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 		}
 	}, [dispatch, elementsErrors.schedule, loadingElements.schedule, periods, task]);
 
-	const peronTouchChanger = (id: number) => {
+	const ownerPressHandler = (id: number) => {
 		// navigate
 	};
 
@@ -152,112 +135,18 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 	return (
 		<>
 			<ScrollView style={styles.screen}>
-				<Headline style={{ alignSelf: 'center', paddingTop: 24 }}>
-					{task.name}
-				</Headline>
+				<DetailsScreenInfo
+					name={task.name!}
+					description={task.description!}
+					iconName="all-inclusive"
+					active={task.active!}
+					createAt={task.createAt!}
+					owner={task.owner}
+					members={task.members}
+					onOwnerPress={ownerPressHandler}
+					onMemberSelect={memberSelectHandler}
+				/>
 
-				<View style={[styles.section, styles.infoContainer]}>
-					<View style={styles.avatarContainer}>
-						<View
-							style={[
-								{ backgroundColor: theme.colors.disabled },
-								styles.avatar,
-							]}
-						>
-							<MaterialCommunityIcons
-								name="all-inclusive"
-								size={40}
-								color={theme.colors.background}
-							/>
-						</View>
-					</View>
-					<View
-						style={{
-							minWidth: (() => {
-								const x = dimensions.width - 32 - 16 - 64;
-								return x;
-							})(),
-
-							marginStart: 8,
-							justifyContent: 'center',
-						}}
-					>
-						{task.owner ? (
-							<>
-								<View
-									style={{
-										flexDirection: 'row',
-										flexWrap: 'wrap',
-										justifyContent: 'flex-start',
-									}}
-								>
-									<Text>Created by </Text>
-									<Link
-										onPress={() => peronTouchChanger(task.owner!.id)}
-									>
-										{task.owner.emailAddress}
-									</Link>
-								</View>
-								<Text>
-									Created at {moment(task.createAt).format('ll')}
-								</Text>
-							</>
-						) : (
-							<Placeholder Animation={Shine}>
-								<PlaceholderLine height={16} />
-								<PlaceholderLine height={16} />
-							</Placeholder>
-						)}
-					</View>
-				</View>
-				<Divider style={styles.divider} />
-				<View style={styles.section}>
-					<Title>Description</Title>
-					<Paragraph>{task.description}</Paragraph>
-				</View>
-				<Divider style={styles.divider} />
-				<View style={styles.section}>
-					<Title>Members</Title>
-					{task.members ? (
-						task.members.map((member) => {
-							return (
-								<List.Item
-									key={member.id}
-									title={member.emailAddress}
-									description={member.userName}
-									left={(props) =>
-										member.avatarUrl ? (
-											<Avatar.Image
-												source={{
-													uri: member.avatarUrl,
-												}}
-												size={48}
-											/>
-										) : (
-											<Avatar.Icon
-												icon="account-outline"
-												size={48}
-												theme={{
-													colors: {
-														primary: theme.colors.disabled,
-													},
-												}}
-											/>
-										)
-									}
-									rippleColor={theme.colors.primary}
-									onPress={() => memberSelectHandler(member.id)}
-								/>
-							);
-						})
-					) : (
-						<Placeholder Animation={Shine}>
-							<PlaceholderLine height={40} />
-							<PlaceholderLine height={40} />
-						</Placeholder>
-					)}
-				</View>
-				<Divider style={styles.divider} />
 				<View style={styles.section}>
 					<Title>Periods</Title>
 					<PeriodsTable periods={periods} />
@@ -282,11 +171,6 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 				onStateChange={({ open }) => {
 					setFabOpen(open);
 				}}
-				// onPress={() => {
-				// 	if (fabOpen) {
-				// 		// do something if the speed dial is open
-				// 	}
-				// }}
 			/>
 		</>
 	);
@@ -299,26 +183,6 @@ const styles = StyleSheet.create({
 	section: {
 		paddingHorizontal: 8,
 		paddingBottom: 8,
-	},
-	infoContainer: {
-		paddingVertical: 8,
-		justifyContent: 'center',
-		flexWrap: 'wrap',
-		flexDirection: 'row',
-	},
-	avatarContainer: {
-		marginVertical: 8,
-		height: 64,
-		width: 64,
-		borderRadius: 32,
-		backgroundColor: 'white',
-		overflow: 'hidden',
-	},
-	avatar: {
-		width: '100%',
-		height: '100%',
-		justifyContent: 'center',
-		alignItems: 'center',
 	},
 	divider: {
 		marginHorizontal: 16,

@@ -12,6 +12,7 @@ type APIFlat = {
 	members?: number[];
 	createBy: number;
 	createAt: Date;
+	active: boolean;
 };
 
 export type AddFlatActionPayload = { flat: Flat; tmpId: string };
@@ -30,14 +31,7 @@ export const createFlat = (
 		const url = '/flats';
 		try {
 			const { data } = await axios.post<APIFlat>(url, flat);
-			const createdFlat = new Flat({
-				id: data.id,
-				name: data.name,
-				description: data.description,
-				createAt: data.createAt,
-				ownerId: data.createBy,
-			});
-
+			const createdFlat = mapAPIFlatDataToModel(data);
 			dispatch({
 				type: FlatsActionTypes.Add,
 				payload: {
@@ -62,16 +56,8 @@ export const fetchFlats = (): ThunkAction<
 		const url = `/flats?userId=${loggedUser!.id}`;
 		try {
 			const { data } = await axios.get<APIFlat[]>(url);
-			const flats = data.map(
-				x =>
-					new Flat({
-						id: x.id,
-						name: x.name,
-						description: x.description,
-						ownerId: x.createBy,
-						createAt: x.createAt
-					})
-			);
+			const flats = data.map(mapAPIFlatDataToModel);
+
 			dispatch({
 				type: FlatsActionTypes.Set,
 				payload: flats
@@ -156,3 +142,16 @@ export const fetchFlatMembers = (
 		}
 	};
 };
+
+export const mapAPIFlatDataToModel = (data: APIFlat) =>
+	new Flat({
+		id: data.id,
+		description: data.description,
+		name: data.name,
+		ownerId: data.createBy,
+		createAt:
+			typeof data.createAt === 'string'
+				? new Date(data.createAt)
+				: data.createAt,
+		active: data.active,
+	});

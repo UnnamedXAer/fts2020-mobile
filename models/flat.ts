@@ -8,6 +8,7 @@ export default class Flat {
 	ownerId: number;
 	owner?: User;
 	createAt?: Date;
+	active?: boolean;
 
 	constructor(prams: Flat = {} as Flat) {
 		const {
@@ -17,7 +18,8 @@ export default class Flat {
 			members,
 			owner,
 			ownerId,
-			createAt
+			createAt,
+			active,
 		} = prams;
 
 		this.id = id;
@@ -27,6 +29,7 @@ export default class Flat {
 		this.owner = owner;
 		this.ownerId = ownerId;
 		this.createAt = createAt;
+		this.active = active;
 	}
 }
 

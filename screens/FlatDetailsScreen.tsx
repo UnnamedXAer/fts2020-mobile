@@ -25,6 +25,7 @@ import {
 	FlatDetailsScreenRouteProps,
 	FlatDetailsScreenNavigationProps,
 } from '../types/navigationTypes';
+import { FABAction } from '../types/types';
 
 interface Props {
 	route: FlatDetailsScreenRouteProps;
@@ -38,6 +39,7 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 	const dispatch = useDispatch();
 	const [fabOpen, setFabOpen] = useState(false);
 	const id = route.params.id;
+	const loggedUser = useSelector((state: RootState) => state.auth.user)!;
 	const flat = useSelector((state: RootState) =>
 		state.flats.flats.find((x) => x.id === id)
 	)!;
@@ -112,12 +114,83 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 		// open modal with options
 	};
 
+	const FABActions: FABAction[] = [];
+	if (loggedUser && flat) {
+		if (flat.active) {
+			FABActions.push({
+				icon: 'table-plus',
+				onPress: () =>
+					navigation.navigate('NewTaskName', {
+						flatId: id,
+					}),
+				label: 'Add Task',
+			});
+			if (flat.ownerId === loggedUser.id) {
+				FABActions.push(
+					{
+						icon: 'close-box-outline',
+						onPress: () => {
+							console.log('Closing flat.');
+						},
+						label: 'Close Flat',
+					},
+					{
+						icon: 'account-multiple-plus',
+						onPress: () =>
+							navigation.navigate('InviteMembers', {
+								flatId: id,
+								isNewFlat: false,
+							}),
+						label: 'Invite a new member',
+					}
+				);
+			} else {
+				FABActions.push({
+					icon: 'exit-to-app',
+					onPress: () => {
+						console.log('Leaving Flat.');
+					},
+					label: 'Leave Flat',
+				});
+			}
+		} else {
+			if (flat.ownerId !== loggedUser.id) {
+				FABActions.push({
+					icon: 'exit-to-app',
+					onPress: () => {
+						console.log('Leaving Flat.');
+					},
+					label: 'Leave Flat',
+				});
+			} else {
+				FABActions.push({
+					icon: 'information-variant',
+					onPress: () => {
+						console.log('no actions available');
+					},
+					label: 'No actions available',
+				});
+			}
+		}
+	}
+
 	return (
 		<>
 			<ScrollView style={styles.screen}>
-				<Headline style={{ alignSelf: 'center', paddingTop: 24 }}>
-					{flat.name}
-				</Headline>
+				<View
+					style={{
+						flexDirection: 'row',
+						paddingTop: 24,
+						justifyContent: 'center',
+					}}
+				>
+					{!flat.active && (
+						<Headline style={{ color: theme.colors.placeholder }}>
+							[Inactive]{' '}
+						</Headline>
+					)}
+					<Headline>{flat.name}</Headline>
+				</View>
 
 				<View style={[styles.section, styles.infoContainer]}>
 					<View style={styles.avatarContainer}>
@@ -231,25 +304,7 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 				open={fabOpen}
 				color="white"
 				icon={fabOpen ? 'close' : 'plus'}
-				actions={[
-					{
-						icon: 'account-multiple-plus',
-						onPress: () =>
-							navigation.navigate('InviteMembers', {
-								flatId: id,
-								isNewFlat: false,
-							}),
-						label: 'Invite a new member',
-					},
-					{
-						icon: 'table-plus',
-						onPress: () =>
-							navigation.navigate('NewTaskName', {
-								flatId: id,
-							}),
-						label: 'Add Task',
-					},
-				]}
+				actions={FABActions}
 				onStateChange={({ open }) => {
 					setFabOpen(open);
 				}}

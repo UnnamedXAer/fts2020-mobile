@@ -25,10 +25,15 @@ import NewTaskMembersScreen from '../screens/TaskMembersUpdateScreen';
 const RootStack = createStackNavigator<RootStackParamList>();
 const RootStackNavigator = () => {
 	const dispatch = useDispatch();
+	const loggedUser = useSelector((state: RootState) => state.auth.user!);
 	return (
 		<RootStack.Navigator
 			screenOptions={{
-				headerRight: (props) => <Link onPress={() => dispatch(logOut())}>L</Link>,
+				headerRight: (props) => (
+					<Link onPress={() => dispatch(logOut())}>
+						{loggedUser.emailAddress}
+					</Link>
+				),
 			}}
 		>
 			<RootStack.Screen

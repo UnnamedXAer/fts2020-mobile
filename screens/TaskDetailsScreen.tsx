@@ -14,6 +14,7 @@ import PeriodsTable from '../components/Task/PeriodsTable';
 import HttpErrorParser from '../utils/parseError';
 import { fetchTaskPeriods } from '../store/actions/periods';
 import DetailsScreenInfo from '../components/DetailsScreeenInfo/DetailsScreenInfo';
+import { FABAction } from '../types/types';
 
 interface Props {
 	route: TaskDetailsScreenRouteProps;
@@ -132,6 +133,51 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 		// open modal with options
 	};
 
+	const FABActions: FABAction[] = [];
+	const isFlatOwner = loggedUser.id === flat?.ownerId;
+	const isTaskOwner = loggedUser.id === task.createBy;
+
+	if (!isTaskOwner) {
+		FABActions.push({
+			icon: 'exit-to-app',
+			onPress: () => {
+				console.log('Leaving task.');
+			},
+			label: 'Leave Task',
+		});
+	}
+
+	if (task.active) {
+		FABActions.push({
+			icon: 'ballot-recount-outline',
+			onPress: () => {
+				console.log('Resetting periods.');
+			},
+			label: 'Reset Periods',
+		});
+
+		if (isTaskOwner || isFlatOwner) {
+			FABActions.push(
+				{
+					icon: 'account-multiple-plus',
+					onPress: () =>
+						navigation.navigate('NewTaskMembers', {
+							newTask: false,
+							id: id,
+						}),
+					label: 'Update members',
+				},
+				{
+					icon: 'close-box-outline',
+					onPress: () => {
+						console.log('Closing task.');
+					},
+					label: 'Close Task',
+				}
+			);
+		}
+	}
+
 	return (
 		<>
 			<ScrollView style={styles.screen}>
@@ -157,17 +203,7 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 				open={fabOpen}
 				color="white"
 				icon={fabOpen ? 'close' : 'plus'}
-				actions={[
-					{
-						icon: 'account-multiple-plus',
-						onPress: () =>
-							navigation.navigate('NewTaskMembers', {
-								newTask: false,
-								id: id,
-							}),
-						label: 'Update members',
-					},
-				]}
+				actions={FABActions}
 				onStateChange={({ open }) => {
 					setFabOpen(open);
 				}}

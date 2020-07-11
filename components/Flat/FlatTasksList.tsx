@@ -99,7 +99,7 @@ const FlatTasksList: React.FC<Props> = ({ flatId, theme, navigation }) => {
 	let content: JSX.Element;
 
 	if (error) {
-		content = <NotificationCard serverity="error">{error}</NotificationCard>;
+		content = <NotificationCard severity="error">{error}</NotificationCard>;
 	} else if (tasksLoading) {
 		content = (
 			<Placeholder Animation={Shine}>

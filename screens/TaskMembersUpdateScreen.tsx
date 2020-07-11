@@ -197,7 +197,7 @@ const NewTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => 
 									</Chip>
 								))
 						) : (
-							<NotificationCard serverity="success">
+							<NotificationCard severity="success">
 								All flat members are assigned to task.
 							</NotificationCard>
 						)}
@@ -265,7 +265,7 @@ const NewTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => 
 					</View>
 					<View style={styles.inputContainer}>
 						{error && (
-							<NotificationCard serverity="error">{error}</NotificationCard>
+							<NotificationCard severity="error">{error}</NotificationCard>
 						)}
 					</View>
 					<View style={styles.actions}>

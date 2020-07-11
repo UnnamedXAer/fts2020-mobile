@@ -153,7 +153,7 @@ const FlatsScreen: React.FC<Props> = ({ theme, navigation }) => {
 						setError(null);
 					}}
 				>
-					<NotificationCard serverity="error">{error}</NotificationCard>
+					<NotificationCard severity="error">{error}</NotificationCard>
 				</FloatingCard>
 			)}
 			<FAB

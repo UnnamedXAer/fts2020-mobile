@@ -356,7 +356,7 @@ const InviteMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 					</View>
 					{error && (
 						<View style={{ width: '90%' }}>
-							<NotificationCard serverity="error">{error}</NotificationCard>
+							<NotificationCard severity="error">{error}</NotificationCard>
 						</View>
 					)}
 					<View style={styles.actions}>

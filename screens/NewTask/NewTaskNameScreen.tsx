@@ -151,7 +151,7 @@ const NewTaskNameScreen: React.FC<Props> = ({ theme, route, navigation }) => {
 					</View>
 					<View style={styles.inputContainer}>
 						{error && (
-							<NotificationCard serverity="error">{error}</NotificationCard>
+							<NotificationCard severity="error">{error}</NotificationCard>
 						)}
 					</View>
 					<View style={styles.actions}>

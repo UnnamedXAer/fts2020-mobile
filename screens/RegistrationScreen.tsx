@@ -194,7 +194,7 @@ const RegistrationScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 					</View>
 					<View style={styles.errorContainer}>
 						{error !== null && (
-							<NotificationCard serverity="error">{error}</NotificationCard>
+							<NotificationCard severity="error">{error}</NotificationCard>
 						)}
 					</View>
 					<View style={styles.linkContainer}>

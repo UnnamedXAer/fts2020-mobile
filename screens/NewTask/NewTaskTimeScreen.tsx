@@ -234,7 +234,7 @@ const NewTaskTimeScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 					</View>
 					<View style={styles.inputContainer}>
 						{error && (
-							<NotificationCard serverity="error">{error}</NotificationCard>
+							<NotificationCard severity="error">{error}</NotificationCard>
 						)}
 					</View>
 					<View style={styles.actions}>

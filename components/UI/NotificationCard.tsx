@@ -1,28 +1,36 @@
 import React from 'react';
-import {
-	StyleSheet,
-	View,
-	// GestureResponderEvent,
-	ViewStyle,
-	TextStyle,
-} from 'react-native';
-import { Paragraph, Card, withTheme } from 'react-native-paper';
+import { StyleSheet, View, ViewStyle, TextStyle } from 'react-native';
+import { Paragraph, Card } from 'react-native-paper';
 import { MaterialIcons, MaterialCommunityIcons, AntDesign } from '@expo/vector-icons';
-import { Theme } from 'react-native-paper/lib/typescript/src/types';
+import { assertUnreachable } from '../../utils/assertUnreachable';
+import { Severity } from '../../store/ReactTypes/customReactTypes';
 
 interface Props {
-	serverity?: 'error' | 'warning' | 'info' | 'success';
-	// onPress?: (ev: GestureResponderEvent) => void;
+	severity?: Severity;
 	children: React.ReactNode;
-	theme: Theme;
 }
 
-const NotificationCard: React.FC<Props> = (props) => {
+const NotificationCard: React.FC<Props> = ({ severity = 'info', children }) => {
 	let serverityTextStyle: TextStyle;
 	let serverityCardStyle: ViewStyle;
 	let NotificationIcon: React.ReactElement;
 
-	switch (props.serverity) {
+	switch (severity) {
+		case 'info':
+			serverityCardStyle = {
+				backgroundColor: 'rgb(232, 244, 253)',
+			};
+			serverityTextStyle = {
+				color: 'rgb(13, 60, 97)',
+			};
+			NotificationIcon = (
+				<MaterialIcons
+					name="info-outline"
+					size={26}
+					style={{ color: '#2196f3' }}
+				/>
+			);
+			break;
 		case 'error':
 			serverityCardStyle = {
 				backgroundColor: 'rgb(253, 236, 234)',
@@ -65,20 +73,7 @@ const NotificationCard: React.FC<Props> = (props) => {
 			);
 			break;
 		default:
-			serverityCardStyle = {
-				backgroundColor: 'rgb(232, 244, 253)',
-			};
-			serverityTextStyle = {
-				color: 'rgb(13, 60, 97)',
-			};
-			NotificationIcon = (
-				<MaterialIcons
-					name="info-outline"
-					size={26}
-					style={{ color: '#2196f3' }}
-				/>
-			);
-			break;
+			assertUnreachable(severity);
 	}
 
 	return (
@@ -86,7 +81,7 @@ const NotificationCard: React.FC<Props> = (props) => {
 			<View style={styles.container}>
 				{NotificationIcon}
 				<Paragraph style={[styles.text, serverityTextStyle]}>
-					{props.children}
+					{children}
 				</Paragraph>
 			</View>
 		</Card>
@@ -112,4 +107,4 @@ const styles = StyleSheet.create({
 	},
 });
 
-export default withTheme(NotificationCard);
+export default NotificationCard;

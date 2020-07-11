@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Title, FAB } from 'react-native-paper';
@@ -9,12 +9,19 @@ import {
 	TaskDetailsScreenRouteProps,
 	TaskDetailsScreenNavigationProps,
 } from '../types/navigationTypes';
-import { fetchTaskOwner, fetchTaskMembers } from '../store/actions/tasks';
+import { fetchTaskOwner, fetchTaskMembers, updateTask } from '../store/actions/tasks';
 import PeriodsTable from '../components/Task/PeriodsTable';
 import HttpErrorParser from '../utils/parseError';
-import { fetchTaskPeriods } from '../store/actions/periods';
+import { fetchTaskPeriods, resetTaskPeriods } from '../store/actions/periods';
 import DetailsScreenInfo from '../components/DetailsScreeenInfo/DetailsScreenInfo';
 import { FABAction } from '../types/types';
+import AlertDialog, { AlertDialogData } from '../components/UI/AlertDialog/AlertDialog';
+import Task from '../models/task';
+import AlertSnackbar, {
+	AlertSnackbarData,
+} from '../components/UI/AlertSnackbar/AlertSnackbar';
+
+type FABActionsKeys = 'resetPeriods' | 'updateMembers' | 'closeTask' | 'noActions';
 
 interface Props {
 	route: TaskDetailsScreenRouteProps;
@@ -48,6 +55,122 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 		members: null,
 		schedule: null,
 	});
+
+	const [dialogData, setDialogData] = useState<AlertDialogData>({
+		content: '',
+		onDismiss: () => {},
+		title: '',
+		loading: false,
+		open: false,
+	});
+
+	const [snackbarData, setSnackbarData] = useState<AlertSnackbarData>({
+		content: '',
+		onClose: () => {},
+		open: false,
+	});
+
+	const isMounted = useRef(true);
+	useEffect(() => {
+		isMounted.current = true;
+		return () => {
+			isMounted.current = false;
+		};
+	}, []);
+
+	const closeDialogAlertHandler = () =>
+		setDialogData((prevState) => ({
+			...prevState,
+			open: prevState.loading,
+		}));
+
+	const closeSnackbarAlertHandler = () =>
+		setSnackbarData((prevState) => ({
+			...prevState,
+			open: false,
+		}));
+
+	const resetPeriodsHandler = useCallback(async () => {
+		setDialogData((prevState) => ({ ...prevState, loading: true }));
+
+		try {
+			await dispatch(resetTaskPeriods(id));
+			isMounted.current &&
+				isMounted.current &&
+				setSnackbarData({
+					open: true,
+					action: {
+						label: 'OK',
+						onPress: closeSnackbarAlertHandler,
+					},
+					severity: 'success',
+					timeout: 3000,
+					content: 'Periods reset successfully.',
+					onClose: closeSnackbarAlertHandler,
+				});
+		} catch (err) {
+			if (isMounted.current) {
+				const httpError = new HttpErrorParser(err);
+				const msg = httpError.getMessage();
+				setSnackbarData({
+					open: true,
+					action: {
+						label: 'OK',
+						onPress: closeSnackbarAlertHandler,
+					},
+					severity: 'error',
+					timeout: 4000,
+					content: msg,
+					onClose: closeSnackbarAlertHandler,
+				});
+			}
+		}
+		isMounted.current &&
+			setDialogData((prevState) => ({ ...prevState, open: false }));
+	}, [dispatch, id]);
+
+	const taskCloseHandler = useCallback(async () => {
+		const _task: Partial<Task> = new Task({
+			id: task!.id,
+			active: false,
+		});
+		setDialogData((prevState) => ({ ...prevState, loading: true }));
+		setTimeout(async () => {
+			try {
+				await dispatch(updateTask(_task));
+				isMounted.current &&
+					setSnackbarData({
+						open: true,
+						action: {
+							label: 'ok',
+							onPress: closeSnackbarAlertHandler,
+						},
+						severity: 'success',
+						timeout: 3000,
+						content: 'Task closed.',
+						onClose: closeSnackbarAlertHandler,
+					});
+			} catch (err) {
+				if (isMounted.current) {
+					const httpError = new HttpErrorParser(err);
+					const msg = httpError.getMessage();
+					setSnackbarData({
+						open: true,
+						action: {
+							label: 'ok',
+							onPress: closeSnackbarAlertHandler,
+						},
+						severity: 'error',
+						timeout: 4000,
+						content: msg,
+						onClose: closeSnackbarAlertHandler,
+					});
+				}
+			}
+			isMounted.current &&
+				setDialogData((prevState) => ({ ...prevState, open: false }));
+		}, 3000);
+	}, [dispatch, task]);
 
 	useEffect(() => {
 		if (!task.owner && !loadingElements.owner && !elementsErrors.owner) {
@@ -133,49 +256,87 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 		// open modal with options
 	};
 
-	const FABActions: FABAction[] = [];
-	const isFlatOwner = loggedUser.id === flat?.ownerId;
-	const isTaskOwner = loggedUser.id === task.createBy;
-
-	if (!isTaskOwner) {
-		FABActions.push({
-			icon: 'exit-to-app',
-			onPress: () => {
-				console.log('Leaving task.');
-			},
-			label: 'Leave Task',
-		});
-	}
-
-	if (task.active) {
-		FABActions.push({
+	const taskFABActions: {
+		[key in FABActionsKeys]: FABAction;
+	} = {
+		resetPeriods: {
 			icon: 'ballot-recount-outline',
 			onPress: () => {
-				console.log('Resetting periods.');
+				setDialogData({
+					open: true,
+					title: 'Reset Periods',
+					content: 'Do you want reset future periods?',
+					onDismiss: closeDialogAlertHandler,
+					loading: false,
+					actions: [
+						{
+							label: 'Yes',
+							onPress: resetPeriodsHandler,
+							color: 'primary',
+						},
+						{
+							color: 'accent',
+							label: 'Cancel',
+							onPress: closeDialogAlertHandler,
+						},
+					],
+				});
 			},
 			label: 'Reset Periods',
-		});
+		},
+		updateMembers: {
+			icon: 'account-multiple-plus',
+			onPress: () =>
+				navigation.navigate('NewTaskMembers', {
+					newTask: false,
+					id: id,
+				}),
+			label: 'Update Members',
+		},
+		closeTask: {
+			icon: 'close-box-outline',
+			onPress: () => {
+				setDialogData({
+					open: true,
+					title: 'Close Task',
+					content: 'Do you want to close this task?',
+					onDismiss: closeDialogAlertHandler,
+					loading: false,
+					actions: [
+						{
+							label: 'Yes',
+							onPress: taskCloseHandler,
+							color: 'primary',
+						},
+						{
+							color: 'accent',
+							label: 'Cancel',
+							onPress: closeDialogAlertHandler,
+						},
+					],
+				});
+			},
+			label: 'Close Task',
+		},
+		noActions: {
+			icon: 'information-variant',
+			onPress: () => {},
+			label: 'No actions available',
+		},
+	};
 
-		if (isTaskOwner || isFlatOwner) {
-			FABActions.push(
-				{
-					icon: 'account-multiple-plus',
-					onPress: () =>
-						navigation.navigate('NewTaskMembers', {
-							newTask: false,
-							id: id,
-						}),
-					label: 'Update members',
-				},
-				{
-					icon: 'close-box-outline',
-					onPress: () => {
-						console.log('Closing task.');
-					},
-					label: 'Close Task',
-				}
-			);
-		}
+	const actions: FABAction[] = [];
+	if (
+		task.active &&
+		(loggedUser.id === flat?.ownerId || loggedUser.id === task.createBy)
+	) {
+		actions.push(
+			taskFABActions.closeTask,
+			taskFABActions.updateMembers,
+			taskFABActions.resetPeriods
+		);
+	} else {
+		actions.push(taskFABActions.noActions);
 	}
 
 	return (
@@ -203,11 +364,13 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 				open={fabOpen}
 				color="white"
 				icon={fabOpen ? 'close' : 'plus'}
-				actions={FABActions}
+				actions={actions}
 				onStateChange={({ open }) => {
 					setFabOpen(open);
 				}}
 			/>
+			<AlertDialog data={dialogData} />
+			<AlertSnackbar data={snackbarData} />
 		</>
 	);
 };

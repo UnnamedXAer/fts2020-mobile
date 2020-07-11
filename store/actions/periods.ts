@@ -79,6 +79,34 @@ export const completePeriod = (
 	};
 };
 
+export const resetTaskPeriods = (
+	taskId: number
+): ThunkAction<
+	Promise<void>,
+	RootState,
+	any,
+	StoreAction<
+		SetTaskPeriodsActionPayload,
+		TaskPeriodsActionTypes.SetTaskPeriods
+	>
+> => {
+	return async (dispatch) => {
+		const url = `/tasks/${taskId}/periods`;
+		try {
+			const { data } = await axios.put<APITaskPeriod[]>(url);
+
+			const periods = data.map(mapApiPeriodDataToModel);
+
+			dispatch({
+				type: TaskPeriodsActionTypes.SetTaskPeriods,
+				payload: { taskId, periods },
+			});
+		} catch (err) {
+			throw err;
+		}
+	};
+};
+
 export const clearTaskPeriods = (
 	taskId: number
 ): StoreAction<{ taskId: number }, TaskPeriodsActionTypes.ClearTaskPeriods> => {

@@ -18,6 +18,31 @@ const setFlats: SimpleReducer<FlatsState, Flat[]> = (state, action) => {
 	};
 };
 
+const setFlat: SimpleReducer<FlatsState, Flat> = (state, action) => {
+	const flat = action.payload;
+	const updatedFlats = [...state.flats];
+	const flatIdx = updatedFlats.findIndex((x) => x.id === flat.id);
+
+	if (flatIdx === -1) {
+		updatedFlats.push(flat);
+	} else {
+		const updatedFlat = flat;
+
+		if (updatedFlats[flatIdx].owner) {
+			updatedFlat.owner = updatedFlats[flatIdx].owner;
+		}
+		if (updatedFlats[flatIdx].members) {
+			updatedFlat.members = updatedFlats[flatIdx].members;
+		}
+		updatedFlats[flatIdx] = updatedFlat;
+	}
+
+	return {
+		...state,
+		flats: updatedFlats,
+	};
+};
+
 const addFlat: SimpleReducer<FlatsState, AddFlatActionPayload> = (
 	state,
 	action
@@ -84,6 +109,8 @@ const reducer: AppReducer<FlatsState, FlatsActionTypes> = (
 	switch (action.type) {
 		case FlatsActionTypes.Set:
 			return setFlats(state, action);
+		case FlatsActionTypes.SetFlat:
+			return setFlat(state, action);
 		case FlatsActionTypes.Add:
 			return addFlat(state, action);
 		case FlatsActionTypes.SetOwner:

@@ -68,6 +68,34 @@ export const fetchFlats = (): ThunkAction<
 	};
 };
 
+export const updateFlat = (
+	flat: Partial<FlatData>
+): ThunkAction<
+	Promise<void>,
+	RootState,
+	any,
+	StoreAction<Flat, FlatsActionTypes.SetFlat>
+> => {
+	return async (dispatch) => {
+		const url = `/flats/${flat.id}`;
+		try {
+			const requestPayload: Partial<APIFlat> = {
+				name: flat.name!,
+				description: flat.description,
+				active: flat.active,
+			};
+			const { data } = await axios.patch<APIFlat>(url, requestPayload);
+			const updatedTask = mapAPIFlatDataToModel(data);
+			dispatch({
+				type: FlatsActionTypes.SetFlat,
+				payload: updatedTask,
+			});
+		} catch (err) {
+			throw err;
+		}
+	};
+};
+
 export const fetchFlatOwner = (
 	userId: number,
 	flatId: number

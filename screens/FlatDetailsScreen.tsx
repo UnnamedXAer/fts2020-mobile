@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Title, FAB, Divider } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
 import RootState from '../store/storeTypes';
 import { StateError } from '../store/ReactTypes/customReactTypes';
-import { fetchFlatOwner, fetchFlatMembers } from '../store/actions/flats';
+import { fetchFlatOwner, fetchFlatMembers, updateFlat } from '../store/actions/flats';
 import FlatTasksList from '../components/Flat/FlatTasksList';
 import {
 	FlatDetailsScreenRouteProps,
@@ -13,6 +13,19 @@ import {
 } from '../types/navigationTypes';
 import { FABAction } from '../types/types';
 import DetailsScreenInfo from '../components/DetailsScreeenInfo/DetailsScreenInfo';
+import AlertDialog, { AlertDialogData } from '../components/UI/AlertDialog/AlertDialog';
+import AlertSnackbar, {
+	AlertSnackbarData,
+} from '../components/UI/AlertSnackbar/AlertSnackbar';
+import HttpErrorParser from '../utils/parseError';
+import { FlatData } from '../models/flat';
+
+type FABActionsKeys =
+	| 'addTask'
+	| 'leaveFlat'
+	| 'inviteMembers'
+	| 'closeFlat'
+	| 'noActions';
 
 interface Props {
 	route: FlatDetailsScreenRouteProps;
@@ -39,6 +52,87 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 		owner: null,
 		members: null,
 	});
+
+	const [dialogData, setDialogData] = useState<AlertDialogData>({
+		content: '',
+		onDismiss: () => {},
+		title: '',
+		loading: false,
+		open: false,
+	});
+
+	const [snackbarData, setSnackbarData] = useState<AlertSnackbarData>({
+		content: '',
+		onClose: () => {},
+		open: false,
+	});
+
+	const isMounted = useRef(true);
+	useEffect(() => {
+		isMounted.current = true;
+		return () => {
+			isMounted.current = false;
+		};
+	}, []);
+
+	const closeFlatHandler = async () => {
+		const _flat: Partial<FlatData> = new FlatData({
+			id: flat!.id,
+			active: false,
+		});
+		setDialogData((prevState) => ({ ...prevState, loading: true }));
+
+		try {
+			await dispatch(updateFlat(_flat));
+			if (isMounted.current !== null) {
+				setSnackbarData({
+					open: true,
+					action: {
+						label: 'OK',
+						onPress: closeSnackbarAlertHandler,
+					},
+					severity: 'success',
+					timeout: 3000,
+					content: 'Flat closed.',
+					onClose: closeSnackbarAlertHandler,
+				});
+			}
+		} catch (err) {
+			if (isMounted.current !== null) {
+				const httpError = new HttpErrorParser(err);
+				const msg = httpError.getMessage();
+				setSnackbarData({
+					open: true,
+					action: {
+						label: 'OK',
+						onPress: closeSnackbarAlertHandler,
+					},
+					severity: 'error',
+					timeout: 4000,
+					content: msg,
+					onClose: closeSnackbarAlertHandler,
+				});
+			}
+		} finally {
+			isMounted.current !== null &&
+				setDialogData((prevState) => ({
+					...prevState,
+					open: false,
+				}));
+		}
+	};
+
+	const closeDialogAlertHandler = () =>
+		setDialogData((prevState) => ({
+			...prevState,
+			open: prevState.loading,
+		}));
+
+	const closeSnackbarAlertHandler = () =>
+		setSnackbarData((prevState) => ({
+			...prevState,
+			open: false,
+		}));
 
 	useEffect(() => {
 		if (!flat.owner && !loadingElements.owner && !elementsErrors.owner) {
@@ -98,63 +192,80 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 		// open modal with options
 	};
 
-	const FABActions: FABAction[] = [];
-	if (loggedUser && flat) {
-		if (flat.active) {
-			FABActions.push({
-				icon: 'table-plus',
-				onPress: () =>
-					navigation.navigate('NewTaskName', {
-						flatId: id,
-					}),
-				label: 'Add Task',
-			});
-			if (flat.ownerId === loggedUser.id) {
-				FABActions.push(
-					{
-						icon: 'close-box-outline',
-						onPress: () => {
-							console.log('Closing flat.');
+	const flatFABActions: {
+		[key in FABActionsKeys]: FABAction;
+	} = {
+		closeFlat: {
+			icon: 'close-box-outline',
+			onPress: () => {
+				setDialogData({
+					open: true,
+					content: 'Do you want to close this flat?',
+					title: 'Close Flat',
+					onDismiss: closeDialogAlertHandler,
+					loading: false,
+					actions: [
+						{
+							label: 'Yes',
+							onPress: closeFlatHandler,
+							color: 'primary',
 						},
-						label: 'Close Flat',
-					},
-					{
-						icon: 'account-multiple-plus',
-						onPress: () =>
-							navigation.navigate('InviteMembers', {
-								flatId: id,
-								isNewFlat: false,
-							}),
-						label: 'Invite a new member',
-					}
-				);
-			} else {
-				FABActions.push({
-					icon: 'exit-to-app',
-					onPress: () => {
-						console.log('Leaving Flat.');
-					},
-					label: 'Leave Flat',
+						{
+							color: 'accent',
+							label: 'Cancel',
+							onPress: closeDialogAlertHandler,
+						},
+					],
 				});
+			},
+			label: 'Close Flat',
+		},
+		addTask: {
+			icon: 'table-plus',
+			onPress: () =>
+				navigation.navigate('NewTaskName', {
+					flatId: id,
+				}),
+			label: 'Add Task',
+		},
+		leaveFlat: {
+			icon: 'exit-to-app',
+			onPress: () => {
+				console.log('Leaving Flat.');
+			},
+			label: 'Leave Flat',
+		},
+		inviteMembers: {
+			icon: 'account-multiple-plus',
+			onPress: () =>
+				navigation.navigate('InviteMembers', {
+					flatId: id,
+					isNewFlat: false,
+				}),
+			label: 'Invite a new member',
+		},
+		noActions: {
+			icon: 'information-variant',
+			onPress: () => {},
+			label: 'No actions available',
+		},
+	};
+
+	const actions: FABAction[] = [];
+	if (loggedUser && flat) {
+		const isOwner = flat.ownerId === loggedUser.id;
+		if (!isOwner) {
+			actions.push(flatFABActions.leaveFlat);
+		}
+		if (flat.active) {
+			if (isOwner) {
+				actions.unshift(flatFABActions.closeFlat, flatFABActions.inviteMembers);
 			}
-		} else {
-			if (flat.ownerId !== loggedUser.id) {
-				FABActions.push({
-					icon: 'exit-to-app',
-					onPress: () => {
-						console.log('Leaving Flat.');
-					},
-					label: 'Leave Flat',
-				});
-			} else {
-				FABActions.push({
-					icon: 'information-variant',
-					onPress: () => {
-						console.log('no actions available');
-					},
-					label: 'No actions available',
-				});
-			}
+			actions.push(flatFABActions.addTask);
+		}
+
+		if (actions.length === 0) {
+			actions.push(flatFABActions.noActions);
 		}
 	}
 
@@ -186,11 +297,13 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 				open={fabOpen}
 				color="white"
 				icon={fabOpen ? 'close' : 'plus'}
-				actions={FABActions}
+				actions={actions}
 				onStateChange={({ open }) => {
 					setFabOpen(open);
 				}}
 			/>
+			<AlertDialog data={dialogData} />
+			<AlertSnackbar data={snackbarData} />
 		</>
 	);
 };

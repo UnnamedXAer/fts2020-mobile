@@ -6,11 +6,12 @@ export enum AuthActionTypes {
 }
 
 export enum FlatsActionTypes {
-	Set = 'FLAT_SET',
-	Add = 'FLAT_ADD',
-	SetOwner = 'FLAT_SET_OWNER',
-	SetMembers = 'FLAT_SET_MEMBERS',
-	ClearState = 'FLAT_CLEAR_STATE',
+	Add = 'FLATS_ADD_FLAT',
+	Set = 'FLATS_SET_FLATS',
+	SetFlat = 'FLATS_SET_FLAT',
+	SetOwner = 'FLATS_SET_FLAT_OWNER',
+	SetMembers = 'FLATS_SET_FLAT_MEMBERS',
+	ClearState = 'FLATS_CLEAR_STATE',
 }
 
 export enum TasksActionTypes {

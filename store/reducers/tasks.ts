@@ -24,10 +24,19 @@ const setTask: SimpleReducer<TasksState, Task> = (state, action) => {
 	const task = action.payload;
 	const updatedTasks = [...state.tasks];
 	const taskIdx = updatedTasks.findIndex((x) => x.id === task.id);
+
 	if (taskIdx === -1) {
 		updatedTasks.push(task);
 	} else {
-		updatedTasks[taskIdx] = task;
+		const updatedTask = new Task({ ...task });
+
+		if (!task.owner && updatedTasks[taskIdx].owner) {
+			updatedTask.owner = updatedTasks[taskIdx].owner;
+		}
+		if (!task.members && updatedTasks[taskIdx].members) {
+			updatedTask.members = updatedTasks[taskIdx].members;
+		}
+		updatedTasks[taskIdx] = updatedTask;
 	}
 
 	return {

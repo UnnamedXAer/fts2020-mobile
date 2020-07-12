@@ -5,6 +5,7 @@ import { ThunkAction } from 'redux-thunk';
 import RootState, { StoreAction } from '../storeTypes';
 import User from '../../models/user';
 import { APIUser, mapApiUserDataToModel } from './users';
+import { AsyncStorage } from 'react-native';
 
 type FetchFlatTasksAction = {
 	type: TasksActionTypes.SetFlatTasks;
@@ -24,9 +25,18 @@ type FetchTaskAction = {
 	payload: Task;
 };
 
-type SetTaskMembersAction = {
+type SetTaskMembersActionPayload = {
 	type: TasksActionTypes.SetMembers;
 	payload: { members: User[]; taskId: number };
+};
+
+export type SetShowInactiveTasksActionPayload = {
+	show: boolean
+}
+
+type SetShowInactiveTasksAction = {
+	type: TasksActionTypes.SetShowInactive;
+	payload: SetShowInactiveTasksActionPayload;
 };
 
 type APITask = {
@@ -149,7 +159,7 @@ export const fetchUserTasks = (): ThunkAction<
 
 export const fetchTaskMembers = (
 	taskId: number
-): ThunkAction<Promise<void>, RootState, any, SetTaskMembersAction> => {
+): ThunkAction<Promise<void>, RootState, any, SetTaskMembersActionPayload> => {
 	return async (dispatch) => {
 		const url = `/tasks/${taskId}/members`;
 		try {
@@ -230,7 +240,7 @@ export const updateTask = (
 export const updatedTaskMembers = (
 	taskId: number,
 	members: number[]
-): ThunkAction<Promise<void>, RootState, any, SetTaskMembersAction> => {
+): ThunkAction<Promise<void>, RootState, any, SetTaskMembersActionPayload> => {
 	return async (dispatch) => {
 		const url = `/tasks/${taskId}/members`;
 		try {
@@ -240,6 +250,46 @@ export const updatedTaskMembers = (
 				type: TasksActionTypes.SetMembers,
 				payload: { taskId, members: taskMembers },
 			});
+		} catch (err) {
+			throw err;
+		}
+	};
+};
+
+export const readSaveShowInactive = (
+): ThunkAction<Promise<void>, RootState, any, SetShowInactiveTasksAction> => {
+	return async (dispatch, getState) => {
+		const userId = getState().auth.user!.id;
+
+		try {
+			const savedShow = await AsyncStorage.getItem('tasksShowInactive_' + userId);
+			const show = savedShow === '1';
+
+			dispatch(setShowInactiveTasks(show, true));
+		} catch (err) {
+			throw err;
+		}
+	};
+};
+
+
+
+
+export const setShowInactiveTasks = (
+	show: boolean,
+	skipSaving?: boolean
+): ThunkAction<Promise<void>, RootState, any, SetShowInactiveTasksAction> => {
+	return async (dispatch, getState) => {
+		const userId = getState().auth.user!.id;
+
+		try {
+			dispatch({
+				type: TasksActionTypes.SetShowInactive,
+				payload: { show },
+			});
+			if (skipSaving !== true) {
+				await AsyncStorage.setItem('tasksShowInactive_' + userId, show ? '1' : '0');
+			}
 		} catch (err) {
 			throw err;
 		}

@@ -14,13 +14,15 @@ import FlatDetailsScreen from '../screens/FlatDetailsScreen';
 import { navigationContainerTheme } from '../config/theme';
 import Link from '../components/UI/Link';
 import { RootStackParamList } from '../types/navigationTypes';
-import TaskDetailsScreen from '../screens/TaskDetailsScreen';
+import TaskDetailsScreen from '../screens/Task/TaskDetailsScreen';
 import NewFlatInfoScreen from '../screens/NewFlatInfoScreen';
 import NewFlatScreen from '../screens/NewFlatScreen';
 import InviteMembersScreen from '../screens/InviteMembersScreen';
 import NewTaskNameScreen from '../screens/NewTask/NewTaskNameScreen';
 import NewTaskTimeScreen from '../screens/NewTask/NewTaskTimeScreen';
-import NewTaskMembersScreen from '../screens/TaskMembersUpdateScreen';
+import NewTaskMembersScreen from '../screens/Task/TaskMembersUpdateScreen';
+import UserTasksScreen from '../screens/Task/UserTasksScreen';
+import { readSaveShowInactive } from '../store/actions/tasks';
 
 const RootStack = createStackNavigator<RootStackParamList>();
 const RootStackNavigator = () => {
@@ -35,11 +37,17 @@ const RootStackNavigator = () => {
 					</Link>
 				),
 			}}
+			initialRouteName="UserTasks"
 		>
 			<RootStack.Screen
 				name="Flats"
 				options={{ title: 'Your Flats' }}
 				component={FlatsScreen}
+			/>
+			<RootStack.Screen
+				name="UserTasks"
+				options={{ title: 'Your Tasks' }}
+				component={UserTasksScreen}
 			/>
 			<RootStack.Screen
 				name="FlatDetails"
@@ -103,6 +111,7 @@ const AppNavitaionContainer = () => {
 			};
 			tryRestoreSession();
 		} else {
+			dispatch(readSaveShowInactive());
 			setLoading(false);
 		}
 	}, [loggedUser]);

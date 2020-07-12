@@ -21,6 +21,7 @@ export enum TasksActionTypes {
 	SetFlatTasks = 'TASK_SET_FLAT_TASKS',
 	SetUserTasks = 'TASK_SET_USER_TASKS',
 	SetMembers = 'FLAT_TASK_SET_MEMBERS',
+	SetShowInactive = 'TASKS_SET_SHOW_INACTIVE',
 	ClearState = 'TASK_CLEAR_STATE',
 }
 

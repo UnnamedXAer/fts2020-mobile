@@ -14,17 +14,17 @@ import { Theme } from 'react-native-paper/lib/typescript/src/types';
 import {
 	NewTaskMembersScreenNavigationProps,
 	NewTaskMembersScreenRouteProps,
-} from '../types/navigationTypes';
-import { StateError } from '../store/ReactTypes/customReactTypes';
-import HttpErrorParser from '../utils/parseError';
-import Header from '../components/UI/Header';
-import NotificationCard from '../components/UI/NotificationCard';
-import CustomButton from '../components/UI/CustomButton';
-import RootState from '../store/storeTypes';
-import User from '../models/user';
-import Stepper from '../components/UI/Stepper';
-import { updatedTaskMembers } from '../store/actions/tasks';
-import { clearTaskPeriods } from '../store/actions/periods';
+} from '../../types/navigationTypes';
+import { StateError } from '../../store/ReactTypes/customReactTypes';
+import HttpErrorParser from '../../utils/parseError';
+import Header from '../../components/UI/Header';
+import NotificationCard from '../../components/UI/NotificationCard';
+import CustomButton from '../../components/UI/CustomButton';
+import RootState from '../../store/storeTypes';
+import User from '../../models/user';
+import Stepper from '../../components/UI/Stepper';
+import { updatedTaskMembers } from '../../store/actions/tasks';
+import { clearTaskPeriods } from '../../store/actions/periods';
 
 interface Props {
 	theme: Theme;

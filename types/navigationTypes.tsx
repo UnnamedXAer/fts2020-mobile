@@ -4,6 +4,7 @@ import { TaskPeriodUnit } from '../models/task';
 
 export type RootStackParamList = {
 	Flats: undefined;
+	UserTasks: undefined;
 	FlatDetails: {
 		id: number;
 	};

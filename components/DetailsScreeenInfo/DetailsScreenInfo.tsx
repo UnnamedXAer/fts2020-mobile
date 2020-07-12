@@ -6,8 +6,11 @@ import MembersList from '../MembersList/MembersList';
 import User from '../../models/user';
 import { Placeholder } from 'rn-placeholder';
 import { PlaceholderLine, Shine } from '../UI/Placeholder/Placeholder';
+import { StateError } from '../../store/ReactTypes/customReactTypes';
+import NotificationCard from '../UI/NotificationCard';
 
 interface Props {
+	error: StateError;
 	owner: User | undefined;
 	createAt: Date | undefined;
 	onOwnerPress: (id: User['id']) => void;
@@ -20,6 +23,7 @@ interface Props {
 }
 
 const DetailsScreenInfo: React.FC<Props> = ({
+	error,
 	owner,
 	createAt,
 	onOwnerPress,
@@ -33,13 +37,30 @@ const DetailsScreenInfo: React.FC<Props> = ({
 	const theme = useTheme();
 	return (
 		<>
+			{error && <NotificationCard severity="error">{error}</NotificationCard>}
 			<View style={styles.container}>
-				{!active && (
-					<Headline style={{ color: theme.colors.placeholder }}>
-						[Inactive]{' '}
-					</Headline>
+				{name ? (
+					<>
+						{active === false && (
+							<Headline style={{ color: theme.colors.placeholder }}>
+								[Inactive]{' '}
+							</Headline>
+						)}
+						<Headline>{name}</Headline>
+					</>
+				) : (
+					<Placeholder Animation={Shine}>
+						<PlaceholderLine
+							height={40}
+							style={{
+								width: '80%',
+								alignSelf: 'center',
+								marginBottom: 8,
+								marginTop: 8,
+							}}
+						/>
+					</Placeholder>
 				)}
-				<Headline>{name}</Headline>
 			</View>
 			<DetailsScreenHeader
 				owner={owner}

@@ -33,6 +33,7 @@ export type TasksState = {
 	userTasks: UserTask[];
 	userTasksLoadTime: number;
 	createdTasksTmpIds: { [key: string]: number };
+	showInactive: boolean;
 };
 
 export type PeriodsState = {

@@ -2,7 +2,7 @@ import { AppReducer, TasksState, SimpleReducer } from '../storeTypes';
 import { TasksActionTypes } from '../actions/actionTypes';
 import Task from '../../models/task';
 import User from '../../models/user';
-import { CreateTaskActionPayload } from '../actions/tasks';
+import { CreateTaskActionPayload, SetShowInactiveTasksActionPayload } from '../actions/tasks';
 
 const initialState: TasksState = {
 	tasks: [],
@@ -10,6 +10,7 @@ const initialState: TasksState = {
 	userTasks: [],
 	userTasksLoadTime: 0,
 	createdTasksTmpIds: {},
+	showInactive: false
 };
 
 const setUserTasks: SimpleReducer<TasksState, Task[]> = (state, action) => {
@@ -118,6 +119,13 @@ const setOwner: SimpleReducer<
 	};
 };
 
+const setShowInactive: SimpleReducer<TasksState, SetShowInactiveTasksActionPayload> = (state, action) => {
+	return {
+		...state,
+		showInactive: action.payload.show
+	};
+};
+
 const clearState: SimpleReducer<TasksState, undefined> = (state, action) => {
 	return {
 		...initialState,
@@ -141,6 +149,8 @@ const reducer: AppReducer<TasksState, TasksActionTypes> = (
 			return setMembers(state, action);
 		case TasksActionTypes.SetOwner:
 			return setOwner(state, action);
+		case TasksActionTypes.SetShowInactive:
+			return setShowInactive(state, action);
 		case TasksActionTypes.ClearState:
 			return clearState(state, action);
 		default:

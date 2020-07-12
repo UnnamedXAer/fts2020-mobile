@@ -3,23 +3,30 @@ import { StyleSheet, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Title, FAB } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
-import RootState from '../store/storeTypes';
-import { StateError } from '../store/ReactTypes/customReactTypes';
+import RootState from '../../store/storeTypes';
+import { StateError } from '../../store/ReactTypes/customReactTypes';
 import {
 	TaskDetailsScreenRouteProps,
 	TaskDetailsScreenNavigationProps,
-} from '../types/navigationTypes';
-import { fetchTaskOwner, fetchTaskMembers, updateTask } from '../store/actions/tasks';
-import PeriodsTable from '../components/Task/PeriodsTable';
-import HttpErrorParser from '../utils/parseError';
-import { fetchTaskPeriods, resetTaskPeriods } from '../store/actions/periods';
-import DetailsScreenInfo from '../components/DetailsScreeenInfo/DetailsScreenInfo';
-import { FABAction } from '../types/types';
-import AlertDialog, { AlertDialogData } from '../components/UI/AlertDialog/AlertDialog';
-import Task from '../models/task';
+} from '../../types/navigationTypes';
+import {
+	fetchTaskOwner,
+	fetchTaskMembers,
+	updateTask,
+	fetchTask,
+} from '../../store/actions/tasks';
+import PeriodsTable from '../../components/Task/PeriodsTable';
+import HttpErrorParser from '../../utils/parseError';
+import { fetchTaskPeriods, resetTaskPeriods } from '../../store/actions/periods';
+import DetailsScreenInfo from '../../components/DetailsScreeenInfo/DetailsScreenInfo';
+import { FABAction } from '../../types/types';
+import AlertDialog, {
+	AlertDialogData,
+} from '../../components/UI/AlertDialog/AlertDialog';
+import Task from '../../models/task';
 import AlertSnackbar, {
 	AlertSnackbarData,
-} from '../components/UI/AlertSnackbar/AlertSnackbar';
+} from '../../components/UI/AlertSnackbar/AlertSnackbar';
 
 type FABActionsKeys = 'resetPeriods' | 'updateMembers' | 'closeTask' | 'noActions';
 
@@ -31,18 +38,19 @@ interface Props {
 const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 	const dispatch = useDispatch();
 	const id = route.params.id;
-	const task = useSelector(
-		(state: RootState) => state.tasks.tasks.find((x) => x.id === route.params.id)!
+	const task = useSelector((state: RootState) =>
+		state.tasks.tasks.find((x) => x.id === route.params.id)
 	);
 	const flat = useSelector((state: RootState) =>
-		state.flats.flats.find((x) => x.id === task.flatId!)
+		state.flats.flats.find((x) => x.id === task?.flatId!)
 	);
 	const loggedUser = useSelector((state: RootState) => state.auth.user!);
+	const [error, setError] = useState<StateError>(null);
 	const [fabOpen, setFabOpen] = useState(false);
 	const periods = useSelector((state: RootState) => state.periods.taskPeriods[id]);
 	const [loadingElements, setLoadingElements] = useState({
-		owner: !!task.owner,
-		members: !!task.members,
+		owner: !!task?.owner,
+		members: !!task?.members,
 		schedule: !!periods,
 	});
 
@@ -77,6 +85,24 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 			isMounted.current = false;
 		};
 	}, []);
+
+	useEffect(() => {
+		if (!task) {
+			const loadTask = async (id: number) => {
+				setError(null);
+				try {
+					await dispatch(fetchTask(id));
+				} catch (err) {
+					if (isMounted.current) {
+						const error = new HttpErrorParser(err);
+						const msg = error.getMessage();
+						setError(msg);
+					}
+				}
+			};
+			loadTask(id);
+		}
+	}, [dispatch, id, task]);
 
 	const closeDialogAlertHandler = () =>
 		setDialogData((prevState) => ({
@@ -173,7 +199,7 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 	}, [dispatch, task]);
 
 	useEffect(() => {
-		if (!task.owner && !loadingElements.owner && !elementsErrors.owner) {
+		if (task && !task.owner && !loadingElements.owner && !elementsErrors.owner) {
 			const loadOwner = async () => {
 				setLoadingElements((prevState) => ({
 					...prevState,
@@ -198,7 +224,12 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 			loadOwner();
 		}
 
-		if (!task.members && !loadingElements.members && !elementsErrors.members) {
+		if (
+			task &&
+			!task.members &&
+			!loadingElements.members &&
+			!elementsErrors.members
+		) {
 			const loadMembers = async () => {
 				setLoadingElements((prevState) => ({
 					...prevState,
@@ -327,7 +358,7 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 
 	const actions: FABAction[] = [];
 	if (
-		task.active &&
+		task?.active &&
 		(loggedUser.id === flat?.ownerId || loggedUser.id === task.createBy)
 	) {
 		actions.push(
@@ -343,13 +374,14 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 		<>
 			<ScrollView style={styles.screen}>
 				<DetailsScreenInfo
-					name={task.name!}
-					description={task.description!}
+					error={error}
+					name={task?.name!}
+					description={task?.description!}
 					iconName="all-inclusive"
-					active={task.active!}
-					createAt={task.createAt!}
-					owner={task.owner}
-					members={task.members}
+					active={task?.active!}
+					createAt={task?.createAt!}
+					owner={task?.owner}
+					members={task?.members}
 					onOwnerPress={ownerPressHandler}
 					onMemberSelect={memberSelectHandler}
 				/>
@@ -360,7 +392,7 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 				</View>
 			</ScrollView>
 			<FAB.Group
-				visible={Boolean(task.members && task.owner)}
+				visible={Boolean(task?.members && task.owner)}
 				open={fabOpen}
 				color="white"
 				icon={fabOpen ? 'close' : 'plus'}

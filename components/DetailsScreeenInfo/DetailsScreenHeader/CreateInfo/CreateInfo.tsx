@@ -10,7 +10,7 @@ const dimensions = Dimensions.get('screen');
 
 interface Props {
 	owner: User | undefined;
-	createAt: Date;
+	createAt: Date | undefined;
 	onPersonTouch: (id: User['id']) => void;
 }
 

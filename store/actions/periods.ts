@@ -24,6 +24,8 @@ export type CompletePeriodActionPayload = {
 	taskId: number;
 };
 
+export type ClearTaskPeriodsAction = StoreAction<{ taskId: number }, TaskPeriodsActionTypes.ClearTaskPeriods>
+
 export const fetchTaskPeriods = (
 	taskId: number
 ): ThunkAction<
@@ -109,7 +111,7 @@ export const resetTaskPeriods = (
 
 export const clearTaskPeriods = (
 	taskId: number
-): StoreAction<{ taskId: number }, TaskPeriodsActionTypes.ClearTaskPeriods> => {
+): ClearTaskPeriodsAction => {
 	return {
 		type: TaskPeriodsActionTypes.ClearTaskPeriods,
 		payload: { taskId },

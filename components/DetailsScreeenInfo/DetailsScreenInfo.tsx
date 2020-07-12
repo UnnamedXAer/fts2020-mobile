@@ -4,15 +4,17 @@ import { Divider, Headline, Title, Paragraph, useTheme, Theme } from 'react-nati
 import DetailsScreenHeader from './DetailsScreenHeader/DetailsScreenHeader';
 import MembersList from '../MembersList/MembersList';
 import User from '../../models/user';
+import { Placeholder } from 'rn-placeholder';
+import { PlaceholderLine, Shine } from '../UI/Placeholder/Placeholder';
 
 interface Props {
 	owner: User | undefined;
-	createAt: Date;
+	createAt: Date | undefined;
 	onOwnerPress: (id: User['id']) => void;
 	iconName: string;
-	active: boolean;
-	name: string;
-	description: string;
+	active: boolean | undefined;
+	name: string | undefined;
+	description: string | undefined;
 	members: User[] | undefined;
 	onMemberSelect: (id: User['id']) => void;
 }
@@ -49,7 +51,15 @@ const DetailsScreenInfo: React.FC<Props> = ({
 			<Divider style={styles.divider} />
 			<View style={styles.section}>
 				<Title>Description</Title>
-				<Paragraph>{description}</Paragraph>
+				{description !== void 0 ? (
+					<Paragraph>{description}</Paragraph>
+				) : (
+					<Placeholder Animation={Shine}>
+						<PlaceholderLine height={16} />
+						<PlaceholderLine height={16} />
+						<PlaceholderLine height={16} />
+					</Placeholder>
+				)}
 			</View>
 			<Divider style={styles.divider} />
 			<View style={styles.section}>

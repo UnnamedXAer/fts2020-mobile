@@ -11,7 +11,7 @@ import NotificationCard from '../UI/NotificationCard';
 import { FlatDetailsScreenNavigationProps } from '../../types/navigationTypes';
 
 interface Props {
-	flatId: number;
+	flatId: number | undefined;
 	theme: Theme;
 	navigation: FlatDetailsScreenNavigationProps;
 }
@@ -20,8 +20,11 @@ const FlatTasksList: React.FC<Props> = ({ flatId, theme, navigation }) => {
 	const dispatch = useDispatch();
 	const [openTime] = useState(Date.now() - 1000 * 60 * 10);
 	const tasksLoadTime = useSelector((state: RootState) => {
-		const time = state.tasks.tasksLoadTimes[flatId];
-		return time !== void 0 ? time : 0;
+		let time = 0;
+		if (flatId !== void 0) {
+			time = state.tasks.tasksLoadTimes[flatId];
+		}
+		return time;
 	});
 	const [tasksLoading, setTasksLoading] = useState(tasksLoadTime < openTime);
 	const [error, setError] = useState<string | null>(null);
@@ -38,7 +41,7 @@ const FlatTasksList: React.FC<Props> = ({ flatId, theme, navigation }) => {
 	}>({});
 
 	useEffect(() => {
-		if (tasksLoadTime < openTime) {
+		if (flatId && tasksLoadTime < openTime) {
 			setTasksLoading(true);
 			setError(null);
 			const loadTasks = async () => {

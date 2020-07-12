@@ -36,6 +36,7 @@ interface Props {
 const FlatsScreen: React.FC<Props> = ({ theme, navigation }) => {
 	const dispatch = useDispatch();
 	const flats = useSelector((state: RootState) => state.flats.flats);
+	const flatsLoadTime = useSelector((state: RootState) => state.flats.flatsLoadTime);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<StateError>(null);
 	const [refreshing, setRefreshing] = useState(false);
@@ -52,11 +53,13 @@ const FlatsScreen: React.FC<Props> = ({ theme, navigation }) => {
 	}, [dispatch]);
 
 	useEffect(() => {
-		setLoading(true);
-		loadFlats().then(() => {
-			setLoading(false);
-		});
-	}, [loadFlats]);
+		if (flatsLoadTime === 0) {
+			setLoading(true);
+			loadFlats().then(() => {
+				setLoading(false);
+			});
+		}
+	}, [loadFlats, flatsLoadTime]);
 
 	const refreshHandler = async () => {
 		setRefreshing(true);

@@ -8,7 +8,7 @@ import User from '../../../models/user';
 interface Props {
 	theme: Theme;
 	owner: User | undefined;
-	createAt: Date;
+	createAt: Date | undefined;
 	onOwnerPress: (id: User['id']) => void;
 	iconName: string;
 }

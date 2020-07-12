@@ -5,7 +5,12 @@ import { Title, FAB, Divider } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
 import RootState from '../store/storeTypes';
 import { StateError } from '../store/ReactTypes/customReactTypes';
-import { fetchFlatOwner, fetchFlatMembers, updateFlat } from '../store/actions/flats';
+import {
+	fetchFlatOwner,
+	fetchFlatMembers,
+	updateFlat,
+	leaveFlat,
+} from '../store/actions/flats';
 import FlatTasksList from '../components/Flat/FlatTasksList';
 import {
 	FlatDetailsScreenRouteProps,
@@ -39,10 +44,10 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 	const loggedUser = useSelector((state: RootState) => state.auth.user)!;
 	const flat = useSelector((state: RootState) =>
 		state.flats.flats.find((x) => x.id === id)
-	)!;
+	);
 	const [loadingElements, setLoadingElements] = useState({
-		owner: !!flat.owner,
-		members: !!flat.members,
+		owner: !!flat?.owner,
+		members: !!flat?.members,
 	});
 
 	const [elementsErrors, setElementsErrors] = useState<{
@@ -84,7 +89,7 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 
 		try {
 			await dispatch(updateFlat(_flat));
-			if (isMounted.current !== null) {
+			if (isMounted.current) {
 				setSnackbarData({
 					open: true,
 					action: {
@@ -98,7 +103,7 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 				});
 			}
 		} catch (err) {
-			if (isMounted.current !== null) {
+			if (isMounted.current) {
 				const httpError = new HttpErrorParser(err);
 				const msg = httpError.getMessage();
 				setSnackbarData({
@@ -114,7 +119,7 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 				});
 			}
 		} finally {
-			isMounted.current !== null &&
+			isMounted.current &&
 				setDialogData((prevState) => ({
 					...prevState,
 					open: false,
@@ -122,20 +127,66 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 		}
 	};
 
-	const closeDialogAlertHandler = () =>
-		setDialogData((prevState) => ({
-			...prevState,
-			open: prevState.loading,
-		}));
+	const leaveFlatHandler = async () => {
+		setDialogData((prevState) => ({ ...prevState, loading: true }));
 
-	const closeSnackbarAlertHandler = () =>
-		setSnackbarData((prevState) => ({
-			...prevState,
-			open: false,
-		}));
+		try {
+			await dispatch(leaveFlat(flat!.id!));
+			if (isMounted.current) {
+				setSnackbarData({
+					open: true,
+					action: {
+						label: 'OK',
+						onPress: closeSnackbarAlertHandler,
+					},
+					severity: 'success',
+					timeout: 3000,
+					content: 'You left the flat.',
+					onClose: closeSnackbarAlertHandler,
+				});
+			}
+			navigation.popToTop();
+		} catch (err) {
+			if (isMounted.current) {
+				setDialogData((prevState) => ({
+					...prevState,
+					open: false,
+				}));
+				const httpError = new HttpErrorParser(err);
+				const msg = httpError.getMessage();
+				setSnackbarData({
+					open: true,
+					action: {
+						label: 'OK',
+						onPress: closeSnackbarAlertHandler,
+					},
+					severity: 'error',
+					timeout: 4000,
+					content: msg,
+					onClose: closeSnackbarAlertHandler,
+				});
+			}
+		}
+	};
+
+	const closeDialogAlertHandler = () => {
+		isMounted.current &&
+			setDialogData((prevState) => ({
+				...prevState,
+				open: prevState.loading,
+			}));
+	};
+
+	const closeSnackbarAlertHandler = () => {
+		isMounted.current &&
+			setSnackbarData((prevState) => ({
+				...prevState,
+				open: false,
+			}));
+	};
 
 	useEffect(() => {
-		if (!flat.owner && !loadingElements.owner && !elementsErrors.owner) {
+		if (flat && !flat.owner && !loadingElements.owner && !elementsErrors.owner) {
 			const loadOwner = async () => {
 				setLoadingElements((prevState) => ({
 					...prevState,
@@ -160,7 +211,12 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 			loadOwner();
 		}
 
-		if (!flat.members && !loadingElements.members && !elementsErrors.members) {
+		if (
+			flat &&
+			!flat.members &&
+			!loadingElements.members &&
+			!elementsErrors.members
+		) {
 			const loadMembers = async () => {
 				setLoadingElements((prevState) => ({
 					...prevState,
@@ -231,7 +287,25 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 		leaveFlat: {
 			icon: 'exit-to-app',
 			onPress: () => {
-				console.log('Leaving Flat.');
+				setDialogData({
+					open: true,
+					content: 'Do you want to leave this flat?',
+					title: 'Leave Flat',
+					onDismiss: closeDialogAlertHandler,
+					loading: false,
+					actions: [
+						{
+							label: 'Yes',
+							onPress: leaveFlatHandler,
+							color: 'primary',
+						},
+						{
+							color: 'accent',
+							label: 'Cancel',
+							onPress: closeDialogAlertHandler,
+						},
+					],
+				});
 			},
 			label: 'Leave Flat',
 		},
@@ -273,13 +347,13 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 		<>
 			<ScrollView style={styles.screen}>
 				<DetailsScreenInfo
-					name={flat.name}
-					description={flat.description}
+					name={flat?.name}
+					description={flat?.description}
 					iconName="home-city-outline"
-					active={flat.active!}
-					createAt={flat.createAt!}
-					owner={flat.owner}
-					members={flat.members}
+					active={flat?.active!}
+					createAt={flat?.createAt!}
+					owner={flat?.owner}
+					members={flat?.members}
 					onOwnerPress={ownerPressHandler}
 					onMemberSelect={memberSelectHandler}
 				/>
@@ -289,11 +363,11 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 				<Divider style={styles.divider} />
 				<View style={styles.section}>
 					<Title>Tasks</Title>
-					<FlatTasksList flatId={id!} navigation={navigation} />
+					<FlatTasksList flatId={flat?.id} navigation={navigation} />
 				</View>
 			</ScrollView>
 			<FAB.Group
-				visible={Boolean(flat.members && flat.owner)}
+				visible={Boolean(flat?.members && flat.owner)}
 				open={fabOpen}
 				color="white"
 				icon={fabOpen ? 'close' : 'plus'}

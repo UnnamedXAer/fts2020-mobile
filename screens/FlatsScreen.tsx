@@ -15,14 +15,15 @@ import {
 	Headline,
 	Divider,
 	FAB,
+	Text,
+	Checkbox,
 } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
 import RootState from '../store/storeTypes';
-import { fetchFlats } from '../store/actions/flats';
+import { fetchFlats, setShowInactiveFlats } from '../store/actions/flats';
 import HttpErrorParser from '../utils/parseError';
 import Flat from '../models/flat';
 import NotificationCard from '../components/UI/NotificationCard';
-import FloatingCard from '../components/FloatingCard';
 import { StateError } from '../store/ReactTypes/customReactTypes';
 import { FlatDetailsScreenNavigationProps } from '../types/navigationTypes';
 import { Placeholder } from 'rn-placeholder';
@@ -35,9 +36,16 @@ interface Props {
 
 const FlatsScreen: React.FC<Props> = ({ theme, navigation }) => {
 	const dispatch = useDispatch();
-	const flats = useSelector((state: RootState) => state.flats.flats);
+	const showInactive = useSelector((state: RootState) => state.flats.showInactive);
+	const flats = useSelector((state: RootState) => {
+		if (!showInactive) {
+			return state.flats.flats.filter((x) => x.active === true);
+		} else {
+			return state.flats.flats;
+		}
+	});
 	const flatsLoadTime = useSelector((state: RootState) => state.flats.flatsLoadTime);
-	const [loading, setLoading] = useState(true);
+	const [loading, setLoading] = useState(flatsLoadTime === 0);
 	const [error, setError] = useState<StateError>(null);
 	const [refreshing, setRefreshing] = useState(false);
 
@@ -55,7 +63,7 @@ const FlatsScreen: React.FC<Props> = ({ theme, navigation }) => {
 	useEffect(() => {
 		if (flatsLoadTime === 0) {
 			setLoading(true);
-			loadFlats().then(() => {
+			loadFlats().finally(() => {
 				setLoading(false);
 			});
 		}
@@ -69,6 +77,10 @@ const FlatsScreen: React.FC<Props> = ({ theme, navigation }) => {
 
 	const flatSelectHandler = (id: number) => {
 		navigation.navigate('FlatDetails', { id: id });
+	};
+
+	const showInactiveChangeHandler = async () => {
+		dispatch(setShowInactiveFlats(!showInactive));
 	};
 
 	const renderItem: ListRenderItem<Flat> = ({ item }) => {
@@ -87,7 +99,11 @@ const FlatsScreen: React.FC<Props> = ({ theme, navigation }) => {
 				>
 					<View style={{ marginRight: 4 }}>
 						<Avatar.Icon
-							color={theme.colors.primary}
+							color={
+								item.active
+									? theme.colors.primary
+									: theme.colors.placeholder
+							}
 							style={{ backgroundColor: theme.colors.background }}
 							icon="home-city-outline"
 						/>
@@ -103,6 +119,24 @@ const FlatsScreen: React.FC<Props> = ({ theme, navigation }) => {
 
 	return (
 		<View style={styles.container}>
+			<View style={styles.showInactiveContainer}>
+				<Checkbox
+					status={showInactive ? 'checked' : 'unchecked'}
+					onPress={showInactiveChangeHandler}
+					color={theme.colors.primary}
+				/>
+				<Text>Show Inactive Flats</Text>
+			</View>
+			{error && (
+				<NotificationCard
+					severity="error"
+					onPress={() => {
+						setError(null);
+					}}
+				>
+					Sorry, could not load flats. Please try again later.
+				</NotificationCard>
+			)}
 			<FlatList
 				ItemSeparatorComponent={() => (
 					<View
@@ -140,25 +174,22 @@ const FlatsScreen: React.FC<Props> = ({ theme, navigation }) => {
 									<PlaceholderLine height={64} />
 								</Placeholder>
 							) : (
-								<NotificationCard>
-									Your are not a member of any flat yet.{'\n'}Add new
-									flat or find existing.
-								</NotificationCard>
+								<NotificationCard
+									childrens={[
+										'You are not a member of any active flat. ',
+										{
+											onPress: () =>
+												navigation.navigate('NewFlatInfo'),
+											text: 'Add ',
+										},
+										'your first flat or find one.',
+									]}
+								/>
 							)}
 						</View>
 					) : null
 				}
 			/>
-
-			{error && (
-				<FloatingCard
-					onPress={() => {
-						setError(null);
-					}}
-				>
-					<NotificationCard severity="error">{error}</NotificationCard>
-				</FloatingCard>
-			)}
 			<FAB
 				style={styles.fab}
 				icon="plus"
@@ -173,6 +204,10 @@ const styles = StyleSheet.create({
 	container: {
 		position: 'relative',
 		flex: 1,
+	},
+	showInactiveContainer: {
+		flexDirection: 'row',
+		alignItems: 'center',
 	},
 	fab: {
 		position: 'absolute',

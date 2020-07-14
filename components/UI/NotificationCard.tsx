@@ -1,16 +1,24 @@
 import React from 'react';
 import { StyleSheet, View, ViewStyle, TextStyle } from 'react-native';
-import { Paragraph, Card } from 'react-native-paper';
+import { Paragraph, Card, useTheme, Text } from 'react-native-paper';
 import { MaterialIcons, MaterialCommunityIcons, AntDesign } from '@expo/vector-icons';
 import { assertUnreachable } from '../../utils/assertUnreachable';
 import { Severity } from '../../store/ReactTypes/customReactTypes';
 
 interface Props {
 	severity?: Severity;
-	children: React.ReactNode;
+	children?: React.ReactNode;
+	childrens?: (string | { text: string; onPress: () => void })[];
+	onPress?: () => void;
 }
 
-const NotificationCard: React.FC<Props> = ({ severity = 'info', children }) => {
+const NotificationCard: React.FC<Props> = ({
+	severity = 'info',
+	children,
+	childrens,
+	onPress
+}) => {
+	const theme = useTheme();
 	let serverityTextStyle: TextStyle;
 	let serverityCardStyle: ViewStyle;
 	let NotificationIcon: React.ReactElement;
@@ -77,12 +85,35 @@ const NotificationCard: React.FC<Props> = ({ severity = 'info', children }) => {
 	}
 
 	return (
-		<Card style={[styles.card, serverityCardStyle]}>
+		<Card style={[styles.card, serverityCardStyle]} onPress={onPress}>
 			<View style={styles.container}>
 				{NotificationIcon}
-				<Paragraph style={[styles.text, serverityTextStyle]}>
-					{children}
-				</Paragraph>
+				{children && (
+					<Paragraph style={[styles.text, serverityTextStyle]}>
+						{children}
+					</Paragraph>
+				)}
+				{childrens && (
+					<Paragraph style={[styles.text, serverityTextStyle]}>
+						{childrens.map((child, i) =>
+							typeof child === 'string' ? (
+								<Text key={i}>{child}</Text>
+							) : (
+								<Text
+									key={i}
+									style={[
+										{
+											color: theme.colors.primary,
+										},
+									]}
+									onPress={child.onPress}
+								>
+									{child.text}
+								</Text>
+							)
+						)}
+					</Paragraph>
+				)}
 			</View>
 		</Card>
 	);

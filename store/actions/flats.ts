@@ -4,6 +4,7 @@ import RootState, { StoreAction } from '../storeTypes';
 import { FlatsActionTypes, TasksActionTypes, TaskPeriodsActionTypes } from './actionTypes';
 import axios from '../../axios/axios';
 import User from '../../models/user';
+import { AsyncStorage } from 'react-native';
 
 type APIFlat = {
 	id: number;
@@ -17,6 +18,14 @@ type APIFlat = {
 
 export type AddFlatActionPayload = { flat: Flat; tmpId: string };
 
+export type SetShowInactiveFlatsActionPayload = {
+	show: boolean
+}
+
+type SetShowInactiveFlatsAction = {
+	type: FlatsActionTypes.SetShowInactive;
+	payload: SetShowInactiveFlatsActionPayload;
+};
 
 export const createFlat = (
 	flat: FlatData,
@@ -201,6 +210,44 @@ export const fetchFlatMembers = (
 					flatId
 				}
 			});
+		} catch (err) {
+			throw err;
+		}
+	};
+};
+
+
+export const readSaveShowInactive = (
+): ThunkAction<Promise<void>, RootState, any, SetShowInactiveFlatsAction> => {
+	return async (dispatch, getState) => {
+		const userId = getState().auth.user!.id;
+
+		try {
+			const savedShow = await AsyncStorage.getItem('flatsShowInactive_' + userId);
+			const show = savedShow === '1';
+
+			dispatch(setShowInactiveFlats(show, true));
+		} catch (err) {
+			throw err;
+		}
+	};
+};
+
+export const setShowInactiveFlats = (
+	show: boolean,
+	skipSaving?: boolean
+): ThunkAction<Promise<void>, RootState, any, SetShowInactiveFlatsAction> => {
+	return async (dispatch, getState) => {
+		const userId = getState().auth.user!.id;
+
+		try {
+			dispatch({
+				type: FlatsActionTypes.SetShowInactive,
+				payload: { show },
+			});
+			if (skipSaving !== true) {
+				await AsyncStorage.setItem('flatsShowInactive_' + userId, show ? '1' : '0');
+			}
 		} catch (err) {
 			throw err;
 		}

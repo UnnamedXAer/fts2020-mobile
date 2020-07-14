@@ -22,7 +22,6 @@ import { Placeholder } from 'rn-placeholder';
 import RootState from '../../store/storeTypes';
 import HttpErrorParser from '../../utils/parseError';
 import NotificationCard from '../../components/UI/NotificationCard';
-import FloatingCard from '../../components/FloatingCard';
 import { StateError } from '../../store/ReactTypes/customReactTypes';
 import { PlaceholderLine, Shine } from '../../components/UI/Placeholder/Placeholder';
 import {
@@ -31,7 +30,6 @@ import {
 } from '../../types/navigationTypes';
 import { fetchUserTasks, setShowInactiveTasks } from '../../store/actions/tasks';
 import { UserTask } from '../../models/task';
-import Link from '../../components/UI/Link';
 
 interface Props {
 	theme: Theme;
@@ -51,7 +49,7 @@ const FlatsScreen: React.FC<Props> = ({ theme, navigation }) => {
 	const tasksLoadTime = useSelector(
 		(state: RootState) => state.tasks.userTasksLoadTime
 	);
-	const [loading, setLoading] = useState(true);
+	const [loading, setLoading] = useState(tasksLoadTime === 0);
 	const [error, setError] = useState<StateError>(null);
 	const [refreshing, setRefreshing] = useState(false);
 
@@ -79,7 +77,7 @@ const FlatsScreen: React.FC<Props> = ({ theme, navigation }) => {
 	useEffect(() => {
 		if (tasksLoadTime === 0) {
 			setLoading(true);
-			loadTasks().then(() => {
+			loadTasks().finally(() => {
 				isMounted.current && setLoading(false);
 			});
 		}
@@ -141,6 +139,16 @@ const FlatsScreen: React.FC<Props> = ({ theme, navigation }) => {
 				/>
 				<Text>Show Inactive Tasks</Text>
 			</View>
+			{error && (
+				<NotificationCard
+					severity="error"
+					onPress={() => {
+						setError(null);
+					}}
+				>
+					Sorry, could not load tasks. Please try again later.
+				</NotificationCard>
+			)}
 			<FlatList
 				ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
 				refreshControl={
@@ -170,31 +178,21 @@ const FlatsScreen: React.FC<Props> = ({ theme, navigation }) => {
 									<PlaceholderLine height={64} />
 								</Placeholder>
 							) : (
-								<NotificationCard>
-									You are not a member of any task. You can go to{' '}
-									<Link onPress={() => navigation.navigate('Flats')}>
-										Your Flats
-									</Link>{' '}
-									section and create task for a flat.
-								</NotificationCard>
+								<NotificationCard
+									childrens={[
+										'You are not a member of any active task. You can go to ',
+										{
+											text: 'Your Flats',
+											onPress: () => navigation.navigate('Flats'),
+										},
+										' section and create task for a flat.',
+									]}
+								/>
 							)}
 						</View>
 					) : null
 				}
 			/>
-
-			{error && (
-				<FloatingCard
-					onPress={() => {
-						setError(null);
-					}}
-				>
-					<NotificationCard severity="error">
-						Could not load tasks due to following reason: {'\n'}
-						{error}
-					</NotificationCard>
-				</FloatingCard>
-			)}
 		</View>
 	);
 };

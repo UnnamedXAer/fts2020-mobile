@@ -11,6 +11,7 @@ export enum FlatsActionTypes {
 	SetFlat = 'FLATS_SET_FLAT',
 	SetOwner = 'FLATS_SET_FLAT_OWNER',
 	SetMembers = 'FLATS_SET_FLAT_MEMBERS',
+	SetShowInactive = 'FLATS_SET_SHOW_INACTIVE',
 	ClearState = 'FLATS_CLEAR_STATE',
 }
 

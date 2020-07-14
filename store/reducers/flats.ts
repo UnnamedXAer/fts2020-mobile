@@ -2,12 +2,13 @@ import { AppReducer, FlatsState, SimpleReducer } from '../storeTypes';
 import { FlatsActionTypes } from '../actions/actionTypes';
 import Flat from '../../models/flat';
 import User from '../../models/user';
-import { AddFlatActionPayload } from '../actions/flats';
+import { AddFlatActionPayload, SetShowInactiveFlatsActionPayload } from '../actions/flats';
 
 const initialState: FlatsState = {
 	flats: [],
 	flatsLoadTime: 0,
 	createdFlatsTmpIds: {},
+	showInactive: false
 };
 
 const setFlats: SimpleReducer<FlatsState, Flat[]> = (state, action) => {
@@ -96,6 +97,13 @@ const setMembers: SimpleReducer<
 	};
 };
 
+const setShowInactive: SimpleReducer<FlatsState, SetShowInactiveFlatsActionPayload> = (state, action) => {
+	return {
+		...state,
+		showInactive: action.payload.show
+	};
+};
+
 const clearState: SimpleReducer<FlatsState, undefined> = (state, action) => {
 	return {
 		...initialState,
@@ -117,6 +125,8 @@ const reducer: AppReducer<FlatsState, FlatsActionTypes> = (
 			return setOwner(state, action);
 		case FlatsActionTypes.SetMembers:
 			return setMembers(state, action);
+		case FlatsActionTypes.SetShowInactive:
+			return setShowInactive(state, action);
 		case FlatsActionTypes.ClearState:
 			return clearState(state, action);
 		default:

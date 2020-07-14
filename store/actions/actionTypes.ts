@@ -16,10 +16,11 @@ export enum FlatsActionTypes {
 
 export enum TasksActionTypes {
 	Add = 'TASK_ADD',
-	SetTask = 'TASK_SET',
+	SetTask = 'TASKS_SET_TASK',
 	SetOwner = 'TASK_SET_OWNER',
 	SetFlatTasks = 'TASK_SET_FLAT_TASKS',
 	SetUserTasks = 'TASK_SET_USER_TASKS',
+	SetUserTask = 'TASKS_SET_USER_TASK',
 	SetMembers = 'FLAT_TASK_SET_MEMBERS',
 	SetShowInactive = 'TASKS_SET_SHOW_INACTIVE',
 	ClearState = 'TASK_CLEAR_STATE',

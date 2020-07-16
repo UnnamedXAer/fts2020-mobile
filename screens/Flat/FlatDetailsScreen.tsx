@@ -10,6 +10,7 @@ import {
 	fetchFlatMembers,
 	updateFlat,
 	leaveFlat,
+	fetchFlats,
 } from '../../store/actions/flats';
 import FlatTasksList from '../../components/Flat/FlatTasksList';
 import {
@@ -18,7 +19,9 @@ import {
 } from '../../types/navigationTypes';
 import { FABAction } from '../../types/types';
 import DetailsScreenInfo from '../../components/DetailsScreeenInfo/DetailsScreenInfo';
-import AlertDialog, { AlertDialogData } from '../../components/UI/AlertDialog/AlertDialog';
+import AlertDialog, {
+	AlertDialogData,
+} from '../../components/UI/AlertDialog/AlertDialog';
 import AlertSnackbar, {
 	AlertSnackbarData,
 } from '../../components/UI/AlertSnackbar/AlertSnackbar';
@@ -40,8 +43,10 @@ interface Props {
 const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 	const dispatch = useDispatch();
 	const [fabOpen, setFabOpen] = useState(false);
+	const [error, setError] = useState<StateError>(null);
 	const id = route.params.id;
 	const loggedUser = useSelector((state: RootState) => state.auth.user)!;
+	const flatsLoadTime = useSelector((state: RootState) => state.flats.flatsLoadTime);
 	const flat = useSelector((state: RootState) =>
 		state.flats.flats.find((x) => x.id === id)
 	);
@@ -79,6 +84,24 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 			isMounted.current = false;
 		};
 	}, []);
+
+	useEffect(() => {
+		if (flatsLoadTime === 0) {
+			const loadFlats = async () => {
+				try {
+					await dispatch(fetchFlats());
+				} catch (err) {
+					if (isMounted.current !== null) {
+						const httpError = new HttpErrorParser(err);
+						const msg = httpError.getMessage();
+						setError(msg);
+					}
+				}
+			};
+
+			loadFlats();
+		}
+	}, [dispatch, flatsLoadTime]);
 
 	const closeFlatHandler = async () => {
 		const _flat: Partial<FlatData> = new FlatData({
@@ -347,6 +370,7 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 		<>
 			<ScrollView style={styles.screen}>
 				<DetailsScreenInfo
+					error={error}
 					name={flat?.name}
 					description={flat?.description}
 					iconName="home-city-outline"

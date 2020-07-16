@@ -19,23 +19,23 @@ import {
 	IconButton,
 } from 'react-native-paper';
 import { Theme } from 'react-native-paper/lib/typescript/src/types';
-import CustomButton from '../components/UI/CustomButton';
+import CustomButton from '../../../components/UI/CustomButton';
 import {
 	InviteMembersScreenNavigationProps,
 	InviteMembersScreenRouteProps,
-} from '../types/navigationTypes';
-import { StateError } from '../store/ReactTypes/customReactTypes';
-import RootState from '../store/storeTypes';
-import User from '../models/user';
-import { NewFlatMember } from '../types/types';
-import { checkEmailAddress } from '../utils/validation';
-import { mapApiUserDataToModel, APIUser } from '../store/actions/users';
-import { UsersActionTypes } from '../store/actions/actionTypes';
-import axios from '../axios/axios';
-import { MembersStatus } from '../components/Flat/InvitationMembersEmailListItem';
-import InviteMembersEmailList from '../components/Flat/InviteMembersEmailList';
-import HttpErrorParser from '../utils/parseError';
-import NotificationCard from '../components/UI/NotificationCard';
+} from '../../../types/navigationTypes';
+import { StateError } from '../../../store/ReactTypes/customReactTypes';
+import RootState from '../../../store/storeTypes';
+import User from '../../../models/user';
+import { NewFlatMember } from '../../../types/types';
+import { checkEmailAddress } from '../../../utils/validation';
+import { mapApiUserDataToModel, APIUser } from '../../../store/actions/users';
+import { UsersActionTypes } from '../../../store/actions/actionTypes';
+import axios from '../../../axios/axios';
+import { MembersStatus } from '../../../components/Flat/InvitationMembersEmailListItem';
+import InviteMembersEmailList from '../../../components/Flat/InviteMembersEmailList';
+import HttpErrorParser from '../../../utils/parseError';
+import NotificationCard from '../../../components/UI/NotificationCard';
 
 interface Props {
 	theme: Theme;

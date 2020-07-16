@@ -1,22 +1,25 @@
 import Flat, { FlatData } from '../../models/flat';
 import { ThunkAction } from 'redux-thunk';
 import RootState, { StoreAction } from '../storeTypes';
-import { FlatsActionTypes, TasksActionTypes, TaskPeriodsActionTypes } from './actionTypes';
+import {
+	FlatsActionTypes,
+	TasksActionTypes,
+	TaskPeriodsActionTypes
+} from './actionTypes';
 import axios from '../../axios/axios';
 import User from '../../models/user';
 import { AsyncStorage } from 'react-native';
-
-type APIFlat = {
-	id: number;
-	name: string;
-	description: string;
-	members?: number[];
-	createBy: number;
-	createAt: Date;
-	active: boolean;
-};
+import Invitation from '../../models/invitation';
+import { APIFlat, APIInvitation } from '../apiTypes';
+import { mapAPIFlatDataToModel } from '../mapAPIToModel/mapFlat';
+import { mapAPIInvitationDataToModel } from '../mapAPIToModel/mapInvitation';
 
 export type AddFlatActionPayload = { flat: Flat; tmpId: string };
+
+export type SetFlatInvitationsActionPayload = {
+	flatId: number;
+	invitations: Invitation[];
+};
 
 export type SetShowInactiveFlatsActionPayload = {
 	show: boolean
@@ -216,6 +219,35 @@ export const fetchFlatMembers = (
 	};
 };
 
+export const fetchFlatInvitations = (
+	flatId: number
+): ThunkAction<
+	Promise<void>,
+	RootState,
+	any,
+	StoreAction<
+		SetFlatInvitationsActionPayload,
+		FlatsActionTypes.SetInvitations
+	>
+> => {
+	return async (dispatch) => {
+		const url = `/flats/${flatId}/invitations`;
+		try {
+			const { data } = await axios.get<APIInvitation[]>(url);
+
+			const invitations = data.map(mapAPIInvitationDataToModel);
+			dispatch({
+				type: FlatsActionTypes.SetInvitations,
+				payload: {
+					invitations,
+					flatId,
+				},
+			});
+		} catch (err) {
+			throw err;
+		}
+	};
+};
 
 export const readSaveShowInactive = (
 ): ThunkAction<Promise<void>, RootState, any, SetShowInactiveFlatsAction> => {
@@ -253,16 +285,3 @@ export const setShowInactiveFlats = (
 		}
 	};
 };
-
-export const mapAPIFlatDataToModel = (data: APIFlat) =>
-	new Flat({
-		id: data.id,
-		description: data.description,
-		name: data.name,
-		ownerId: data.createBy,
-		createAt:
-			typeof data.createAt === 'string'
-				? new Date(data.createAt)
-				: data.createAt,
-		active: data.active,
-	});

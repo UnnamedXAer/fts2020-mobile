@@ -1,4 +1,4 @@
-export type Provider = 'local' | 'google';
+import { APIUser, Provider } from "../store/apiTypes";
 
 export default class User {
 	public id: number;
@@ -24,5 +24,26 @@ export default class User {
 		this.joinDate = joinDate;
 		this.avatarUrl = avatarUrl;
 		this.active = active;
+	}
+
+	static fromData(params: APIUser = {} as APIUser): User {
+		const {
+			id,
+			emailAddress,
+			userName,
+			provider,
+			joinDate,
+			avatarUrl,
+			active,
+		} = params;
+		return new User(
+			id,
+			emailAddress,
+			userName,
+			provider,
+			typeof joinDate === 'string' ? new Date(joinDate) : joinDate,
+			avatarUrl,
+			active
+		);
 	}
 }

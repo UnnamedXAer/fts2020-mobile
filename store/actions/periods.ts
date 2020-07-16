@@ -2,17 +2,9 @@ import { ThunkAction } from 'redux-thunk';
 import RootState, { StoreAction } from '../storeTypes';
 import { TaskPeriodsActionTypes } from './actionTypes';
 import axios from '../../axios/axios';
-import { Period, PeriodUser } from '../../models/period';
-
-type APITaskPeriod = {
-	id: number;
-	taskId: number;
-	startDate: string;
-	endDate: string;
-	assignedTo: PeriodUser;
-	completedBy: PeriodUser | null;
-	completedAt: string | null;
-};
+import { Period } from '../../models/period';
+import { APITaskPeriod } from '../apiTypes';
+import { mapApiPeriodDataToModel } from '../mapAPIToModel/mapPeriod';
 
 export type SetTaskPeriodsActionPayload = {
 	taskId: number;
@@ -117,13 +109,3 @@ export const clearTaskPeriods = (
 		payload: { taskId },
 	};
 };
-
-const mapApiPeriodDataToModel = (period: APITaskPeriod) =>
-	new Period({
-		id: period.id,
-		startDate: new Date(period.startDate),
-		endDate: new Date(period.endDate),
-		assignedTo: period.assignedTo,
-		completedAt: period.completedAt ? new Date(period.completedAt) : null,
-		completedBy: period.completedBy,
-	});

@@ -1,11 +1,16 @@
 import axios from '../../axios/axios';
 import { TasksActionTypes } from './actionTypes';
-import Task, { TaskPeriodUnit, UserTask, TaskData } from '../../models/task';
+import Task, { UserTask, TaskData } from '../../models/task';
 import { ThunkAction } from 'redux-thunk';
 import RootState, { StoreAction } from '../storeTypes';
 import User from '../../models/user';
-import { APIUser, mapApiUserDataToModel } from './users';
 import { AsyncStorage } from 'react-native';
+import { APITask, APIUserTask, APIUser } from '../apiTypes';
+import {
+	mapApiTaskDataToModel,
+	mapApiUserTaskDataToModel
+} from '../mapAPIToModel/mapTask';
+import { mapApiUserDataToModel } from '../mapAPIToModel/mapUser';
 
 type FetchFlatTasksAction = {
 	type: TasksActionTypes.SetFlatTasks;
@@ -39,30 +44,6 @@ type SetShowInactiveTasksAction = {
 	payload: SetShowInactiveTasksActionPayload;
 };
 
-type APITask = {
-	id?: number;
-	title: string;
-	description?: string;
-	members?: number[];
-	createBy?: number;
-	createAt?: string;
-	flatId: number;
-	startDate?: string;
-	endDate?: string;
-	timePeriodUnit?: TaskPeriodUnit;
-	timePeriodValue?: number;
-	active?: boolean;
-};
-
-type APIUserTask = {
-	id?: number;
-	title: string;
-	flatName?: string;
-	flatId: number;
-	timePeriodUnit?: TaskPeriodUnit;
-	timePeriodValue?: number;
-	active?: boolean;
-};
 
 export type CreateTaskActionPayload = { task: Task, tmpId: string }
 
@@ -299,29 +280,3 @@ export const setShowInactiveTasks = (
 		}
 	};
 };
-
-const mapApiTaskDataToModel = (data: APITask) =>
-	new Task({
-		id: data.id,
-		flatId: data.flatId,
-		name: data.title,
-		description: data.description,
-		startDate: new Date(data.startDate!),
-		endDate: new Date(data.endDate!),
-		timePeriodUnit: data.timePeriodUnit,
-		timePeriodValue: data.timePeriodValue,
-		active: data.active,
-		createAt: new Date(data.createAt!),
-		createBy: data.createBy,
-	});
-
-const mapApiUserTaskDataToModel = (data: APIUserTask) =>
-	new UserTask({
-		id: data.id,
-		flatId: data.flatId,
-		name: data.title,
-		flatName: data.flatName,
-		timePeriodUnit: data.timePeriodUnit,
-		timePeriodValue: data.timePeriodValue,
-		active: data.active,
-	});

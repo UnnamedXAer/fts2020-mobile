@@ -10,9 +10,10 @@ import {
 	AuthActionTypes,
 	UsersActionTypes,
 } from './actionTypes';
-import RootState, { StoreAction } from '../storeTypes';
+import RootState from '../storeTypes';
 import User from '../../models/user';
-import { FetchUserAction, mapApiUserDataToModel } from './users';
+import { FetchUserAction } from './users';
+import { mapApiUserDataToModel } from '../mapAPIToModel/mapUser';
 
 type AuthorizeActionPayload = {
 	user: User;

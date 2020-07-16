@@ -3,10 +3,12 @@ import { Action } from 'redux';
 import Flat from '../models/flat';
 import Task, { UserTask } from '../models/task';
 import { Period } from '../models/period';
+import { InvitationPresentation } from '../models/invitation';
 
 export type RootState = {
 	auth: AuthState;
 	flats: FlatsState;
+	invitations: InvitationsState
 	tasks: TasksState;
 	users: UsersState;
 	periods: PeriodsState
@@ -26,6 +28,11 @@ export type FlatsState = {
 	flatsLoadTime: number;
 	createdFlatsTmpIds: { [key: string]: number | undefined };
 	showInactive: boolean;
+};
+
+export type InvitationsState = {
+	userInvitations: InvitationPresentation[];
+	userInvitationsLoadTime: number;
 };
 
 export type TasksState = {

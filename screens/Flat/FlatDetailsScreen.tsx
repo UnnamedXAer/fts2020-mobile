@@ -11,6 +11,7 @@ import {
 	updateFlat,
 	leaveFlat,
 	fetchFlats,
+	fetchFlatInvitations,
 } from '../../store/actions/flats';
 import FlatTasksList from '../../components/Flat/FlatTasksList';
 import {
@@ -27,6 +28,7 @@ import AlertSnackbar, {
 } from '../../components/UI/AlertSnackbar/AlertSnackbar';
 import HttpErrorParser from '../../utils/parseError';
 import { FlatData } from '../../models/flat';
+import FlatInvitationsList from '../../components/Flat/FlatInvitationsList/FlatInvitationsList';
 
 type FABActionsKeys =
 	| 'addTask'
@@ -50,17 +52,21 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 	const flat = useSelector((state: RootState) =>
 		state.flats.flats.find((x) => x.id === id)
 	);
+
 	const [loadingElements, setLoadingElements] = useState({
 		owner: !!flat?.owner,
 		members: !!flat?.members,
+		invitations: !!flat?.invitations,
 	});
 
 	const [elementsErrors, setElementsErrors] = useState<{
 		owner: StateError;
 		members: StateError;
+		invitations: StateError;
 	}>({
 		owner: null,
 		members: null,
+		invitations: null,
 	});
 
 	const [dialogData, setDialogData] = useState<AlertDialogData>({
@@ -209,6 +215,38 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 	};
 
 	useEffect(() => {
+		if (
+			flat &&
+			!flat.invitations &&
+			!loadingElements.invitations &&
+			!elementsErrors.invitations
+		) {
+			const loadInvitations = async () => {
+				setLoadingElements((prevState) => ({
+					...prevState,
+					invitations: true,
+				}));
+				setTimeout(async () => {
+					try {
+						await dispatch(fetchFlatInvitations(flat.id!));
+					} catch (err) {
+						setElementsErrors((prevState) => ({
+							...prevState,
+							invitations: err.message,
+						}));
+					}
+					setLoadingElements((prevState) => ({
+						...prevState,
+						invitations: false,
+					}));
+				}, 1010);
+			};
+
+			loadInvitations();
+		}
+	}, [dispatch, flat, elementsErrors.invitations, loadingElements.invitations]);
+
+	useEffect(() => {
 		if (flat && !flat.owner && !loadingElements.owner && !elementsErrors.owner) {
 			const loadOwner = async () => {
 				setLoadingElements((prevState) => ({
@@ -268,6 +306,10 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 	};
 
 	const memberSelectHandler = (id: number) => {
+		// open modal with options
+	};
+
+	const invitataionSelectHandler = (id: number) => {
 		// open modal with options
 	};
 
@@ -365,7 +407,7 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 			actions.push(flatFABActions.noActions);
 		}
 	}
-
+	console.log(!!flat, flat?.invitations);
 	return (
 		<>
 			<ScrollView style={styles.screen}>
@@ -382,7 +424,10 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 					onMemberSelect={memberSelectHandler}
 				/>
 				<View style={styles.section}>
-					<Title>Invitations</Title>
+					<FlatInvitationsList
+						invitations={flat?.invitations}
+						onSelect={invitataionSelectHandler}
+					/>
 				</View>
 				<Divider style={styles.divider} />
 				<View style={styles.section}>

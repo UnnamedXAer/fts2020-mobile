@@ -2,23 +2,16 @@ import { ThunkAction } from 'redux-thunk';
 import RootState from '../storeTypes';
 import axios from '../../axios/axios';
 import { UsersActionTypes } from './actionTypes';
-import User, { Provider } from '../../models/user';
+import User from '../../models/user';
 import { AxiosResponse } from 'axios';
+import { APIUser } from '../apiTypes';
+import { mapApiUserDataToModel } from '../mapAPIToModel/mapUser';
 
 export type FetchUserAction = {
 	type: UsersActionTypes.SetUser;
 	payload: User;
 };
 
-export type APIUser = {
-	id: number;
-	emailAddress: string;
-	userName: string;
-	provider: Provider;
-	joinDate: Date;
-	avatarUrl: string | undefined;
-	active: boolean;
-};
 
 export const fetchUser = (
 	userId: number
@@ -65,14 +58,3 @@ export const updateUser = (
 		}
 	};
 };
-
-export const mapApiUserDataToModel = (data: APIUser): User =>
-	new User(
-		data.id,
-		data.emailAddress,
-		data.userName,
-		data.provider,
-		data.joinDate,
-		data.avatarUrl,
-		data.active
-	);

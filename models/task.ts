@@ -1,12 +1,5 @@
 import User from './user';
-
-export enum TaskPeriodUnit {
-	'HOUR' = 'HOUR',
-	'DAY' = 'DAY',
-	'WEEK' = 'WEEK',
-	'MONTH' = 'MONTH',
-	'YEAR' = 'YEAR',
-}
+import { TaskPeriodUnit } from '../constants/task';
 
 export default class Task {
 	id?: number;

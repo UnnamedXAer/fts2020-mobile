@@ -10,20 +10,20 @@ import {
 } from 'react-native';
 import { withTheme } from 'react-native-paper';
 import { Theme } from 'react-native-paper/lib/typescript/src/types';
-import Header from '../components/UI/Header';
-import CustomButton from '../components/UI/CustomButton';
-import { NewFlatScreenNavigationProps } from '../types/navigationTypes';
-import Input from '../components/UI/Input';
-import useForm, { createInitialState, FormActionTypes } from '../hooks/useForm';
-import { StateError } from '../store/ReactTypes/customReactTypes';
-import { validateFlatFields } from '../utils/validation';
-import NotificationCard from '../components/UI/NotificationCard';
-import { createFlat } from '../store/actions/flats';
+import Header from '../../../components/UI/Header';
+import CustomButton from '../../../components/UI/CustomButton';
+import { NewFlatScreenNavigationProps } from '../../../types/navigationTypes';
+import Input from '../../../components/UI/Input';
+import useForm, { createInitialState, FormActionTypes } from '../../../hooks/useForm';
+import { StateError } from '../../../store/ReactTypes/customReactTypes';
+import { validateFlatFields } from '../../../utils/validation';
+import NotificationCard from '../../../components/UI/NotificationCard';
+import { createFlat } from '../../../store/actions/flats';
 import { useDispatch, useSelector } from 'react-redux';
-import HttpErrorParser from '../utils/parseError';
-import { getRandomInt } from '../utils/random';
-import { FlatData } from '../models/flat';
-import RootState from '../store/storeTypes';
+import HttpErrorParser from '../../../utils/parseError';
+import { getRandomInt } from '../../../utils/random';
+import { FlatData } from '../../../models/flat';
+import RootState from '../../../store/storeTypes';
 
 interface Props {
 	theme: Theme;

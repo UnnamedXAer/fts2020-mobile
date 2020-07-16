@@ -10,17 +10,17 @@ import {
 	StatusBar,
 } from 'react-native';
 import { Theme, withTheme, Button } from 'react-native-paper';
-import Header from '../components/UI/Header';
-import validateAuthFormField from '../utils/validation';
-import Input from '../components/UI/Input';
-import CustomButton from '../components/UI/CustomButton';
-import { StateError } from '../store/ReactTypes/customReactTypes';
-import NotificationCard from '../components/UI/NotificationCard';
+import Header from '../../components/UI/Header';
+import validateAuthFormField from '../../utils/validation';
+import Input from '../../components/UI/Input';
+import CustomButton from '../../components/UI/CustomButton';
+import { StateError } from '../../store/ReactTypes/customReactTypes';
+import NotificationCard from '../../components/UI/NotificationCard';
 import { useDispatch } from 'react-redux';
-import { authorize } from '../store/actions/auth';
-import { Credentials } from '../models/auth';
-import HttpErrorParser from '../utils/parseError';
-import useForm, { createInitialState, FormActionTypes } from '../hooks/useForm';
+import { authorize } from '../../store/actions/auth';
+import { Credentials } from '../../models/auth';
+import HttpErrorParser from '../../utils/parseError';
+import useForm, { createInitialState, FormActionTypes } from '../../hooks/useForm';
 
 interface Props {
 	theme: Theme;

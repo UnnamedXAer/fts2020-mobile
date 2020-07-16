@@ -3,27 +3,27 @@ import { StyleSheet, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Title, FAB, Divider } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
-import RootState from '../store/storeTypes';
-import { StateError } from '../store/ReactTypes/customReactTypes';
+import RootState from '../../store/storeTypes';
+import { StateError } from '../../store/ReactTypes/customReactTypes';
 import {
 	fetchFlatOwner,
 	fetchFlatMembers,
 	updateFlat,
 	leaveFlat,
-} from '../store/actions/flats';
-import FlatTasksList from '../components/Flat/FlatTasksList';
+} from '../../store/actions/flats';
+import FlatTasksList from '../../components/Flat/FlatTasksList';
 import {
 	FlatDetailsScreenRouteProps,
 	FlatDetailsScreenNavigationProps,
-} from '../types/navigationTypes';
-import { FABAction } from '../types/types';
-import DetailsScreenInfo from '../components/DetailsScreeenInfo/DetailsScreenInfo';
-import AlertDialog, { AlertDialogData } from '../components/UI/AlertDialog/AlertDialog';
+} from '../../types/navigationTypes';
+import { FABAction } from '../../types/types';
+import DetailsScreenInfo from '../../components/DetailsScreeenInfo/DetailsScreenInfo';
+import AlertDialog, { AlertDialogData } from '../../components/UI/AlertDialog/AlertDialog';
 import AlertSnackbar, {
 	AlertSnackbarData,
-} from '../components/UI/AlertSnackbar/AlertSnackbar';
-import HttpErrorParser from '../utils/parseError';
-import { FlatData } from '../models/flat';
+} from '../../components/UI/AlertSnackbar/AlertSnackbar';
+import HttpErrorParser from '../../utils/parseError';
+import { FlatData } from '../../models/flat';
 
 type FABActionsKeys =
 	| 'addTask'

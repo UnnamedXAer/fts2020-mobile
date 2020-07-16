@@ -19,15 +19,15 @@ import {
 	Checkbox,
 } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
-import RootState from '../store/storeTypes';
-import { fetchFlats, setShowInactiveFlats } from '../store/actions/flats';
-import HttpErrorParser from '../utils/parseError';
-import Flat from '../models/flat';
-import NotificationCard from '../components/UI/NotificationCard';
-import { StateError } from '../store/ReactTypes/customReactTypes';
-import { FlatDetailsScreenNavigationProps } from '../types/navigationTypes';
+import RootState from '../../store/storeTypes';
+import { fetchFlats, setShowInactiveFlats } from '../../store/actions/flats';
+import HttpErrorParser from '../../utils/parseError';
+import Flat from '../../models/flat';
+import NotificationCard from '../../components/UI/NotificationCard';
+import { StateError } from '../../store/ReactTypes/customReactTypes';
+import { FlatDetailsScreenNavigationProps } from '../../types/navigationTypes';
 import { Placeholder } from 'rn-placeholder';
-import { PlaceholderLine, Shine } from '../components/UI/Placeholder/Placeholder';
+import { PlaceholderLine, Shine } from '../../components/UI/Placeholder/Placeholder';
 
 interface Props {
 	theme: Theme;

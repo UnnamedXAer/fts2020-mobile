@@ -2,7 +2,8 @@ import React from 'react';
 import User from '../../../models/user';
 import { Theme } from 'react-native-paper/lib/typescript/src/types';
 import { List, Avatar } from 'react-native-paper';
-import Invitation, { InvitationStatusInfo } from '../../../models/invitation';
+import Invitation from '../../../models/invitation';
+import { InvitationStatusInfo } from '../../../constants/invitation';
 
 interface Props {
 	invitation: Invitation;
@@ -17,7 +18,7 @@ const FlatInvitationsListItem: React.FC<Props> = ({ invitation, theme, onSelect 
 			description={InvitationStatusInfo[invitation.status]}
 			left={() => (
 				<Avatar.Icon
-					icon="mdi-card-account-mail-outline"
+					icon="contact-mail-outline"
 					size={48}
 					theme={{
 						colors: {

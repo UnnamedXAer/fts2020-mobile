@@ -407,7 +407,7 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 			actions.push(flatFABActions.noActions);
 		}
 	}
-	console.log(!!flat, flat?.invitations);
+
 	return (
 		<>
 			<ScrollView style={styles.screen}>

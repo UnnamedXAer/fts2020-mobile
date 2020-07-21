@@ -29,7 +29,6 @@ import RootState from '../../../store/storeTypes';
 import User from '../../../models/user';
 import { NewFlatMember } from '../../../types/types';
 import { checkEmailAddress } from '../../../utils/validation';
-import { mapApiUserDataToModel } from '../../../store/actions/users';
 import { UsersActionTypes } from '../../../store/actions/actionTypes';
 import axios from '../../../axios/axios';
 import { MembersStatus } from '../../../components/Flat/InvitationMembersEmailListItem';
@@ -37,6 +36,7 @@ import InviteMembersEmailList from '../../../components/Flat/InviteMembersEmailL
 import HttpErrorParser from '../../../utils/parseError';
 import NotificationCard from '../../../components/UI/NotificationCard';
 import { APIUser } from '../../../store/apiTypes';
+import { mapApiUserDataToModel } from '../../../store/mapAPIToModel/mapUser';
 
 interface Props {
 	theme: Theme;

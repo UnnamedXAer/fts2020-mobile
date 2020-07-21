@@ -19,7 +19,7 @@ import {
 	NewTaskTimeScreenRouteProps,
 } from '../../types/navigationTypes';
 import { StateError } from '../../store/ReactTypes/customReactTypes';
-import { TaskData, TaskPeriodUnit } from '../../models/task';
+import { TaskData } from '../../models/task';
 import HttpErrorParser from '../../utils/parseError';
 import Header from '../../components/UI/Header';
 import NotificationCard from '../../components/UI/NotificationCard';
@@ -29,6 +29,7 @@ import Picker from '../../components/UI/Picker';
 import { getRandomInt } from '../../utils/random';
 import { createTask } from '../../store/actions/tasks';
 import RootState from '../../store/storeTypes';
+import { TaskPeriodUnit } from '../../constants/task';
 
 interface Props {
 	theme: Theme;

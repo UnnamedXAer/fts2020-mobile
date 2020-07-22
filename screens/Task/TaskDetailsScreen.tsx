@@ -17,7 +17,11 @@ import {
 } from '../../store/actions/tasks';
 import PeriodsTable from '../../components/Task/PeriodsTable';
 import HttpErrorParser from '../../utils/parseError';
-import { fetchTaskPeriods, resetTaskPeriods } from '../../store/actions/periods';
+import {
+	fetchTaskPeriods,
+	resetTaskPeriods,
+	completePeriod,
+} from '../../store/actions/periods';
 import DetailsScreenInfo from '../../components/DetailsScreeenInfo/DetailsScreenInfo';
 import { FABAction } from '../../types/types';
 import AlertDialog, {
@@ -27,6 +31,7 @@ import Task from '../../models/task';
 import AlertSnackbar, {
 	AlertSnackbarData,
 } from '../../components/UI/AlertSnackbar/AlertSnackbar';
+import PeriodCompleteText from '../../components/Task/PeriodCompleteText';
 
 type FABActionsKeys = 'resetPeriods' | 'updateMembers' | 'closeTask' | 'noActions';
 
@@ -53,6 +58,9 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 		members: !!task?.members,
 		schedule: !!periods,
 	});
+	const [periodsLoading, setPeriodsLoading] = useState<{
+		[id: number]: boolean;
+	}>({});
 
 	const [elementsErrors, setElementsErrors] = useState<{
 		owner: StateError;
@@ -279,6 +287,86 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 		}
 	}, [dispatch, elementsErrors.schedule, loadingElements.schedule, periods, task]);
 
+	const completePeriodHandler = useCallback(
+		async (id: number) => {
+			setPeriodsLoading((prevState) => ({ ...prevState, [id]: true }));
+			setDialogData((prevState) => ({ ...prevState, loading: true }));
+			try {
+				await dispatch(completePeriod(id, task!.id!));
+				isMounted.current &&
+					setSnackbarData({
+						open: true,
+						action: {
+							label: 'OK',
+							onPress: closeSnackbarAlertHandler,
+						},
+						severity: 'success',
+						timeout: 3000,
+						content: 'Period completed.',
+						onClose: closeSnackbarAlertHandler,
+					});
+			} catch (err) {
+				if (isMounted.current) {
+					const error = new HttpErrorParser(err);
+					const msg = error.getMessage();
+					setSnackbarData({
+						open: true,
+						action: { label: 'OK', onPress: closeSnackbarAlertHandler },
+						severity: 'error',
+						timeout: 4000,
+						content: 'Could not complete the period.',
+						onClose: closeSnackbarAlertHandler,
+					});
+				}
+			} finally {
+				if (isMounted.current) {
+					setPeriodsLoading((prevState) => ({
+						...prevState,
+						[id]: false,
+					}));
+					setDialogData((prevState) => ({
+						...prevState,
+						open: false,
+					}));
+				}
+			}
+		},
+		[dispatch, task]
+	);
+
+	const completePeriodPressHandler = useCallback(
+		(id: number) => {
+			const period = periods!.find((x) => x.id === id)!;
+
+			setDialogData({
+				open: true,
+				// 'Are you sure?',
+				content: (
+					<PeriodCompleteText
+						loggedUserEmailAddress={loggedUser.emailAddress}
+						period={period}
+					/>
+				),
+				title: 'Complete Period?',
+				onDismiss: closeDialogAlertHandler,
+				loading: false,
+				actions: [
+					{
+						label: 'Complete',
+						onPress: () => completePeriodHandler(id),
+						color: 'primary',
+					},
+					{
+						color: 'accent',
+						label: 'Cancel',
+						onPress: closeDialogAlertHandler,
+					},
+				],
+			});
+		},
+		[completePeriodHandler, loggedUser.emailAddress, periods]
+	);
+
 	const ownerPressHandler = (id: number) => {
 		// navigate
 	};
@@ -388,7 +476,13 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 
 				<View style={styles.section}>
 					<Title>Periods</Title>
-					<PeriodsTable periods={periods} />
+					<PeriodsTable
+						periods={periods}
+						disabled={!task?.active}
+						periodsLoading={periodsLoading}
+						loggedUserEmailAddress={loggedUser.emailAddress}
+						onCompletePeriod={completePeriodPressHandler}
+					/>
 				</View>
 			</ScrollView>
 			<FAB.Group

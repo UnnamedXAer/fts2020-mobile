@@ -1,9 +1,10 @@
 import React from 'react';
-import { Text } from 'react-native';
+import { Text, TouchableHighlight } from 'react-native';
 import { Period } from '../../models/period';
 import moment, { Moment } from 'moment';
 import { Theme } from 'react-native-paper/lib/typescript/src/types';
 import { IconButton, ActivityIndicator } from 'react-native-paper';
+import SimpleToast from 'react-native-simple-toast';
 
 interface Props {
 	period: Period;
@@ -25,7 +26,35 @@ const PeriodsTableStatusCellValue: React.FC<Props> = ({
 }) => {
 	let element: JSX.Element;
 	if (period.completedBy) {
-		element = <Text>{moment(period.completedAt).format('ll')}</Text>;
+		element = (
+			<TouchableHighlight
+				style={{
+					flex: 1,
+					borderRadius: theme.roundness,
+					justifyContent: 'center',
+				}}
+				onPress={() => {
+					SimpleToast.show(
+						`Compleated by:\n${period.completedBy!.emailAddress}`
+					);
+				}}
+				underlayColor={'rgba(0, 150, 136, 0.25)'} //{theme.colors.primary}
+				activeOpacity={0.55}
+			>
+				<>
+					<Text style={{ textAlign: 'right' }}>
+						{moment(period.completedAt).format('ll')}
+					</Text>
+					<Text
+						style={{ textAlign: 'right', fontSize: 12 }}
+						numberOfLines={1}
+						ellipsizeMode="tail"
+					>
+						{period.completedBy.emailAddress}
+					</Text>
+				</>
+			</TouchableHighlight>
+		);
 	} else {
 		const startDateMidnight = periodDates.start.toDate();
 		const periodStarted = date >= startDateMidnight;

@@ -10,18 +10,22 @@ interface Props {
 	children?: React.ReactNode;
 	childrens?: (string | { text: string; onPress: () => void })[];
 	onPress?: () => void;
+	hideIcon?: boolean;
+	fontSize?: number;
 }
 
 const NotificationCard: React.FC<Props> = ({
 	severity = 'info',
 	children,
 	childrens,
-	onPress
+	onPress,
+	hideIcon,
+	fontSize = 18,
 }) => {
 	const theme = useTheme();
 	let serverityTextStyle: TextStyle;
 	let serverityCardStyle: ViewStyle;
-	let NotificationIcon: React.ReactElement;
+	let notificationIcon: React.ReactElement | null = null;
 
 	switch (severity) {
 		case 'info':
@@ -31,7 +35,7 @@ const NotificationCard: React.FC<Props> = ({
 			serverityTextStyle = {
 				color: 'rgb(13, 60, 97)',
 			};
-			NotificationIcon = (
+			notificationIcon = (
 				<MaterialIcons
 					name="info-outline"
 					size={26}
@@ -46,7 +50,7 @@ const NotificationCard: React.FC<Props> = ({
 			serverityTextStyle = {
 				color: 'rgb(97, 26, 21)',
 			};
-			NotificationIcon = (
+			notificationIcon = (
 				<MaterialIcons
 					name="error-outline"
 					size={26}
@@ -61,7 +65,7 @@ const NotificationCard: React.FC<Props> = ({
 			serverityTextStyle = {
 				color: 'rgb(102, 60, 0)',
 			};
-			NotificationIcon = (
+			notificationIcon = (
 				<AntDesign name="warning" size={24} style={{ color: '#ff9800' }} />
 			);
 			break;
@@ -72,7 +76,7 @@ const NotificationCard: React.FC<Props> = ({
 			serverityTextStyle = {
 				color: 'rgb(30, 70, 32)',
 			};
-			NotificationIcon = (
+			notificationIcon = (
 				<MaterialCommunityIcons
 					name="checkbox-marked-circle-outline"
 					size={26}
@@ -87,25 +91,23 @@ const NotificationCard: React.FC<Props> = ({
 	return (
 		<Card style={[styles.card, serverityCardStyle]} onPress={onPress}>
 			<View style={styles.container}>
-				{NotificationIcon}
+				{!hideIcon && notificationIcon}
 				{children && (
-					<Paragraph style={[styles.text, serverityTextStyle]}>
+					<Paragraph style={[styles.text, serverityTextStyle, { fontSize }]}>
 						{children}
 					</Paragraph>
 				)}
 				{childrens && (
-					<Paragraph style={[styles.text, serverityTextStyle]}>
+					<Paragraph style={[styles.text, serverityTextStyle, { fontSize }]}>
 						{childrens.map((child, i) =>
 							typeof child === 'string' ? (
 								<Text key={i}>{child}</Text>
 							) : (
 								<Text
 									key={i}
-									style={[
-										{
-											color: theme.colors.primary,
-										},
-									]}
+									style={{
+										color: theme.colors.primary,
+									}}
 									onPress={child.onPress}
 								>
 									{child.text}
@@ -134,7 +136,6 @@ const styles = StyleSheet.create({
 	text: {
 		flex: 1,
 		paddingStart: 10,
-		fontSize: 18,
 	},
 });
 

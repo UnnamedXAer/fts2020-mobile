@@ -478,6 +478,8 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 					<Title>Periods</Title>
 					<PeriodsTable
 						periods={periods}
+						loading={loadingElements.schedule}
+						error={elementsErrors.schedule}
 						disabled={!task?.active}
 						periodsLoading={periodsLoading}
 						loggedUserEmailAddress={loggedUser.emailAddress}

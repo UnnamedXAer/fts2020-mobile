@@ -1,14 +1,21 @@
 import React, { useState } from 'react';
-import { DataTable,  withTheme, Paragraph } from 'react-native-paper';
-import { Period } from '../../models/period';
-import moment from 'moment';
-import { View } from 'react-native';
-import PeriodsTableStatusCellValue from './PeriodsTableStatusCellValue';
+import { View, StyleSheet } from 'react-native';
+import { DataTable, withTheme, Paragraph } from 'react-native-paper';
 import { Theme } from 'react-native-paper/lib/typescript/src/types';
+import moment from 'moment';
+import { Period } from '../../models/period';
+import PeriodsTableStatusCellValue from './PeriodsTableStatusCellValue';
+import DataTableHeaderCellText, {
+	DataTablePlaceholderCellVal,
+} from '../UI/DataTable/DataTableElements';
+import { StateError } from '../../store/ReactTypes/customReactTypes';
+import NotificationCard from '../UI/NotificationCard';
 
 interface Props {
 	periods: Period[] | undefined;
 	disabled: boolean;
+	loading: boolean;
+	error: StateError;
 	periodsLoading: { [id: number]: boolean };
 	onCompletePeriod: (id: number) => void;
 	loggedUserEmailAddress: string;
@@ -19,6 +26,8 @@ const PeriodsTable: React.FC<Props> = ({
 	periods,
 	disabled,
 	periodsLoading,
+	loading,
+	error,
 	onCompletePeriod,
 	loggedUserEmailAddress,
 	theme,
@@ -29,7 +38,39 @@ const PeriodsTable: React.FC<Props> = ({
 	const fromIdx = page * 10;
 	let toIdx = fromIdx + 10;
 
-	if (periods) {
+	if (loading) {
+		for (let i = 0; i < 2; i++) {
+			rows.push(
+				<DataTable.Row key={i}>
+					<View
+						style={{
+							...styles.cellAlignStartCenter,
+							flex: 1,
+						}}
+					>
+						<DataTablePlaceholderCellVal />
+					</View>
+					<View
+						style={{
+							...styles.cellAlignStartCenter,
+							width: 110,
+							paddingHorizontal: 4,
+						}}
+					>
+						<DataTablePlaceholderCellVal />
+					</View>
+					<View
+						style={{
+							...styles.cellAlignStartCenter,
+							width: 90,
+						}}
+					>
+						<DataTablePlaceholderCellVal />
+					</View>
+				</DataTable.Row>
+			);
+		}
+	} else if (periods) {
 		periodLen = periods.length;
 		if (toIdx > periodLen) {
 			toIdx = periodLen;
@@ -40,8 +81,16 @@ const PeriodsTable: React.FC<Props> = ({
 			const startDateMidnight = moment(period.startDate).startOf('day');
 			const endDateMidnight = moment(period.endDate).startOf('day');
 			rows.push(
-				<DataTable.Row key={period.id} style={{backgroundColor: i%2 === 0 ? '#eee' : void 0}}>
-					<View style={{ flex: 1 }}>
+				<DataTable.Row
+					key={period.id}
+					style={{ backgroundColor: i % 2 === 0 ? '#eee' : void 0 }}
+				>
+					<View
+						style={{
+							...styles.cellAlignStartCenter,
+							flex: 1,
+						}}
+					>
 						<Paragraph
 							numberOfLines={1}
 							style={{
@@ -54,14 +103,17 @@ const PeriodsTable: React.FC<Props> = ({
 						>
 							{period.assignedTo.emailAddress}
 						</Paragraph>
-						<Paragraph numberOfLines={1} ellipsizeMode="tail" style={{color: theme.colors.placeholder}}>
+						<Paragraph
+							numberOfLines={1}
+							ellipsizeMode="tail"
+							style={{ color: theme.colors.placeholder }}
+						>
 							{period.assignedTo.userName}
 						</Paragraph>
 					</View>
 					<View
 						style={{
-							justifyContent: 'center',
-							alignItems: 'flex-end',
+							...styles.cellAlignEndCenter,
 							width: 110,
 						}}
 					>
@@ -70,10 +122,8 @@ const PeriodsTable: React.FC<Props> = ({
 					</View>
 					<View
 						style={{
-							justifyContent: 'center',
-							alignItems: 'flex-end',
+							...styles.cellAlignEndCenter,
 							width: 90,
-							marginRight: 0,
 						}}
 					>
 						<PeriodsTableStatusCellValue
@@ -98,39 +148,31 @@ const PeriodsTable: React.FC<Props> = ({
 			<DataTable.Header>
 				<View
 					style={{
+						...styles.cellAlignStartCenter,
 						flex: 1,
-						alignItems: 'flex-start',
-						justifyContent: 'center',
 					}}
 				>
-					<Paragraph style={{ color: theme.colors.placeholder, fontSize: 12 }}>
-						AssignedTo
-					</Paragraph>
+					<DataTableHeaderCellText>AssignedTo</DataTableHeaderCellText>
 				</View>
 				<View
 					style={{
+						...styles.cellAlignEndCenter,
 						width: 110,
-						alignItems: 'flex-end',
-						justifyContent: 'center',
 					}}
 				>
-					<Paragraph style={{ color: theme.colors.placeholder, fontSize: 12 }}>
-						Start - End Date
-					</Paragraph>
+					<DataTableHeaderCellText>Start - End Date</DataTableHeaderCellText>
 				</View>
 				<View
 					style={{
+						...styles.cellAlignEndCenter,
 						width: 90,
-						alignItems: 'flex-end',
-						justifyContent: 'center',
 					}}
 				>
-					<Paragraph style={{ color: theme.colors.placeholder, fontSize: 12 }}>
-						Complete(d)
-					</Paragraph>
+					<DataTableHeaderCellText>Complete(d)</DataTableHeaderCellText>
 				</View>
 			</DataTable.Header>
-			{rows}
+
+			{error ? <NotificationCard severity="error">{error}</NotificationCard> : rows}
 			{periods && periodLen > 10 && (
 				<DataTable.Pagination
 					page={page}
@@ -144,5 +186,16 @@ const PeriodsTable: React.FC<Props> = ({
 		</DataTable>
 	);
 };
+
+const styles = StyleSheet.create({
+	cellAlignStartCenter: {
+		alignItems: 'flex-start',
+		justifyContent: 'center',
+	},
+	cellAlignEndCenter: {
+		alignItems: 'flex-end',
+		justifyContent: 'center',
+	},
+});
 
 export default withTheme(PeriodsTable);

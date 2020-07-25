@@ -33,7 +33,7 @@ import AlertSnackbar, {
 } from '../../components/UI/AlertSnackbar/AlertSnackbar';
 import PeriodCompleteText from '../../components/Task/PeriodCompleteText';
 
-type FABActionsKeys = 'resetPeriods' | 'updateMembers' | 'closeTask' | 'noActions';
+type FABActionsKeys = 'resetPeriods' | 'updateMembers' | 'closeTask';
 
 interface Props {
 	route: TaskDetailsScreenRouteProps;
@@ -437,11 +437,6 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 			},
 			label: 'Close Task',
 		},
-		noActions: {
-			icon: 'information-variant',
-			onPress: () => {},
-			label: 'No actions available',
-		},
 	};
 
 	const actions: FABAction[] = [];
@@ -451,8 +446,6 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 			taskFABActions.updateMembers,
 			taskFABActions.resetPeriods
 		);
-	} else {
-		actions.push(taskFABActions.noActions);
 	}
 
 	return (
@@ -485,7 +478,7 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 				</View>
 			</ScrollView>
 			<FAB.Group
-				visible={Boolean(task?.members && task.owner)}
+				visible={actions.length > 0}
 				open={fabOpen}
 				color="white"
 				icon={fabOpen ? 'close' : 'plus'}

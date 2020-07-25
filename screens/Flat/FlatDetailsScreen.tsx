@@ -30,12 +30,7 @@ import HttpErrorParser from '../../utils/parseError';
 import { FlatData } from '../../models/flat';
 import FlatInvitationsList from '../../components/Flat/FlatInvitationsList/FlatInvitationsList';
 
-type FABActionsKeys =
-	| 'addTask'
-	| 'leaveFlat'
-	| 'inviteMembers'
-	| 'closeFlat'
-	| 'noActions';
+type FABActionsKeys = 'addTask' | 'leaveFlat' | 'inviteMembers' | 'closeFlat';
 
 interface Props {
 	route: FlatDetailsScreenRouteProps;
@@ -383,11 +378,6 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 				}),
 			label: 'Invite a new member',
 		},
-		noActions: {
-			icon: 'information-variant',
-			onPress: () => {},
-			label: 'No actions available',
-		},
 	};
 
 	const actions: FABAction[] = [];
@@ -401,10 +391,6 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 				actions.unshift(flatFABActions.closeFlat, flatFABActions.inviteMembers);
 			}
 			actions.push(flatFABActions.addTask);
-		}
-
-		if (actions.length === 0) {
-			actions.push(flatFABActions.noActions);
 		}
 	}
 
@@ -436,7 +422,7 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 				</View>
 			</ScrollView>
 			<FAB.Group
-				visible={Boolean(flat?.members && flat.owner)}
+				visible={actions.length > 0}
 				open={fabOpen}
 				color="white"
 				icon={fabOpen ? 'close' : 'plus'}

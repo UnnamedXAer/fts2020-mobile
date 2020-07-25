@@ -380,7 +380,7 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 	);
 
 	const ownerPressHandler = (id: number) => {
-		// navigate
+		navigation.navigate('Profile', { id });
 	};
 
 	const memberSelectHandler = (id: number) => {

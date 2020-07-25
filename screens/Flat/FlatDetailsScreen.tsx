@@ -297,7 +297,7 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 	}, [flat, dispatch, loadingElements, elementsErrors]);
 
 	const ownerPressHandler = (id: number) => {
-		// navigate
+		navigation.navigate('Profile', { id });
 	};
 
 	const memberSelectHandler = (id: number) => {

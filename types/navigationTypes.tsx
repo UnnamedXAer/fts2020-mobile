@@ -1,6 +1,5 @@
 import { RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { TaskPeriodUnit } from '../models/task';
 
 export type RootStackParamList = {
 	Flats: undefined;
@@ -26,6 +25,9 @@ export type RootStackParamList = {
 		id: number;
 		newTask: boolean;
 	};
+	Profile: {
+		id: number;
+	}
 };
 
 export type FlatDetailsScreenRouteProps = RouteProp<RootStackParamList, 'FlatDetails'>;
@@ -80,4 +82,10 @@ export type NewTaskMembersScreenRouteProps = RouteProp<
 export type NewTaskMembersScreenNavigationProps = StackNavigationProp<
 	RootStackParamList,
 	'NewTaskMembers'
+>;
+
+export type ProfileScreenRouteProps = RouteProp<RootStackParamList, 'Profile'>;
+export type ProfileScreenNavigationProps = StackNavigationProp<
+	RootStackParamList,
+	'Profile'
 >;

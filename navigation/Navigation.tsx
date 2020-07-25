@@ -23,6 +23,7 @@ import FlatDetailsScreen from '../screens/Flat/FlatDetailsScreen';
 import InviteMembersScreen from '../screens/Flat/NewFlat/InviteMembersScreen';
 import LogInScreen from '../screens/Auth/LogInScreen';
 import RegistrationScreen from '../screens/Auth/RegistrationScreen';
+import ProfileScreen from '../screens/Profile/ProfileScreen';
 
 const RootStack = createStackNavigator<RootStackParamList>();
 const RootStackNavigator = () => {
@@ -90,6 +91,13 @@ const RootStackNavigator = () => {
 					title: props.route.params.newTask ? 'New Task' : 'Update Task',
 				})}
 				component={NewTaskMembersScreen}
+			/>
+			<RootStack.Screen
+				name="Profile"
+				options={{
+					title: 'View Profile',
+				}}
+				component={ProfileScreen}
 			/>
 		</RootStack.Navigator>
 	);

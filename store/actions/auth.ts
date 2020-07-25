@@ -10,7 +10,7 @@ import {
 	AuthActionTypes,
 	UsersActionTypes,
 } from './actionTypes';
-import RootState from '../storeTypes';
+import RootState, { StoreAction } from '../storeTypes';
 import User from '../../models/user';
 import { FetchUserAction } from './users';
 import { mapApiUserDataToModel } from '../mapAPIToModel/mapUser';
@@ -128,6 +128,20 @@ export const logOut = (): ThunkAction<
 		}
 		await AsyncStorage.multiRemove(['loggedUser', 'expirationTime']);
 	};
+};
+
+export const updateLoggedUser = (
+	user: User
+): ThunkAction<Promise<void>, RootState, any, { payload: User, type: AuthActionTypes.SetLoggedUser }> => {
+	return async (dispatch) => {
+
+		await AsyncStorage.setItem('loggedUser', JSON.stringify(user));
+
+		dispatch({
+			type: AuthActionTypes.SetLoggedUser,
+			payload: user,
+		});
+	}
 };
 
 export const updatePassword = (

@@ -72,14 +72,14 @@ export default function validateAuthFormField(
             }
             break;
         case 'avatarUrl':
-            //   if (
-            // 		!formValues[fieldId] ||
-            // 		formValues[fieldId].length >= 2083 ||
-            // 		/[\s<>]/.test(formValues[fieldId]) ||
-            // 		formValues[fieldId].indexOf('mailto:') === 0
-            // 	) {
-            // 		error = 'Please enter correct avatar url.';
-            // 	}
+              if (
+            		!formValues[fieldId] ||
+            		formValues[fieldId].length >= 2083 ||
+            		/[\s<>]/.test(formValues[fieldId]) ||
+            		formValues[fieldId].indexOf('mailto:') === 0
+            	) {
+            		error = 'Please enter correct avatar url.';
+            	}
             // if (!isSignIn && formValues[fieldId] !== '') {
             //     try {
             //         await testImage(formValues[fieldId]);

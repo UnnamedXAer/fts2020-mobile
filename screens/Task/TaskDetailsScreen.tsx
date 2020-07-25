@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { Title, FAB } from 'react-native-paper';
+import { Title, FAB, Paragraph } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
+import { Placeholder } from 'rn-placeholder';
+import { Shine, PlaceholderLine } from '../../components/UI/Placeholder/Placeholder';
+import moment from 'moment';
 import RootState from '../../store/storeTypes';
 import { StateError } from '../../store/ReactTypes/customReactTypes';
 import {
@@ -32,6 +35,7 @@ import AlertSnackbar, {
 	AlertSnackbarData,
 } from '../../components/UI/AlertSnackbar/AlertSnackbar';
 import PeriodCompleteText from '../../components/Task/PeriodCompleteText';
+import Link from '../../components/UI/Link';
 
 type FABActionsKeys = 'resetPeriods' | 'updateMembers' | 'closeTask';
 
@@ -46,9 +50,17 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 	const task = useSelector((state: RootState) =>
 		state.tasks.tasks.find((x) => x.id === route.params.id)
 	);
-	const flat = useSelector((state: RootState) =>
-		state.flats.flats.find((x) => x.id === task?.flatId!)
-	);
+	const flatName = useSelector<RootState, string>((state) => {
+		let flatName: string;
+		const flat = task ? state.flats.flats.find((x) => x.id === task.flatId) : void 0;
+		if (flat) {
+			flatName = flat.name;
+		} else {
+			const userTask = state.tasks.userTasks.find((x) => x.id === id);
+			flatName = userTask?.flatName!;
+		}
+		return flatName;
+	});
 	const loggedUser = useSelector((state: RootState) => state.auth.user!);
 	const [error, setError] = useState<StateError>(null);
 	const [fabOpen, setFabOpen] = useState(false);
@@ -462,6 +474,73 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 					members={task?.members}
 					onOwnerPress={ownerPressHandler}
 					onMemberSelect={memberSelectHandler}
+					additionalInfo={
+						task ? (
+							<>
+								<Title>Task info</Title>
+								<View style={{ flexDirection: 'row' }}>
+									<View style={{ marginRight: 16 }}>
+										<Paragraph style={styles.taskInfoLabel}>
+											Flat:
+										</Paragraph>
+										<Paragraph style={styles.taskInfoLabel}>
+											Task period:
+										</Paragraph>
+										<Paragraph style={styles.taskInfoLabel}>
+											Start date:
+										</Paragraph>
+										<Paragraph style={styles.taskInfoLabel}>
+											End date:
+										</Paragraph>
+									</View>
+									<View>
+										{task ? (
+											<Link
+												onPress={() =>
+													navigation.navigate('FlatDetails', {
+														id: task!.flatId!,
+													})
+												}
+											>
+												{flatName}
+											</Link>
+										) : (
+											<Paragraph> </Paragraph>
+										)}
+										<Paragraph>
+											{task.timePeriodValue}{' '}
+											{task.timePeriodUnit?.toLocaleLowerCase()}
+											{task.timePeriodValue! > 1 ? 's' : ''}
+										</Paragraph>
+										<Paragraph>
+											{moment(task.startDate).format('LL')}
+										</Paragraph>
+										<Paragraph>
+											{moment(task.startDate).format('LL')}
+										</Paragraph>
+									</View>
+								</View>
+							</>
+						) : (
+							<>
+								<Title>Task info</Title>
+								<Placeholder Animation={Shine}>
+									<PlaceholderLine
+										style={styles.taskInfoPlaceholderLine}
+									/>
+									<PlaceholderLine
+										style={styles.taskInfoPlaceholderLine}
+									/>
+									<PlaceholderLine
+										style={styles.taskInfoPlaceholderLine}
+									/>
+									<PlaceholderLine
+										style={styles.taskInfoPlaceholderLine}
+									/>
+								</Placeholder>
+							</>
+						)
+					}
 				/>
 
 				<View style={styles.section}>
@@ -504,6 +583,8 @@ const styles = StyleSheet.create({
 	divider: {
 		marginHorizontal: 16,
 	},
+	taskInfoPlaceholderLine: { width: '90%', height: 16 },
+	taskInfoLabel: { fontWeight: 'bold' },
 });
 
 export default TaskDetailsScreen;

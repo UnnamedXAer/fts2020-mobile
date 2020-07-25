@@ -20,6 +20,7 @@ interface Props {
 	description: string | undefined;
 	members: User[] | undefined;
 	onMemberSelect: (id: User['id']) => void;
+	additionalInfo?: JSX.Element;
 }
 
 const DetailsScreenInfo: React.FC<Props> = ({
@@ -33,6 +34,7 @@ const DetailsScreenInfo: React.FC<Props> = ({
 	description,
 	members,
 	onMemberSelect,
+	additionalInfo,
 }) => {
 	const theme = useTheme();
 	return (
@@ -70,6 +72,12 @@ const DetailsScreenInfo: React.FC<Props> = ({
 				onOwnerPress={onOwnerPress}
 			/>
 			<Divider style={styles.divider} />
+			{additionalInfo && (
+				<>
+					<View style={styles.section}>{additionalInfo}</View>
+					<Divider style={styles.divider} />
+				</>
+			)}
 			<View style={styles.section}>
 				<Title>Description</Title>
 				{description !== void 0 ? (

@@ -445,10 +445,7 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 	};
 
 	const actions: FABAction[] = [];
-	if (
-		task?.active &&
-		(loggedUser.id === flat?.ownerId || loggedUser.id === task.createBy)
-	) {
+	if (task?.active && loggedUser.id === task.createBy) {
 		actions.push(
 			taskFABActions.closeTask,
 			taskFABActions.updateMembers,

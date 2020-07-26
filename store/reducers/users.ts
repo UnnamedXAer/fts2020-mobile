@@ -16,8 +16,9 @@ const setUser: SimpleReducer<UsersState, User> = (state, action) => {
 	} else {
 		updatedUsers[idx] = user;
 	}
-	
+
 	return {
+		...state,
 		users: updatedUsers,
 	};
 };

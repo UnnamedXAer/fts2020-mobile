@@ -220,9 +220,13 @@ const ProfileScreen: React.FC<Props> = ({ route, navigation, theme }) => {
 			return closeDialogAlertHandler();
 		}
 
-		const error = await validateAuthFormField(editedFieldName!, {
-			[editedFieldName!]: value,
-		});
+		const error = await validateAuthFormField(
+			editedFieldName!,
+			{
+				[editedFieldName!]: value,
+			},
+			true
+		);
 
 		if (error) {
 			return setEditError(error);
@@ -254,7 +258,9 @@ const ProfileScreen: React.FC<Props> = ({ route, navigation, theme }) => {
 		} catch (err) {
 			if (isMounted.current) {
 				const error = new HttpErrorParser(err);
-				const msg = error.getMessage();
+				const fieldsErrors = error.getFieldsErrors();
+				const fieldError = fieldsErrors.find((x) => x.param === editedFieldName);
+				const msg = fieldError?.msg || error.getMessage();
 				setEditError(msg);
 				setDialogData((prevState) => ({ ...prevState, loading: false }));
 			}

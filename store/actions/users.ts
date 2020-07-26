@@ -54,7 +54,6 @@ export const updateUser = (
 			>(url, user);
 
 			const updatedUser = mapApiUserDataToModel(data);
-
 			dispatch({
 				type: UsersActionTypes.SetUser,
 				payload: updatedUser,

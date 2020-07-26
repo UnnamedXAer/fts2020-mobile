@@ -14,6 +14,7 @@ export const checkUserName = (userName: string) => {
 export default function validateAuthFormField(
     fieldId: string,
     formValues: { [key: string]: string },
+    validateUserName?: boolean
 ): StateError {
     const isSignIn = !formValues.hasOwnProperty('confirmPassword');
     let error = null;
@@ -27,14 +28,14 @@ export default function validateAuthFormField(
                 'undefined',
                 'mod',
             ];
-            if (!isSignIn && formValues[fieldId].length < 2) {
+            if ((!isSignIn || validateUserName) && formValues[fieldId].length < 2) {
                 error = 'The Name must be minimum 2 characters long.';
             }
-            else if (!isSignIn && formValues[fieldId].length > 50) {
+            else if ((!isSignIn || validateUserName) && formValues[fieldId].length > 50) {
                 error = 'The Name must be max 50 characters long.';
             }
             else if (
-                !isSignIn &&
+                (!isSignIn || validateUserName) &&
                 notAllowedUserNameValues.includes(fieldId)
             ) {
                 error = 'This value is not allowed as Name.';
@@ -72,14 +73,14 @@ export default function validateAuthFormField(
             }
             break;
         case 'avatarUrl':
-              if (
-            		!formValues[fieldId] ||
-            		formValues[fieldId].length >= 2083 ||
-            		/[\s<>]/.test(formValues[fieldId]) ||
-            		formValues[fieldId].indexOf('mailto:') === 0
-            	) {
-            		error = 'Please enter correct avatar url.';
-            	}
+            if (
+                !formValues[fieldId] ||
+                formValues[fieldId].length >= 2083 ||
+                /[\s<>]/.test(formValues[fieldId]) ||
+                formValues[fieldId].indexOf('mailto:') === 0
+            ) {
+                error = 'Please enter correct avatar url.';
+            }
             // if (!isSignIn && formValues[fieldId] !== '') {
             //     try {
             //         await testImage(formValues[fieldId]);

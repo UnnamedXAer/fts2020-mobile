@@ -13,17 +13,10 @@ interface Props {
 	member: User;
 	onSelect: (id: User['id']) => void;
 	theme: Theme;
-	actions?: MemberAction[];
-	sendMailAction: MemberAction;
+	actions: MemberAction[];
 }
 
-const MembersListItem: React.FC<Props> = ({
-	member,
-	theme,
-	onSelect,
-	actions,
-	sendMailAction,
-}) => {
+const MembersListItem: React.FC<Props> = ({ member, theme, onSelect, actions }) => {
 	return (
 		<List.Item
 			title={member.emailAddress}
@@ -48,28 +41,16 @@ const MembersListItem: React.FC<Props> = ({
 					/>
 				)
 			}
-			right={() => (
-				<>
+			right={() =>
+				actions.map((action) => (
 					<IconButton
-						icon={sendMailAction.icon}
-						onPress={() => sendMailAction.onPress}
-						color={
-							theme.colors[
-								sendMailAction.disabled ? 'disabled' : 'placeholder'
-							]
-						}
+						key={action.icon}
+						icon={action.icon}
+						onPress={() => !action.disabled && action.onPress(member.id)}
+						color={theme.colors[action.disabled ? 'disabled' : 'placeholder']}
 					/>
-					{actions?.map((action) => (
-						<IconButton
-							icon={action.icon}
-							onPress={() => action.onPress}
-							color={
-								theme.colors[action.disabled ? 'disabled' : 'placeholder']
-							}
-						/>
-					))}
-				</>
-			)}
+				))
+			}
 			rippleColor={theme.colors.primary}
 			onPress={() => onSelect(member.id)}
 		/>

@@ -10,34 +10,54 @@ interface Props {
 	members: User[] | undefined;
 	onSelect: (id: User['id']) => void;
 	theme: Theme;
-	actions?: MemberAction[];
+	onMemberDelete?: (id: User['id']) => void;
+	ownerId?: number;
+	loggedUserId: number;
 }
 
-const MembersList: React.FC<Props> = ({ members, onSelect, theme, actions }) => {
+const MembersList: React.FC<Props> = ({
+	members,
+	onSelect,
+	theme,
+	onMemberDelete,
+	loggedUserId,
+	ownerId,
+}) => {
 	const sendMailHandler = (id: number) => {
 		const emailAddress = members!.find((x) => x.id === id)!;
 		Linking.openURL(`mailto:${emailAddress}?subject=FTS2020%20-%20member%20message`);
-	};
-
-	const sendMailAction: MemberAction = {
-		icon: 'email',
-		onPress: sendMailHandler,
 	};
 
 	return (
 		<>
 			<Title>Members</Title>
 			{members ? (
-				members.map((member) => (
-					<MembersListItem
-						key={member.id}
-						member={member}
-						onSelect={onSelect}
-						actions={actions}
-						sendMailAction={sendMailAction}
-						theme={theme}
-					/>
-				))
+				members.map((member) => {
+					const actions: MemberAction[] = [
+						{
+							icon: 'email',
+							onPress: sendMailHandler,
+							disabled: loggedUserId === member.id,
+						},
+					];
+
+					if (onMemberDelete) {
+						actions.push({
+							icon: 'delete',
+							onPress: onMemberDelete,
+							disabled: ownerId === member.id,
+						});
+					}
+					return (
+						<MembersListItem
+							key={member.id}
+							member={member}
+							onSelect={onSelect}
+							actions={actions}
+							theme={theme}
+						/>
+					);
+				})
 			) : (
 				<Placeholder Animation={Shine}>
 					<PlaceholderLine height={40} />

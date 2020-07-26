@@ -7,10 +7,18 @@ export enum FormActionTypes {
 	SetError = 'SET_ERROR',
 	MarkAsTouched = 'MARK_AS_TOUCHED',
 	SetFormError = 'SET_FORM_ERROR',
-	SetAllTouched = 'SET_ALL_TOUCHED'
+	SetAllTouched = 'SET_ALL_TOUCHED',
+	ResetForm = 'RESET_FORM'
 }
 
-export type FormAction = SetValueAction | SetErrorAction | MarkAsTouchedAction | SetErrorAction | MarkAllasTouched | SetFormErrorAction;
+export type FormAction =
+	| SetValueAction
+	| SetErrorAction
+	| MarkAsTouchedAction
+	| SetErrorAction
+	| MarkAllasTouched
+	| SetFormErrorAction
+	| ResetFormAction;
 
 interface SetValueAction<T = any> {
 	type: FormActionTypes.UpdateValue;
@@ -27,6 +35,11 @@ interface SetErrorAction<T = StateError> {
 interface SetFormErrorAction<T = StateError> {
 	type: FormActionTypes.SetFormError;
 	error: T;
+}
+
+interface ResetFormAction {
+	type: FormActionTypes.ResetForm;
+	state: FormState;
 }
 
 interface MarkAsTouchedAction {
@@ -106,6 +119,14 @@ const formReducer = (
 				...state,
 				touches: updatedAllTouches
 			}
+		case FormActionTypes.ResetForm:
+			const _state = action.state;
+			return {
+				..._state,
+				values: _state.values,
+				errors: _state.errors,
+				touches: _state.touches
+			}
 		default:
 			return state;
 	}
@@ -136,7 +157,7 @@ export function createInitialState<T extends string>(
 
 	return {
 		errors,
-		values: initialValues,
+		values: { ...initialValues },
 		touches,
 		formError: null,
 	};

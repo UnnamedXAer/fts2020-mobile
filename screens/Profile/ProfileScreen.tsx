@@ -276,15 +276,19 @@ const ProfileScreen: React.FC<Props> = ({ route, navigation, theme }) => {
 					>
 						{user?.avatarUrl ? (
 							<Avatar.Image
-								style={{ backgroundColor: theme.colors.background }}
+								style={{ backgroundColor: '#eee' }}
 								source={{ uri: user?.avatarUrl }}
 								size={avatarWidth}
 							/>
 						) : (
 							<MaterialCommunityIcons
-								name={'account'}
+								name="account-outline"
 								size={avatarWidth}
-								color={theme.colors.background}
+								style={{
+									backgroundColor: theme.colors.disabled,
+									color: theme.colors.background,
+									borderRadius: avatarWidth,
+								}}
 							/>
 						)}
 					</TouchableWithoutFeedback>

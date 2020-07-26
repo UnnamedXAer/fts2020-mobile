@@ -24,6 +24,7 @@ import InviteMembersScreen from '../screens/Flat/NewFlat/InviteMembersScreen';
 import LogInScreen from '../screens/Auth/LogInScreen';
 import RegistrationScreen from '../screens/Auth/RegistrationScreen';
 import ProfileScreen from '../screens/Profile/ProfileScreen';
+import ChangePasswordScreen from '../screens/Auth/ChangePasswordScreen';
 
 const RootStack = createStackNavigator<RootStackParamList>();
 const RootStackNavigator = () => {
@@ -98,6 +99,13 @@ const RootStackNavigator = () => {
 					title: 'View Profile',
 				}}
 				component={ProfileScreen}
+			/>
+			<RootStack.Screen
+				name="ChangePassword"
+				options={{
+					title: 'Change Password',
+				}}
+				component={ChangePasswordScreen}
 			/>
 		</RootStack.Navigator>
 	);

@@ -357,7 +357,7 @@ const ProfileScreen: React.FC<Props> = ({ route, navigation, theme }) => {
 						<View style={styles.container}>
 							<Link
 								style={{ padding: 8 }}
-								onPress={() => console.log('will change password')}
+								onPress={() => navigation.navigate('ChangePassword')}
 							>
 								Change Password
 							</Link>

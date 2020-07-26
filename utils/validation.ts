@@ -90,6 +90,11 @@ export default function validateAuthFormField(
             //     }
             // }
             break;
+        case 'oldPassword':
+            if (formValues[fieldId].length === 0) {
+                error = 'Please enter Old Password.'
+            }
+            break;
         default:
             break;
     }

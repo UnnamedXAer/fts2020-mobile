@@ -27,7 +27,8 @@ export type RootStackParamList = {
 	};
 	Profile: {
 		id: number;
-	}
+	};
+	ChangePassword: undefined;
 };
 
 export type FlatDetailsScreenRouteProps = RouteProp<RootStackParamList, 'FlatDetails'>;
@@ -88,4 +89,10 @@ export type ProfileScreenRouteProps = RouteProp<RootStackParamList, 'Profile'>;
 export type ProfileScreenNavigationProps = StackNavigationProp<
 	RootStackParamList,
 	'Profile'
+>;
+
+export type ChangePasswordScreenRouteProps = RouteProp<RootStackParamList, 'ChangePassword'>;
+export type ChangePasswordScreenNavigationProps = StackNavigationProp<
+	RootStackParamList,
+	'ChangePassword'
 >;

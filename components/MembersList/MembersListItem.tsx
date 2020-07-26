@@ -1,15 +1,29 @@
 import React from 'react';
 import User from '../../models/user';
 import { Theme } from 'react-native-paper/lib/typescript/src/types';
-import { List, Avatar } from 'react-native-paper';
+import { List, Avatar, IconButton } from 'react-native-paper';
+
+export type MemberAction = {
+	icon: string;
+	onPress: (id: number) => void | Promise<void>;
+	disabled?: boolean;
+};
 
 interface Props {
 	member: User;
 	onSelect: (id: User['id']) => void;
 	theme: Theme;
+	actions?: MemberAction[];
+	sendMailAction: MemberAction;
 }
 
-const MembersListItem: React.FC<Props> = ({ member, theme, onSelect }) => {
+const MembersListItem: React.FC<Props> = ({
+	member,
+	theme,
+	onSelect,
+	actions,
+	sendMailAction,
+}) => {
 	return (
 		<List.Item
 			title={member.emailAddress}
@@ -34,6 +48,28 @@ const MembersListItem: React.FC<Props> = ({ member, theme, onSelect }) => {
 					/>
 				)
 			}
+			right={() => (
+				<>
+					<IconButton
+						icon={sendMailAction.icon}
+						onPress={() => sendMailAction.onPress}
+						color={
+							theme.colors[
+								sendMailAction.disabled ? 'disabled' : 'placeholder'
+							]
+						}
+					/>
+					{actions?.map((action) => (
+						<IconButton
+							icon={action.icon}
+							onPress={() => action.onPress}
+							color={
+								theme.colors[action.disabled ? 'disabled' : 'placeholder']
+							}
+						/>
+					))}
+				</>
+			)}
 			rippleColor={theme.colors.primary}
 			onPress={() => onSelect(member.id)}
 		/>

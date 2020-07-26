@@ -296,12 +296,8 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 		}
 	}, [flat, dispatch, loadingElements, elementsErrors]);
 
-	const ownerPressHandler = (id: number) => {
+	const personSelectHandler = (id: number) => {
 		navigation.navigate('Profile', { id });
-	};
-
-	const memberSelectHandler = (id: number) => {
-		// open modal with options
 	};
 
 	const invitataionSelectHandler = (id: number) => {
@@ -406,8 +402,7 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 					createAt={flat?.createAt!}
 					owner={flat?.owner}
 					members={flat?.members}
-					onOwnerPress={ownerPressHandler}
-					onMemberSelect={memberSelectHandler}
+					onPersonPress={personSelectHandler}
 				/>
 				<View style={styles.section}>
 					<FlatInvitationsList

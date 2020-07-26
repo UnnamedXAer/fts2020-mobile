@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Divider, Headline, Title, Paragraph, useTheme, Theme } from 'react-native-paper';
+import { Divider, Headline, Title, Paragraph, useTheme } from 'react-native-paper';
+import { Placeholder } from 'rn-placeholder';
 import DetailsScreenHeader from './DetailsScreenHeader/DetailsScreenHeader';
 import MembersList from '../MembersList/MembersList';
 import User from '../../models/user';
-import { Placeholder } from 'rn-placeholder';
 import { PlaceholderLine, Shine } from '../UI/Placeholder/Placeholder';
 import { StateError } from '../../store/ReactTypes/customReactTypes';
 import NotificationCard from '../UI/NotificationCard';
@@ -13,13 +13,12 @@ interface Props {
 	error: StateError;
 	owner: User | undefined;
 	createAt: Date | undefined;
-	onOwnerPress: (id: User['id']) => void;
+	onPersonPress: (id: User['id']) => void;
 	iconName: string;
 	active: boolean | undefined;
 	name: string | undefined;
 	description: string | undefined;
 	members: User[] | undefined;
-	onMemberSelect: (id: User['id']) => void;
 	additionalInfo?: JSX.Element;
 }
 
@@ -27,13 +26,12 @@ const DetailsScreenInfo: React.FC<Props> = ({
 	error,
 	owner,
 	createAt,
-	onOwnerPress,
+	onPersonPress,
 	iconName,
 	active,
 	name,
 	description,
 	members,
-	onMemberSelect,
 	additionalInfo,
 }) => {
 	const theme = useTheme();
@@ -69,7 +67,7 @@ const DetailsScreenInfo: React.FC<Props> = ({
 				createAt={createAt}
 				iconName={iconName}
 				theme={theme}
-				onOwnerPress={onOwnerPress}
+				onOwnerPress={onPersonPress}
 			/>
 			<Divider style={styles.divider} />
 			{additionalInfo && (
@@ -92,7 +90,7 @@ const DetailsScreenInfo: React.FC<Props> = ({
 			</View>
 			<Divider style={styles.divider} />
 			<View style={styles.section}>
-				<MembersList members={members} onSelect={onMemberSelect} theme={theme} />
+				<MembersList members={members} onSelect={onPersonPress} theme={theme} />
 			</View>
 			<Divider style={styles.divider} />
 		</>

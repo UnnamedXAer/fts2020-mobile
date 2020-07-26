@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { Title, FAB, Paragraph } from 'react-native-paper';
+import { Title, FAB, Paragraph, Menu } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
 import { Placeholder } from 'rn-placeholder';
 import { Shine, PlaceholderLine } from '../../components/UI/Placeholder/Placeholder';
@@ -379,12 +379,8 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 		[completePeriodHandler, loggedUser.emailAddress, periods]
 	);
 
-	const ownerPressHandler = (id: number) => {
+	const personSelectHandler = (id: number) => {
 		navigation.navigate('Profile', { id });
-	};
-
-	const memberSelectHandler = (id: number) => {
-		// open modal with options
 	};
 
 	const taskFABActions: {
@@ -472,8 +468,7 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 					createAt={task?.createAt!}
 					owner={task?.owner}
 					members={task?.members}
-					onOwnerPress={ownerPressHandler}
-					onMemberSelect={memberSelectHandler}
+					onPersonPress={personSelectHandler}
 					additionalInfo={
 						task ? (
 							<>

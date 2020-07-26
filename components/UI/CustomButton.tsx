@@ -39,18 +39,19 @@ const CustomButton = React.forwardRef<View, Props>((props, ref) => {
 					| (((event: GestureResponderEvent) => void) & (() => void | null))
 					| undefined
 			}
-			disabled={props.disabled}
+			disabled={props.disabled || props.loading}
 		>
 			<View style={styles.container} ref={ref}>
 				<Text
 					style={[
 						styles.text,
 						{
-							color: props.disabled
-								? theme.colors.disabled
-								: !props.accent
-								? theme.colors.primary
-								: theme.colors.accent,
+							color:
+								props.disabled || props.loading
+									? theme.colors.disabled
+									: !props.accent
+									? theme.colors.primary
+									: theme.colors.accent,
 						},
 						props.textStyle,
 					]}
@@ -87,7 +88,6 @@ const styles = StyleSheet.create({
 		fontSize: 24,
 		textAlign: 'center',
 		textAlignVertical: 'center',
-		textTransform: 'capitalize',
 		margin: 10,
 	},
 });

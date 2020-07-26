@@ -2,7 +2,7 @@ import { AppReducer, FlatsState, SimpleReducer } from '../storeTypes';
 import { FlatsActionTypes } from '../actions/actionTypes';
 import Flat from '../../models/flat';
 import User from '../../models/user';
-import { AddFlatActionPayload, SetShowInactiveFlatsActionPayload, SetFlatInvitationsActionPayload } from '../actions/flats';
+import { AddFlatActionPayload, SetShowInactiveFlatsActionPayload, SetFlatInvitationsActionPayload, RemoveFlatMemberActionPayload } from '../actions/flats';
 
 const initialState: FlatsState = {
 	flats: [],
@@ -97,6 +97,29 @@ const setMembers: SimpleReducer<
 	};
 };
 
+const removeMember: SimpleReducer<FlatsState, RemoveFlatMemberActionPayload> = (
+	state,
+	action
+) => {
+	const { flatId, userId } = action.payload;
+	const updatedFlats = [...state.flats];
+	const flatIdx = updatedFlats.findIndex((x) => x.id === flatId);
+
+	if (flatIdx !== -1) {
+		const updatedMembers = updatedFlats[flatIdx].members?.filter(
+			(x) => x.id !== userId
+		);
+		if (updatedMembers) {
+			updatedFlats[flatIdx].members = updatedMembers;
+		}
+	}
+
+	return {
+		...state,
+		flats: updatedFlats,
+	};
+};
+
 const setInvitations: SimpleReducer<
 	FlatsState,
 	SetFlatInvitationsActionPayload
@@ -145,6 +168,8 @@ const reducer: AppReducer<FlatsState, FlatsActionTypes> = (
 			return setOwner(state, action);
 		case FlatsActionTypes.SetMembers:
 			return setMembers(state, action);
+		case FlatsActionTypes.RemoveMember:
+			return removeMember(state, action);
 		case FlatsActionTypes.SetInvitations:
 			return setInvitations(state, action);
 		case FlatsActionTypes.SetShowInactive:

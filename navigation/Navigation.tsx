@@ -39,7 +39,7 @@ const RootStackNavigator = () => {
 					</Link>
 				),
 			}}
-			initialRouteName="UserTasks"
+			initialRouteName="Flats"
 		>
 			<RootStack.Screen
 				name="Flats"

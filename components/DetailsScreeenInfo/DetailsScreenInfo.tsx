@@ -19,7 +19,10 @@ interface Props {
 	name: string | undefined;
 	description: string | undefined;
 	members: User[] | undefined;
+	onMemberDelete?: (id: User['id']) => void;
 	additionalInfo?: JSX.Element;
+	ownerId?: number;
+	loggedUserId: number;
 }
 
 const DetailsScreenInfo: React.FC<Props> = ({
@@ -32,7 +35,10 @@ const DetailsScreenInfo: React.FC<Props> = ({
 	name,
 	description,
 	members,
+	onMemberDelete,
 	additionalInfo,
+	loggedUserId,
+	ownerId,
 }) => {
 	const theme = useTheme();
 	return (
@@ -90,7 +96,14 @@ const DetailsScreenInfo: React.FC<Props> = ({
 			</View>
 			<Divider style={styles.divider} />
 			<View style={styles.section}>
-				<MembersList members={members} onSelect={onPersonPress} theme={theme} />
+				<MembersList
+					members={members}
+					onSelect={onPersonPress}
+					theme={theme}
+					onMemberDelete={onMemberDelete}
+					loggedUserId={loggedUserId}
+					ownerId={ownerId}
+				/>
 			</View>
 			<Divider style={styles.divider} />
 		</>

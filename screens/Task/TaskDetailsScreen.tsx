@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { Title, FAB, Paragraph, Menu } from 'react-native-paper';
+import { Title, FAB, Paragraph } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
 import { Placeholder } from 'rn-placeholder';
 import { Shine, PlaceholderLine } from '../../components/UI/Placeholder/Placeholder';
@@ -536,6 +536,8 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 							</>
 						)
 					}
+					loggedUserId={loggedUser.id}
+					ownerId={task?.createBy}
 				/>
 
 				<View style={styles.section}>

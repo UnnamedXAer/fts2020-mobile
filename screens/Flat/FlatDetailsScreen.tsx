@@ -12,6 +12,7 @@ import {
 	leaveFlat,
 	fetchFlats,
 	fetchFlatInvitations,
+	deleteFlatMember,
 } from '../../store/actions/flats';
 import FlatTasksList from '../../components/Flat/FlatTasksList';
 import {
@@ -149,6 +150,73 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 					open: false,
 				}));
 		}
+	};
+
+	const removeMember = async (id: number) => {
+		setDialogData((prevState) => ({ ...prevState, loading: true }));
+
+		try {
+			await dispatch(deleteFlatMember(flat!.id!, id));
+			if (isMounted.current) {
+				setSnackbarData({
+					open: true,
+					action: {
+						label: 'OK',
+						onPress: closeSnackbarAlertHandler,
+					},
+					severity: 'success',
+					timeout: 3000,
+					content: 'Member removed.',
+					onClose: closeSnackbarAlertHandler,
+				});
+			}
+		} catch (err) {
+			if (isMounted.current) {
+				const httpError = new HttpErrorParser(err);
+				const msg = httpError.getMessage();
+				setSnackbarData({
+					open: true,
+					action: {
+						label: 'OK',
+						onPress: closeSnackbarAlertHandler,
+					},
+					severity: 'error',
+					timeout: 4000,
+					content: msg,
+					onClose: closeSnackbarAlertHandler,
+				});
+			}
+		} finally {
+			isMounted.current &&
+				setDialogData((prevState) => ({
+					...prevState,
+					open: false,
+				}));
+		}
+	};
+
+	const deleteMemberHandler = (id: number) => {
+		const member = flat!.members!.find((x) => x.id === id)!;
+
+		setDialogData({
+			open: true,
+			content: `Do you want to remove this ${member.emailAddress} (${member.userName}) from the flat?`,
+			title: 'Remove Member',
+			onDismiss: closeDialogAlertHandler,
+			loading: false,
+			actions: [
+				{
+					label: 'Yes',
+					onPress: () => removeMember(id),
+					color: 'primary',
+				},
+				{
+					color: 'accent',
+					label: 'Cancel',
+					onPress: closeDialogAlertHandler,
+				},
+			],
+		});
 	};
 
 	const leaveFlatHandler = async () => {
@@ -403,6 +471,11 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 					owner={flat?.owner}
 					members={flat?.members}
 					onPersonPress={personSelectHandler}
+					loggedUserId={loggedUser.id}
+					ownerId={flat?.ownerId}
+					onMemberDelete={
+						loggedUser.id === flat?.ownerId ? deleteMemberHandler : void 0
+					}
 				/>
 				<View style={styles.section}>
 					<FlatInvitationsList

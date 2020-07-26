@@ -30,6 +30,11 @@ type SetShowInactiveFlatsAction = {
 	payload: SetShowInactiveFlatsActionPayload;
 };
 
+export type RemoveFlatMemberActionPayload = {
+	flatId: number;
+	userId: number;
+};
+
 export const createFlat = (
 	flat: FlatData,
 	tmpId: string
@@ -242,6 +247,38 @@ export const fetchFlatInvitations = (
 					invitations,
 					flatId,
 				},
+			});
+		} catch (err) {
+			throw err;
+		}
+	};
+};
+
+export const deleteFlatMember = (
+	id: number,
+	userId: number
+): ThunkAction<
+	Promise<void>,
+	RootState,
+	any,
+	| StoreAction<RemoveFlatMemberActionPayload, FlatsActionTypes.RemoveMember>
+	| StoreAction<
+			void,
+			TasksActionTypes.ClearState | TaskPeriodsActionTypes.ClearState
+	  >
+> => {
+	return async (dispatch) => {
+		const url = `/flats/${id}/members`;
+		try {
+			await axios.delete(url, {
+				data: {
+					userId,
+				},
+			});
+
+			dispatch({
+				type: FlatsActionTypes.RemoveMember,
+				payload: { flatId: id, userId },
 			});
 		} catch (err) {
 			throw err;

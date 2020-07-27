@@ -22,7 +22,7 @@ const FlatTasksList: React.FC<Props> = ({ flatId, theme, navigation }) => {
 	const tasksLoadTime = useSelector((state: RootState) => {
 		let time = 0;
 		if (flatId !== void 0) {
-			time = state.tasks.tasksLoadTimes[flatId];
+			time = state.tasks.tasksLoadTimes[flatId] || 0;
 		}
 		return time;
 	});
@@ -41,11 +41,13 @@ const FlatTasksList: React.FC<Props> = ({ flatId, theme, navigation }) => {
 	}>({});
 
 	useEffect(() => {
+		console.log(flatId, tasksLoadTime, openTime, tasksLoadTime < openTime);
 		if (flatId && tasksLoadTime < openTime) {
 			setTasksLoading(true);
 			setError(null);
 			const loadTasks = async () => {
 				try {
+					console.log('about to fetch tasks for', flatId);
 					await dispatch(fetchFlatTasks(flatId));
 				} catch (err) {
 					const message = new HttpErrorParser(err).getMessage();

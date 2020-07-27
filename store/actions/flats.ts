@@ -13,8 +13,17 @@ import Invitation from '../../models/invitation';
 import { APIFlat, APIInvitation } from '../apiTypes';
 import { mapAPIFlatDataToModel } from '../mapAPIToModel/mapFlat';
 import { mapAPIInvitationDataToModel } from '../mapAPIToModel/mapInvitation';
+import { clearFlatTasks } from './tasks';
 
 export type AddFlatActionPayload = { flat: Flat; tmpId: string };
+
+export type SetFlatActionPayload = {
+	flat: Flat,
+}
+
+type RefreshFlatActionType =
+	| StoreAction<SetFlatActionPayload, FlatsActionTypes.ClearFlat>
+	| StoreAction<{ id: number }, FlatsActionTypes.ClearFlat>
 
 export type SetFlatInvitationsActionPayload = {
 	flatId: number;
@@ -85,13 +94,62 @@ export const fetchFlats = (): ThunkAction<
 	};
 };
 
+export const refreshFlat = (id: number): ThunkAction<
+	Promise<void>,
+	RootState,
+	any,
+	RefreshFlatActionType> => {
+	return async dispatch => {
+
+		await dispatch({
+			type: FlatsActionTypes.ClearFlat,
+			payload: { id }
+		});
+
+		await dispatch(clearFlatTasks(id));
+
+		dispatch(fetchFlat(id));
+	}
+}
+
+
+export const fetchFlat = (id: number): ThunkAction<
+	Promise<void>,
+	RootState,
+	any,
+	StoreAction<SetFlatActionPayload, FlatsActionTypes.SetFlat>
+> => {
+	return async (dispatch) => {
+		const url = `/flats/${id}`;
+		try {
+			const { data, status } = await axios.get<APIFlat>(url);
+			if (status === 200) {
+				const flat = mapAPIFlatDataToModel(data);
+
+				dispatch({
+					type: FlatsActionTypes.SetFlat,
+					payload: {
+						flat,
+					}
+				});
+			}
+			else {
+				throw new Error('Unauthorized access - You do not have permissions to view this flat.')
+			}
+
+		} catch (err) {
+			throw err;
+		}
+	};
+};
+
 export const updateFlat = (
 	flat: Partial<FlatData>
 ): ThunkAction<
 	Promise<void>,
 	RootState,
 	any,
-	StoreAction<Flat, FlatsActionTypes.SetFlat>
+	StoreAction<SetFlatActionPayload, FlatsActionTypes.SetFlat>
 > => {
 	return async (dispatch) => {
 		const url = `/flats/${flat.id}`;
@@ -105,7 +163,7 @@ export const updateFlat = (
 			const updatedTask = mapAPIFlatDataToModel(data);
 			dispatch({
 				type: FlatsActionTypes.SetFlat,
-				payload: updatedTask,
+				payload: { flat: updatedTask },
 			});
 		} catch (err) {
 			throw err;
@@ -263,9 +321,9 @@ export const deleteFlatMember = (
 	any,
 	| StoreAction<RemoveFlatMemberActionPayload, FlatsActionTypes.RemoveMember>
 	| StoreAction<
-			void,
-			TasksActionTypes.ClearState | TaskPeriodsActionTypes.ClearState
-	  >
+		void,
+		TasksActionTypes.ClearState | TaskPeriodsActionTypes.ClearState
+	>
 > => {
 	return async (dispatch) => {
 		const url = `/flats/${id}/members`;

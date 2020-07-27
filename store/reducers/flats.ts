@@ -2,7 +2,13 @@ import { AppReducer, FlatsState, SimpleReducer } from '../storeTypes';
 import { FlatsActionTypes } from '../actions/actionTypes';
 import Flat from '../../models/flat';
 import User from '../../models/user';
-import { AddFlatActionPayload, SetShowInactiveFlatsActionPayload, SetFlatInvitationsActionPayload, RemoveFlatMemberActionPayload } from '../actions/flats';
+import {
+	AddFlatActionPayload,
+	SetShowInactiveFlatsActionPayload,
+	SetFlatInvitationsActionPayload,
+	RemoveFlatMemberActionPayload,
+	SetFlatActionPayload
+} from '../actions/flats';
 
 const initialState: FlatsState = {
 	flats: [],
@@ -19,8 +25,8 @@ const setFlats: SimpleReducer<FlatsState, Flat[]> = (state, action) => {
 	};
 };
 
-const setFlat: SimpleReducer<FlatsState, Flat> = (state, action) => {
-	const flat = action.payload;
+const setFlat: SimpleReducer<FlatsState, SetFlatActionPayload> = (state, action) => {
+	const { flat } = action.payload;
 	const updatedFlats = [...state.flats];
 	const flatIdx = updatedFlats.findIndex((x) => x.id === flat.id);
 
@@ -34,6 +40,9 @@ const setFlat: SimpleReducer<FlatsState, Flat> = (state, action) => {
 		}
 		if (updatedFlats[flatIdx].members) {
 			updatedFlat.members = updatedFlats[flatIdx].members;
+		}
+		if (updatedFlats[flatIdx].invitations) {
+			updatedFlat.invitations = updatedFlats[flatIdx].invitations;
 		}
 		updatedFlats[flatIdx] = updatedFlat;
 	}
@@ -147,6 +156,14 @@ const setShowInactive: SimpleReducer<FlatsState, SetShowInactiveFlatsActionPaylo
 	};
 };
 
+const clearFlat: SimpleReducer<FlatsState, { id: number }> = (state, action) => {
+	const { id } = action.payload
+	return {
+		...state,
+		flats: state.flats.filter(x => x.id !== id)
+	}
+}
+
 const clearState: SimpleReducer<FlatsState, undefined> = (state, action) => {
 	return {
 		...initialState,
@@ -174,6 +191,8 @@ const reducer: AppReducer<FlatsState, FlatsActionTypes> = (
 			return setInvitations(state, action);
 		case FlatsActionTypes.SetShowInactive:
 			return setShowInactive(state, action);
+		case FlatsActionTypes.ClearFlat:
+			return clearFlat(state, action);
 		case FlatsActionTypes.ClearState:
 			return clearState(state, action);
 		default:

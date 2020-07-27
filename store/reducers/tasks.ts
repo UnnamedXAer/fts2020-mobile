@@ -2,7 +2,11 @@ import { AppReducer, TasksState, SimpleReducer } from '../storeTypes';
 import { TasksActionTypes } from '../actions/actionTypes';
 import Task, { UserTask } from '../../models/task';
 import User from '../../models/user';
-import { CreateTaskActionPayload, SetShowInactiveTasksActionPayload } from '../actions/tasks';
+import {
+	CreateTaskActionPayload,
+	SetShowInactiveTasksActionPayload,
+	ClearFlatTasksActionPayload
+} from '../actions/tasks';
 
 const initialState: TasksState = {
 	tasks: [],
@@ -88,6 +92,25 @@ const setFlatTasks: SimpleReducer<
 	};
 };
 
+const clearFlatTasks: SimpleReducer<
+	TasksState,
+	ClearFlatTasksActionPayload
+> = (state, action) => {
+
+	const { flatId } = action.payload;
+	const updatedTasks = state.tasks
+		.filter((x) => x.flatId !== flatId);
+
+	const updatedLoadTimes = { ...state.tasksLoadTimes };
+	delete updatedLoadTimes[flatId];
+
+	return {
+		...state,
+		tasks: updatedTasks,
+		tasksLoadTimes: updatedLoadTimes
+	};
+};
+
 const addTask: SimpleReducer<TasksState, CreateTaskActionPayload> = (state, action) => {
 	const { tmpId, task } = action.payload;
 	const updatedTasks = state.tasks.concat(task);
@@ -143,7 +166,9 @@ const setOwner: SimpleReducer<
 	};
 };
 
-const setShowInactive: SimpleReducer<TasksState, SetShowInactiveTasksActionPayload> = (state, action) => {
+const setShowInactive: SimpleReducer<
+	TasksState, SetShowInactiveTasksActionPayload
+> = (state, action) => {
 	return {
 		...state,
 		showInactive: action.payload.show
@@ -177,6 +202,8 @@ const reducer: AppReducer<TasksState, TasksActionTypes> = (
 			return setOwner(state, action);
 		case TasksActionTypes.SetShowInactive:
 			return setShowInactive(state, action);
+		case TasksActionTypes.ClearFlatTasks:
+			return clearFlatTasks(state, action);
 		case TasksActionTypes.ClearState:
 			return clearState(state, action);
 		default:

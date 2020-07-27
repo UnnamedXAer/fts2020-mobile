@@ -30,9 +30,15 @@ type FetchTaskAction = {
 	payload: Task;
 };
 
-type SetTaskMembersActionPayload = {
+type SetTaskMembersAction = {
 	type: TasksActionTypes.SetMembers;
 	payload: { members: User[]; taskId: number };
+};
+
+export type ClearFlatTasksActionPayload = { flatId: number }
+type ClearFlatTasksAction = {
+	type: TasksActionTypes.ClearFlatTasks;
+	payload: ClearFlatTasksActionPayload;
 };
 
 export type SetShowInactiveTasksActionPayload = {
@@ -93,7 +99,6 @@ export const fetchTask = (
 	};
 };
 
-
 export const fetchFlatTasks = (
 	id: number
 ): ThunkAction<Promise<void>, RootState, any, FetchFlatTasksAction> => {
@@ -113,6 +118,19 @@ export const fetchFlatTasks = (
 		} catch (err) {
 			throw err;
 		}
+	};
+};
+
+export const clearFlatTasks = (
+	id: number
+): ThunkAction<Promise<void>, RootState, any, ClearFlatTasksAction> => {
+	return async (dispatch) => {
+		dispatch({
+			type: TasksActionTypes.ClearFlatTasks,
+			payload: {
+				flatId: id,
+			},
+		});
 	};
 };
 
@@ -140,7 +158,7 @@ export const fetchUserTasks = (): ThunkAction<
 
 export const fetchTaskMembers = (
 	taskId: number
-): ThunkAction<Promise<void>, RootState, any, SetTaskMembersActionPayload> => {
+): ThunkAction<Promise<void>, RootState, any, SetTaskMembersAction> => {
 	return async (dispatch) => {
 		const url = `/tasks/${taskId}/members`;
 		try {
@@ -228,7 +246,7 @@ export const updateTask = (
 export const updatedTaskMembers = (
 	taskId: number,
 	members: number[]
-): ThunkAction<Promise<void>, RootState, any, SetTaskMembersActionPayload> => {
+): ThunkAction<Promise<void>, RootState, any, SetTaskMembersAction> => {
 	return async (dispatch) => {
 		const url = `/tasks/${taskId}/members`;
 		try {

@@ -14,11 +14,17 @@ interface Props {
 	flatId: number | undefined;
 	theme: Theme;
 	navigation: FlatDetailsScreenNavigationProps;
+	refresh: boolean;
 }
 
-const FlatTasksList: React.FC<Props> = ({ flatId, theme, navigation }) => {
+const FlatTasksList: React.FC<Props> = ({
+	flatId,
+	theme,
+	navigation,
+	refresh: refreshing,
+}) => {
 	const dispatch = useDispatch();
-	const [openTime] = useState(Date.now() - 1000 * 60 * 10);
+	const [openTime, setOpenTime] = useState(Date.now() - 1000 * 60 * 10);
 	const tasksLoadTime = useSelector((state: RootState) => {
 		let time = 0;
 		if (flatId !== void 0) {
@@ -41,13 +47,17 @@ const FlatTasksList: React.FC<Props> = ({ flatId, theme, navigation }) => {
 	}>({});
 
 	useEffect(() => {
-		console.log(flatId, tasksLoadTime, openTime, tasksLoadTime < openTime);
+		if (refreshing) {
+			setOpenTime(Date.now() - 1000 * 60 * 10);
+		}
+	}, [refreshing]);
+
+	useEffect(() => {
 		if (flatId && tasksLoadTime < openTime) {
 			setTasksLoading(true);
 			setError(null);
 			const loadTasks = async () => {
 				try {
-					console.log('about to fetch tasks for', flatId);
 					await dispatch(fetchFlatTasks(flatId));
 				} catch (err) {
 					const message = new HttpErrorParser(err).getMessage();
@@ -105,7 +115,7 @@ const FlatTasksList: React.FC<Props> = ({ flatId, theme, navigation }) => {
 
 	if (error) {
 		content = <NotificationCard severity="error">{error}</NotificationCard>;
-	} else if (tasksLoading) {
+	} else if (tasksLoading || refreshing) {
 		content = (
 			<Placeholder Animation={Shine}>
 				<PlaceholderLine height={40} />
@@ -115,7 +125,9 @@ const FlatTasksList: React.FC<Props> = ({ flatId, theme, navigation }) => {
 		);
 	} else if (tasks.length === 0) {
 		content = (
-			<NotificationCard>There is no pending tasks for this flat.</NotificationCard>
+			<NotificationCard>
+				There is no pending tasks for this flat.
+			</NotificationCard>
 		);
 	} else {
 		content = (

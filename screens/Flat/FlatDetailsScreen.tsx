@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { StyleSheet, View, RefreshControl } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { Title, FAB, Divider } from 'react-native-paper';
+import { Title, FAB, Divider, withTheme } from 'react-native-paper';
+import { Theme } from 'react-native-paper/lib/typescript/src/types';
 import { useSelector, useDispatch } from 'react-redux';
 import RootState from '../../store/storeTypes';
 import { StateError } from '../../store/ReactTypes/customReactTypes';
@@ -10,9 +11,9 @@ import {
 	fetchFlatMembers,
 	updateFlat,
 	leaveFlat,
-	fetchFlats,
 	fetchFlatInvitations,
 	deleteFlatMember,
+	refreshFlat,
 } from '../../store/actions/flats';
 import FlatTasksList from '../../components/Flat/FlatTasksList';
 import {
@@ -36,18 +37,22 @@ type FABActionsKeys = 'addTask' | 'leaveFlat' | 'inviteMembers' | 'closeFlat';
 interface Props {
 	route: FlatDetailsScreenRouteProps;
 	navigation: FlatDetailsScreenNavigationProps;
+	theme: Theme;
 }
 
-const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
+const FlatDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) => {
 	const dispatch = useDispatch();
 	const [fabOpen, setFabOpen] = useState(false);
 	const [error, setError] = useState<StateError>(null);
 	const id = route.params.id;
 	const loggedUser = useSelector((state: RootState) => state.auth.user)!;
-	const flatsLoadTime = useSelector((state: RootState) => state.flats.flatsLoadTime);
+	const flatsLoadTime = useSelector(
+		(state: RootState) => state.flats.flatsLoadTime
+	);
 	const flat = useSelector((state: RootState) =>
 		state.flats.flats.find((x) => x.id === id)
 	);
+	const [refreshing, setRefreshing] = useState(false);
 
 	const [loadingElements, setLoadingElements] = useState({
 		owner: !!flat?.owner,
@@ -87,23 +92,29 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 		};
 	}, []);
 
+	const refreshHandler = async () => {
+		setRefreshing(true);
+		await loadFlats();
+		setRefreshing(false);
+	};
+
+	const loadFlats = useCallback(async () => {
+		try {
+			await dispatch(refreshFlat(id));
+		} catch (err) {
+			if (isMounted.current !== null) {
+				const httpError = new HttpErrorParser(err);
+				const msg = httpError.getMessage();
+				setError(msg);
+			}
+		}
+	}, [id]);
+
 	useEffect(() => {
 		if (flatsLoadTime === 0) {
-			const loadFlats = async () => {
-				try {
-					await dispatch(fetchFlats());
-				} catch (err) {
-					if (isMounted.current !== null) {
-						const httpError = new HttpErrorParser(err);
-						const msg = httpError.getMessage();
-						setError(msg);
-					}
-				}
-			};
-
 			loadFlats();
 		}
-	}, [dispatch, flatsLoadTime]);
+	}, [dispatch, flatsLoadTime, loadFlats]);
 
 	const closeFlatHandler = async () => {
 		const _flat: Partial<FlatData> = new FlatData({
@@ -307,10 +318,20 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 
 			loadInvitations();
 		}
-	}, [dispatch, flat, elementsErrors.invitations, loadingElements.invitations]);
+	}, [
+		dispatch,
+		flat,
+		elementsErrors.invitations,
+		loadingElements.invitations,
+	]);
 
 	useEffect(() => {
-		if (flat && !flat.owner && !loadingElements.owner && !elementsErrors.owner) {
+		if (
+			flat &&
+			!flat.owner &&
+			!loadingElements.owner &&
+			!elementsErrors.owner
+		) {
 			const loadOwner = async () => {
 				setLoadingElements((prevState) => ({
 					...prevState,
@@ -452,7 +473,10 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 		}
 		if (flat.active) {
 			if (isOwner) {
-				actions.unshift(flatFABActions.closeFlat, flatFABActions.inviteMembers);
+				actions.unshift(
+					flatFABActions.closeFlat,
+					flatFABActions.inviteMembers
+				);
 			}
 			actions.push(flatFABActions.addTask);
 		}
@@ -460,7 +484,17 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 
 	return (
 		<>
-			<ScrollView style={styles.screen}>
+			<ScrollView
+				style={styles.screen}
+				refreshControl={
+					<RefreshControl
+						refreshing={refreshing}
+						onRefresh={refreshHandler}
+						title={'Loading flats...'}
+						colors={[theme.colors.accent, theme.colors.primary]}
+					/>
+				}
+			>
 				<DetailsScreenInfo
 					error={error}
 					name={flat?.name}
@@ -474,7 +508,9 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 					loggedUserId={loggedUser.id}
 					ownerId={flat?.ownerId}
 					onMemberDelete={
-						loggedUser.id === flat?.ownerId ? deleteMemberHandler : void 0
+						loggedUser.id === flat?.ownerId
+							? deleteMemberHandler
+							: void 0
 					}
 				/>
 				<View style={styles.section}>
@@ -486,7 +522,11 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 				<Divider style={styles.divider} />
 				<View style={styles.section}>
 					<Title>Tasks</Title>
-					<FlatTasksList flatId={flat?.id} navigation={navigation} />
+					<FlatTasksList
+						flatId={flat?.id}
+						navigation={navigation}
+						refresh={refreshing}
+					/>
 				</View>
 			</ScrollView>
 			<FAB.Group
@@ -518,4 +558,4 @@ const styles = StyleSheet.create({
 	},
 });
 
-export default FlatDetailsScreen;
+export default withTheme(FlatDetailsScreen);

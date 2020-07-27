@@ -15,6 +15,7 @@ export enum FlatsActionTypes {
 	RemoveMember = 'FLATS_REMOVE_MEMBER',
 	SetInvitations = 'FLATS_SET_FLAT_INVITATIONS',
 	SetShowInactive = 'FLATS_SET_SHOW_INACTIVE',
+	ClearFlat = 'FLATS_CLEAR_FLAT',
 	ClearState = 'FLATS_CLEAR_STATE',
 }
 
@@ -33,6 +34,7 @@ export enum TasksActionTypes {
 	SetUserTask = 'TASKS_SET_USER_TASK',
 	SetMembers = 'FLAT_TASK_SET_MEMBERS',
 	SetShowInactive = 'TASKS_SET_SHOW_INACTIVE',
+	ClearFlatTasks = 'TASKS_CLEAR_FLAT_TASKS',
 	ClearState = 'TASK_CLEAR_STATE',
 }
 

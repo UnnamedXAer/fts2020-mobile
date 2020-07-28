@@ -14,7 +14,6 @@ import NotificationCard from '../UI/NotificationCard';
 interface Props {
 	periods: Period[] | undefined;
 	disabled: boolean;
-	loading: boolean;
 	error: StateError;
 	periodsLoading: { [id: number]: boolean };
 	onCompletePeriod: (id: number) => void;
@@ -26,7 +25,6 @@ const PeriodsTable: React.FC<Props> = ({
 	periods,
 	disabled,
 	periodsLoading,
-	loading,
 	error,
 	onCompletePeriod,
 	loggedUserEmailAddress,
@@ -38,7 +36,7 @@ const PeriodsTable: React.FC<Props> = ({
 	const fromIdx = page * 10;
 	let toIdx = fromIdx + 10;
 
-	if (loading) {
+	if (!periods) {
 		for (let i = 0; i < 2; i++) {
 			rows.push(
 				<DataTable.Row key={i}>
@@ -117,8 +115,12 @@ const PeriodsTable: React.FC<Props> = ({
 							width: 110,
 						}}
 					>
-						<Paragraph>{moment(period.startDate).format('ll')}</Paragraph>
-						<Paragraph>{moment(period.endDate).format('ll')}</Paragraph>
+						<Paragraph>
+							{moment(period.startDate).format('ll')}
+						</Paragraph>
+						<Paragraph>
+							{moment(period.endDate).format('ll')}
+						</Paragraph>
 					</View>
 					<View
 						style={{
@@ -152,7 +154,9 @@ const PeriodsTable: React.FC<Props> = ({
 						flex: 1,
 					}}
 				>
-					<DataTableHeaderCellText>AssignedTo</DataTableHeaderCellText>
+					<DataTableHeaderCellText>
+						AssignedTo
+					</DataTableHeaderCellText>
 				</View>
 				<View
 					style={{
@@ -160,7 +164,9 @@ const PeriodsTable: React.FC<Props> = ({
 						width: 110,
 					}}
 				>
-					<DataTableHeaderCellText>Start - End Date</DataTableHeaderCellText>
+					<DataTableHeaderCellText>
+						Start - End Date
+					</DataTableHeaderCellText>
 				</View>
 				<View
 					style={{
@@ -168,11 +174,17 @@ const PeriodsTable: React.FC<Props> = ({
 						width: 90,
 					}}
 				>
-					<DataTableHeaderCellText>Complete(d)</DataTableHeaderCellText>
+					<DataTableHeaderCellText>
+						Complete(d)
+					</DataTableHeaderCellText>
 				</View>
 			</DataTable.Header>
 
-			{error ? <NotificationCard severity="error">{error}</NotificationCard> : rows}
+			{error ? (
+				<NotificationCard severity="error">{error}</NotificationCard>
+			) : (
+				rows
+			)}
 			{periods && periodLen > 10 && (
 				<DataTable.Pagination
 					page={page}

@@ -94,21 +94,17 @@ export const fetchFlats = (): ThunkAction<
 	};
 };
 
-export const refreshFlat = (id: number): ThunkAction<
+export const clearFlat = (id: number): ThunkAction<
 	Promise<void>,
 	RootState,
 	any,
 	RefreshFlatActionType> => {
-	return async dispatch => {
-
-		await dispatch({
+	return async (dispatch) => {
+		dispatch({
 			type: FlatsActionTypes.ClearFlat,
 			payload: { id }
 		});
-
 		await dispatch(clearFlatTasks(id));
-
-		dispatch(fetchFlat(id));
 	}
 }
 

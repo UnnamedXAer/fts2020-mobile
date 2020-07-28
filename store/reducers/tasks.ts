@@ -5,7 +5,8 @@ import User from '../../models/user';
 import {
 	CreateTaskActionPayload,
 	SetShowInactiveTasksActionPayload,
-	ClearFlatTasksActionPayload
+	ClearFlatTasksActionPayload,
+	ClearTaskActionPayload
 } from '../actions/tasks';
 
 const initialState: TasksState = {
@@ -85,10 +86,26 @@ const setFlatTasks: SimpleReducer<
 		.concat(tasks);
 
 	const currentTime = Date.now();
+
 	return {
 		...state,
 		tasks: updatedTasks,
 		tasksLoadTimes: { ...state.tasksLoadTimes, [flatId]: currentTime }
+	};
+};
+
+const clearTask: SimpleReducer<
+	TasksState,
+	ClearTaskActionPayload
+> = (state, action) => {
+
+	const { id } = action.payload;
+	const updatedTasks = state.tasks
+		.filter((x) => x.id !== id);
+
+	return {
+		...state,
+		tasks: updatedTasks,
 	};
 };
 
@@ -204,6 +221,8 @@ const reducer: AppReducer<TasksState, TasksActionTypes> = (
 			return setShowInactive(state, action);
 		case TasksActionTypes.ClearFlatTasks:
 			return clearFlatTasks(state, action);
+		case TasksActionTypes.ClearTask:
+			return clearTask(state, action);
 		case TasksActionTypes.ClearState:
 			return clearState(state, action);
 		default:

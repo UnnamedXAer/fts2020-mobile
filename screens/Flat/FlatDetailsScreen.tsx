@@ -13,7 +13,9 @@ import {
 	leaveFlat,
 	fetchFlatInvitations,
 	deleteFlatMember,
-	refreshFlat,
+	clearFlat,
+	fetchFlats,
+	fetchFlat,
 } from '../../store/actions/flats';
 import FlatTasksList from '../../components/Flat/FlatTasksList';
 import {
@@ -55,9 +57,9 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) => {
 	const [refreshing, setRefreshing] = useState(false);
 
 	const [loadingElements, setLoadingElements] = useState({
-		owner: !!flat?.owner,
-		members: !!flat?.members,
-		invitations: !!flat?.invitations,
+		owner: false, //!!flat?.owner,
+		members: false, //!!flat?.members,
+		invitations: false, //!!flat?.invitations,
 	});
 
 	const [elementsErrors, setElementsErrors] = useState<{
@@ -94,13 +96,9 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) => {
 
 	const refreshHandler = async () => {
 		setRefreshing(true);
-		await loadFlats();
-		setRefreshing(false);
-	};
-
-	const loadFlats = useCallback(async () => {
+		await dispatch(clearFlat(id));
 		try {
-			await dispatch(refreshFlat(id));
+			await dispatch(fetchFlat(id));
 		} catch (err) {
 			if (isMounted.current !== null) {
 				const httpError = new HttpErrorParser(err);
@@ -108,13 +106,27 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) => {
 				setError(msg);
 			}
 		}
-	}, [id]);
+		if (isMounted.current) {
+			setRefreshing(false);
+		}
+	};
 
 	useEffect(() => {
 		if (flatsLoadTime === 0) {
-			loadFlats();
+			const loadFlat = async () => {
+				try {
+					await dispatch(fetchFlats());
+				} catch (err) {
+					if (isMounted.current !== null) {
+						const httpError = new HttpErrorParser(err);
+						const msg = httpError.getMessage();
+						setError(msg);
+					}
+				}
+			};
+			loadFlat();
 		}
-	}, [dispatch, flatsLoadTime, loadFlats]);
+	}, [dispatch, flatsLoadTime]);
 
 	const closeFlatHandler = async () => {
 		const _flat: Partial<FlatData> = new FlatData({
@@ -490,7 +502,7 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) => {
 					<RefreshControl
 						refreshing={refreshing}
 						onRefresh={refreshHandler}
-						title={'Loading flats...'}
+						title={'Loading...'}
 						colors={[theme.colors.accent, theme.colors.primary]}
 					/>
 				}

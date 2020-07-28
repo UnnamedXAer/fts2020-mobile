@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, RefreshControl } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { Title, FAB, Paragraph } from 'react-native-paper';
+import { Title, FAB, Paragraph, withTheme } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
 import { Placeholder } from 'rn-placeholder';
-import { Shine, PlaceholderLine } from '../../components/UI/Placeholder/Placeholder';
+import {
+	Shine,
+	PlaceholderLine,
+} from '../../components/UI/Placeholder/Placeholder';
 import moment from 'moment';
 import RootState from '../../store/storeTypes';
 import { StateError } from '../../store/ReactTypes/customReactTypes';
@@ -17,6 +20,7 @@ import {
 	fetchTaskMembers,
 	updateTask,
 	fetchTask,
+	clearTask,
 } from '../../store/actions/tasks';
 import PeriodsTable from '../../components/Task/PeriodsTable';
 import HttpErrorParser from '../../utils/parseError';
@@ -36,15 +40,17 @@ import AlertSnackbar, {
 } from '../../components/UI/AlertSnackbar/AlertSnackbar';
 import PeriodCompleteText from '../../components/Task/PeriodCompleteText';
 import Link from '../../components/UI/Link';
+import { Theme } from 'react-native-paper/lib/typescript/src/types';
 
 type FABActionsKeys = 'resetPeriods' | 'updateMembers' | 'closeTask';
 
 interface Props {
 	route: TaskDetailsScreenRouteProps;
 	navigation: TaskDetailsScreenNavigationProps;
+	theme: Theme;
 }
 
-const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
+const TaskDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) => {
 	const dispatch = useDispatch();
 	const id = route.params.id;
 	const task = useSelector((state: RootState) =>
@@ -52,7 +58,9 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 	);
 	const flatName = useSelector<RootState, string>((state) => {
 		let flatName: string;
-		const flat = task ? state.flats.flats.find((x) => x.id === task.flatId) : void 0;
+		const flat = task
+			? state.flats.flats.find((x) => x.id === task.flatId)
+			: void 0;
 		if (flat) {
 			flatName = flat.name;
 		} else {
@@ -64,11 +72,15 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 	const loggedUser = useSelector((state: RootState) => state.auth.user!);
 	const [error, setError] = useState<StateError>(null);
 	const [fabOpen, setFabOpen] = useState(false);
-	const periods = useSelector((state: RootState) => state.periods.taskPeriods[id]);
+	const periods = useSelector(
+		(state: RootState) => state.periods.taskPeriods[id]
+	);
+	const [refreshing, setRefreshing] = useState(false);
+
 	const [loadingElements, setLoadingElements] = useState({
-		owner: !!task?.owner,
-		members: !!task?.members,
-		schedule: !!periods,
+		owner: false,
+		members: false,
+		schedule: false,
 	});
 	const [periodsLoading, setPeriodsLoading] = useState<{
 		[id: number]: boolean;
@@ -106,9 +118,14 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 		};
 	}, []);
 
+	const refreshHandler = async () => {
+		setRefreshing(true);
+		await dispatch(clearTask(id));
+	};
+
 	useEffect(() => {
 		if (!task) {
-			const loadTask = async (id: number) => {
+			const loadTask = async () => {
 				setError(null);
 				try {
 					await dispatch(fetchTask(id));
@@ -119,8 +136,11 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 						setError(msg);
 					}
 				}
+				if (refreshing && isMounted.current) {
+					setRefreshing(false);
+				}
 			};
-			loadTask(id);
+			loadTask();
 		}
 	}, [dispatch, id, task]);
 
@@ -219,7 +239,12 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 	}, [dispatch, task]);
 
 	useEffect(() => {
-		if (task && !task.owner && !loadingElements.owner && !elementsErrors.owner) {
+		if (
+			task &&
+			!task.owner &&
+			!loadingElements.owner &&
+			!elementsErrors.owner
+		) {
 			const loadOwner = async () => {
 				setLoadingElements((prevState) => ({
 					...prevState,
@@ -227,7 +252,9 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 				}));
 				setTimeout(async () => {
 					try {
-						await dispatch(fetchTaskOwner(task.createBy!, task.id!));
+						await dispatch(
+							fetchTaskOwner(task.createBy!, task.id!)
+						);
 					} catch (err) {
 						setElementsErrors((prevState) => ({
 							...prevState,
@@ -274,7 +301,12 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 	}, [task, dispatch, loadingElements, elementsErrors]);
 
 	useEffect(() => {
-		if (task && !periods && !loadingElements.schedule && !elementsErrors.schedule) {
+		if (
+			task &&
+			!periods &&
+			!loadingElements.schedule &&
+			!elementsErrors.schedule
+		) {
 			const loadSchedule = async (id: number) => {
 				setLoadingElements((prevState) => ({
 					...prevState,
@@ -297,7 +329,13 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 			};
 			loadSchedule(task.id!);
 		}
-	}, [dispatch, elementsErrors.schedule, loadingElements.schedule, periods, task]);
+	}, [
+		dispatch,
+		elementsErrors.schedule,
+		loadingElements.schedule,
+		periods,
+		task,
+	]);
 
 	const completePeriodHandler = useCallback(
 		async (id: number) => {
@@ -323,7 +361,10 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 					const msg = error.getMessage();
 					setSnackbarData({
 						open: true,
-						action: { label: 'OK', onPress: closeSnackbarAlertHandler },
+						action: {
+							label: 'OK',
+							onPress: closeSnackbarAlertHandler,
+						},
 						severity: 'error',
 						timeout: 4000,
 						content: 'Could not complete the period.',
@@ -458,7 +499,17 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 
 	return (
 		<>
-			<ScrollView style={styles.screen}>
+			<ScrollView
+				style={styles.screen}
+				refreshControl={
+					<RefreshControl
+						refreshing={refreshing}
+						onRefresh={refreshHandler}
+						title={'Loading...'}
+						colors={[theme.colors.accent, theme.colors.primary]}
+					/>
+				}
+			>
 				<DetailsScreenInfo
 					error={error}
 					name={task?.name!}
@@ -492,9 +543,12 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 										{task ? (
 											<Link
 												onPress={() =>
-													navigation.navigate('FlatDetails', {
-														id: task!.flatId!,
-													})
+													navigation.navigate(
+														'FlatDetails',
+														{
+															id: task!.flatId!,
+														}
+													)
 												}
 											>
 												{flatName}
@@ -505,13 +559,19 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 										<Paragraph>
 											{task.timePeriodValue}{' '}
 											{task.timePeriodUnit?.toLocaleLowerCase()}
-											{task.timePeriodValue! > 1 ? 's' : ''}
+											{task.timePeriodValue! > 1
+												? 's'
+												: ''}
 										</Paragraph>
 										<Paragraph>
-											{moment(task.startDate).format('LL')}
+											{moment(task.startDate).format(
+												'LL'
+											)}
 										</Paragraph>
 										<Paragraph>
-											{moment(task.startDate).format('LL')}
+											{moment(task.startDate).format(
+												'LL'
+											)}
 										</Paragraph>
 									</View>
 								</View>
@@ -544,7 +604,6 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
 					<Title>Periods</Title>
 					<PeriodsTable
 						periods={periods}
-						loading={loadingElements.schedule}
 						error={elementsErrors.schedule}
 						disabled={!task?.active}
 						periodsLoading={periodsLoading}
@@ -584,4 +643,4 @@ const styles = StyleSheet.create({
 	taskInfoLabel: { fontWeight: 'bold' },
 });
 
-export default TaskDetailsScreen;
+export default withTheme(TaskDetailsScreen);

@@ -11,6 +11,7 @@ import {
 	mapApiUserTaskDataToModel
 } from '../mapAPIToModel/mapTask';
 import { mapApiUserDataToModel } from '../mapAPIToModel/mapUser';
+import { ClearTaskPeriodsAction, clearTaskPeriods } from './periods';
 
 type FetchFlatTasksAction = {
 	type: TasksActionTypes.SetFlatTasks;
@@ -39,6 +40,12 @@ export type ClearFlatTasksActionPayload = { flatId: number }
 type ClearFlatTasksAction = {
 	type: TasksActionTypes.ClearFlatTasks;
 	payload: ClearFlatTasksActionPayload;
+};
+
+export type ClearTaskActionPayload = { id: number }
+type ClearTaskAction = {
+	type: TasksActionTypes.ClearTask;
+	payload: ClearTaskActionPayload;
 };
 
 export type SetShowInactiveTasksActionPayload = {
@@ -121,16 +128,33 @@ export const fetchFlatTasks = (
 	};
 };
 
+export const clearTask = (
+	id: number
+): ThunkAction<Promise<void>, RootState, any, ClearTaskAction | ClearTaskPeriodsAction> => {
+	return async (dispatch) => {
+		dispatch({
+			type: TasksActionTypes.ClearTask,
+			payload: {
+				id
+			},
+		});
+		dispatch(clearTaskPeriods(id));
+	};
+};
+
 export const clearFlatTasks = (
 	id: number
-): ThunkAction<Promise<void>, RootState, any, ClearFlatTasksAction> => {
-	return async (dispatch) => {
+): ThunkAction<Promise<void>, RootState, any, ClearFlatTasksAction | ClearTaskPeriodsAction> => {
+	return async (dispatch, getState) => {
+		const tasksIds = getState().tasks.tasks.filter(x => x.flatId === id).map(x => x.id!);
+
 		dispatch({
 			type: TasksActionTypes.ClearFlatTasks,
 			payload: {
 				flatId: id,
 			},
 		});
+		tasksIds.forEach(async x => dispatch(clearTaskPeriods(x)))
 	};
 };
 

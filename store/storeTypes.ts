@@ -46,7 +46,7 @@ export type TasksState = {
 
 export type PeriodsState = {
 	taskPeriods: {
-		[taskId: number]: Period[]
+		[taskId: number]: Period[] | undefined
 	}
 }
 

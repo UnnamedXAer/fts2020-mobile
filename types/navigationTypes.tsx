@@ -31,6 +31,32 @@ export type RootStackParamList = {
 	ChangePassword: undefined;
 };
 
+export type FlatsStackParamList = {
+	Flats: undefined;
+	FlatDetails: {
+		id: number;
+	};
+	NewFlatInfo: undefined;
+	NewFlat: undefined;
+	InviteMembers: { flatId: number; isNewFlat: boolean };
+	NewTaskName: {
+		flatId: number;
+	};
+	NewTaskTime: {
+		flatId: number;
+		name: string;
+		description: string;
+	};
+	NewTaskMembers: {
+		id: number;
+		newTask: boolean;
+	};
+	Profile: {
+		id: number;
+	};
+	ChangePassword: undefined;
+};
+
 export type FlatDetailsScreenRouteProps = RouteProp<RootStackParamList, 'FlatDetails'>;
 export type FlatDetailsScreenNavigationProps = StackNavigationProp<
 	RootStackParamList,

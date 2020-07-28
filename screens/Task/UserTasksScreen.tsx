@@ -36,7 +36,7 @@ interface Props {
 	navigation: TaskDetailsScreenNavigationProps | FlatDetailsScreenNavigationProps;
 }
 
-const FlatsScreen: React.FC<Props> = ({ theme, navigation }) => {
+const UserTasksScreen: React.FC<Props> = ({ theme, navigation }) => {
 	const dispatch = useDispatch();
 	const showInactive = useSelector((state: RootState) => state.tasks.showInactive);
 	const tasks = useSelector((state: RootState) => {
@@ -219,4 +219,4 @@ const styles = StyleSheet.create({
 	},
 });
 
-export default withTheme(FlatsScreen);
+export default withTheme(UserTasksScreen);

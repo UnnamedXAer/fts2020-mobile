@@ -12,9 +12,15 @@ import { withTheme } from 'react-native-paper';
 import { Theme } from 'react-native-paper/lib/typescript/src/types';
 import Header from '../../../components/UI/Header';
 import CustomButton from '../../../components/UI/CustomButton';
-import { NewFlatScreenNavigationProps } from '../../../types/navigationTypes';
+import {
+	NewFlatScreenNavigationProp,
+	NewFlatScreenRouteProps,
+} from '../../../types/navigationTypes';
 import Input from '../../../components/UI/Input';
-import useForm, { createInitialState, FormActionTypes } from '../../../hooks/useForm';
+import useForm, {
+	createInitialState,
+	FormActionTypes,
+} from '../../../hooks/useForm';
 import { StateError } from '../../../store/ReactTypes/customReactTypes';
 import { validateFlatFields } from '../../../utils/validation';
 import NotificationCard from '../../../components/UI/NotificationCard';
@@ -27,16 +33,22 @@ import RootState from '../../../store/storeTypes';
 
 interface Props {
 	theme: Theme;
-	navigation: NewFlatScreenNavigationProps;
+	navigation: NewFlatScreenNavigationProp;
+	route: NewFlatScreenRouteProps;
 }
 
 const newFlatFormFields = ['name', 'description'] as const;
 export type NewFlatFormFields = typeof newFlatFormFields[number];
 
-const initialState = createInitialState<NewFlatFormFields>({ name: '', description: '' });
+const initialState = createInitialState<NewFlatFormFields>({
+	name: '',
+	description: '',
+});
 
 const NewFlatScreen: React.FC<Props> = ({ theme, navigation }) => {
-	const [tmpFlatId] = useState(String.fromCharCode(getRandomInt(97, 123)) + Date.now());
+	const [tmpFlatId] = useState(
+		String.fromCharCode(getRandomInt(97, 123)) + Date.now()
+	);
 	const flatId = useSelector(
 		(state: RootState) => state.flats.createdFlatsTmpIds[tmpFlatId]
 	);
@@ -65,7 +77,10 @@ const NewFlatScreen: React.FC<Props> = ({ theme, navigation }) => {
 		}
 	}, [flatId, isMounted, navigation]);
 
-	const fieldTextChangeHandler = (fieldName: NewFlatFormFields, txt: string) => {
+	const fieldTextChangeHandler = (
+		fieldName: NewFlatFormFields,
+		txt: string
+	) => {
 		dispatchForm({
 			fieldId: fieldName,
 			value: txt,
@@ -157,7 +172,9 @@ const NewFlatScreen: React.FC<Props> = ({ theme, navigation }) => {
 							keyboardType="default"
 							returnKeyType="next"
 							returnKeyLabel="next"
-							onSubmitEditing={() => descriptionInpRef!.current!.focus()}
+							onSubmitEditing={() =>
+								descriptionInpRef!.current!.focus()
+							}
 							disabled={loading}
 							formState={formState}
 							textChanged={fieldTextChangeHandler}
@@ -184,7 +201,9 @@ const NewFlatScreen: React.FC<Props> = ({ theme, navigation }) => {
 					</View>
 					<View style={styles.inputContainer}>
 						{error && (
-							<NotificationCard severity="error">{error}</NotificationCard>
+							<NotificationCard severity="error">
+								{error}
+							</NotificationCard>
 						)}
 					</View>
 					<View style={styles.actions}>
@@ -195,7 +214,10 @@ const NewFlatScreen: React.FC<Props> = ({ theme, navigation }) => {
 						>
 							CANCEL
 						</CustomButton>
-						<CustomButton onPress={submitHandler} disabled={loading}>
+						<CustomButton
+							onPress={submitHandler}
+							disabled={loading}
+						>
 							NEXT
 						</CustomButton>
 					</View>

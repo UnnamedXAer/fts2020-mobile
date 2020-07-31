@@ -23,22 +23,27 @@ import RootState from '../../store/storeTypes';
 import HttpErrorParser from '../../utils/parseError';
 import NotificationCard from '../../components/UI/NotificationCard';
 import { StateError } from '../../store/ReactTypes/customReactTypes';
-import { PlaceholderLine, Shine } from '../../components/UI/Placeholder/Placeholder';
 import {
-	TaskDetailsScreenNavigationProps,
-	FlatDetailsScreenNavigationProps,
-} from '../../types/navigationTypes';
-import { fetchUserTasks, setShowInactiveTasks } from '../../store/actions/tasks';
+	PlaceholderLine,
+	Shine,
+} from '../../components/UI/Placeholder/Placeholder';
+import { UserTasksScreenNavigationProp } from '../../types/navigationTypes';
+import {
+	fetchUserTasks,
+	setShowInactiveTasks,
+} from '../../store/actions/tasks';
 import { UserTask } from '../../models/task';
 
 interface Props {
 	theme: Theme;
-	navigation: TaskDetailsScreenNavigationProps | FlatDetailsScreenNavigationProps;
+	navigation: UserTasksScreenNavigationProp;
 }
 
 const UserTasksScreen: React.FC<Props> = ({ theme, navigation }) => {
 	const dispatch = useDispatch();
-	const showInactive = useSelector((state: RootState) => state.tasks.showInactive);
+	const showInactive = useSelector(
+		(state: RootState) => state.tasks.showInactive
+	);
 	const tasks = useSelector((state: RootState) => {
 		if (!showInactive) {
 			return state.tasks.userTasks.filter((x) => x.active === true);
@@ -119,7 +124,9 @@ const UserTasksScreen: React.FC<Props> = ({ theme, navigation }) => {
 						<Headline>{item.name}</Headline>
 						<View style={{ flexDirection: 'row' }}>
 							<Paragraph>Flat: </Paragraph>
-							<Paragraph style={{ color: theme.colors.placeholder }}>
+							<Paragraph
+								style={{ color: theme.colors.placeholder }}
+							>
 								{item.flatName}
 							</Paragraph>
 						</View>
@@ -150,7 +157,9 @@ const UserTasksScreen: React.FC<Props> = ({ theme, navigation }) => {
 				</NotificationCard>
 			)}
 			<FlatList
-				ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
+				ItemSeparatorComponent={() => (
+					<View style={styles.itemSeparator} />
+				)}
 				refreshControl={
 					<RefreshControl
 						refreshing={refreshing}
@@ -170,7 +179,9 @@ const UserTasksScreen: React.FC<Props> = ({ theme, navigation }) => {
 									<PlaceholderLine
 										height={64}
 										noMargin
-										style={{ borderRadius: theme.roundness }}
+										style={{
+											borderRadius: theme.roundness,
+										}}
 									/>
 									<Divider style={{ marginVertical: 16 }} />
 									<PlaceholderLine height={64} noMargin />
@@ -183,7 +194,11 @@ const UserTasksScreen: React.FC<Props> = ({ theme, navigation }) => {
 										'You are not a member of any active task. You can go to ',
 										{
 											text: 'Your Flats',
-											onPress: () => navigation.navigate('Flats'),
+											onPress: () =>
+												navigation.navigate(
+													'FlatsStack',
+													{ screen: 'Flats' }
+												),
 										},
 										' section and create task for a flat.',
 									]}

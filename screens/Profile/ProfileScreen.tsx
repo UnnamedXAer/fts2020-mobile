@@ -25,7 +25,7 @@ import moment from 'moment';
 import RootState from '../../store/storeTypes';
 import { StateError } from '../../store/ReactTypes/customReactTypes';
 import {
-	ProfileScreenNavigationProps,
+	ProfileScreenNavigationProp,
 	ProfileScreenRouteProps,
 } from '../../types/navigationTypes';
 
@@ -48,7 +48,7 @@ const avatarWidth = width / (width < height ? 2.6 : 4);
 
 interface Props {
 	route: ProfileScreenRouteProps;
-	navigation: ProfileScreenNavigationProps;
+	navigation: ProfileScreenNavigationProp;
 	theme: Theme;
 }
 type EditableFields = 'emailAddress' | 'userName' | 'avatarUrl';

@@ -25,13 +25,13 @@ import HttpErrorParser from '../../utils/parseError';
 import Flat from '../../models/flat';
 import NotificationCard from '../../components/UI/NotificationCard';
 import { StateError } from '../../store/ReactTypes/customReactTypes';
-import { FlatDetailsScreenNavigationProps } from '../../types/navigationTypes';
+import { FlatsScreenNavigationProp } from '../../types/navigationTypes';
 import { Placeholder } from 'rn-placeholder';
 import { PlaceholderLine, Shine } from '../../components/UI/Placeholder/Placeholder';
 
 interface Props {
 	theme: Theme;
-	navigation: FlatDetailsScreenNavigationProps;
+	navigation: FlatsScreenNavigationProp;
 }
 
 const FlatsScreen: React.FC<Props> = ({ theme, navigation }) => {

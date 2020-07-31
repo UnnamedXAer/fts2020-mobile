@@ -27,10 +27,7 @@ import {
 	PlaceholderLine,
 	Shine,
 } from '../../components/UI/Placeholder/Placeholder';
-import {
-	TaskDetailsScreenNavigationProps,
-	FlatDetailsScreenNavigationProps,
-} from '../../types/navigationTypes';
+import { CurrentPeriodsScreenNavigationProp } from '../../types/navigationTypes';
 import {
 	fetchUserTasks,
 	setShowInactiveTasks,
@@ -39,7 +36,7 @@ import { UserTask } from '../../models/task';
 
 interface Props {
 	theme: Theme;
-	navigation: null; //TaskDetailsScreenNavigationProps | FlatDetailsScreenNavigationProps;
+	navigation: CurrentPeriodsScreenNavigationProp;
 }
 
 const CurrentPeriodsScreen: React.FC<Props> = ({ theme, navigation }) => {

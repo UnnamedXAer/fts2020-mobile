@@ -18,10 +18,7 @@ import {
 	fetchFlat,
 } from '../../store/actions/flats';
 import FlatTasksList from '../../components/Flat/FlatTasksList';
-import {
-	FlatDetailsScreenRouteProps,
-	FlatDetailsScreenNavigationProps,
-} from '../../types/navigationTypes';
+import { FlatDetailsScreenNavigationProp, FlatDetailsScreenRouteProps } from '../../types/navigationTypes';
 import { FABAction } from '../../types/types';
 import DetailsScreenInfo from '../../components/DetailsScreeenInfo/DetailsScreenInfo';
 import AlertDialog, {
@@ -38,7 +35,7 @@ type FABActionsKeys = 'addTask' | 'leaveFlat' | 'inviteMembers' | 'closeFlat';
 
 interface Props {
 	route: FlatDetailsScreenRouteProps;
-	navigation: FlatDetailsScreenNavigationProps;
+	navigation: FlatDetailsScreenNavigationProp;
 	theme: Theme;
 }
 
@@ -397,10 +394,6 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) => {
 		}
 	}, [flat, dispatch, loadingElements, elementsErrors]);
 
-	const personSelectHandler = (id: number) => {
-		navigation.navigate('Profile', { id });
-	};
-
 	const invitataionSelectHandler = (id: number) => {
 		// open modal with options
 	};
@@ -435,10 +428,15 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) => {
 		},
 		addTask: {
 			icon: 'table-plus',
-			onPress: () =>
-				navigation.navigate('NewTaskName', {
-					flatId: id,
-				}),
+			onPress: () => {
+				// navigation.navigate('NewTaskName', {
+				// 	flatId: id,
+				// });
+				navigation.navigate('TasksStack', {
+					screen: 'NewTaskName',
+					params: { flatId: id },
+				});
+			},
 			label: 'Add Task',
 		},
 		leaveFlat: {
@@ -508,6 +506,7 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) => {
 				}
 			>
 				<DetailsScreenInfo
+					navigation={navigation}
 					error={error}
 					name={flat?.name}
 					description={flat?.description}
@@ -516,7 +515,6 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) => {
 					createAt={flat?.createAt!}
 					owner={flat?.owner}
 					members={flat?.members}
-					onPersonPress={personSelectHandler}
 					loggedUserId={loggedUser.id}
 					ownerId={flat?.ownerId}
 					onMemberDelete={

@@ -13,7 +13,7 @@ import RootState from '../../store/storeTypes';
 import { StateError } from '../../store/ReactTypes/customReactTypes';
 import {
 	TaskDetailsScreenRouteProps,
-	TaskDetailsScreenNavigationProps,
+	TaskDetailsScreenNavigationProp,
 } from '../../types/navigationTypes';
 import {
 	fetchTaskOwner,
@@ -46,7 +46,7 @@ type FABActionsKeys = 'resetPeriods' | 'updateMembers' | 'closeTask';
 
 interface Props {
 	route: TaskDetailsScreenRouteProps;
-	navigation: TaskDetailsScreenNavigationProps;
+	navigation: TaskDetailsScreenNavigationProp;
 	theme: Theme;
 }
 
@@ -420,10 +420,6 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) => {
 		[completePeriodHandler, loggedUser.emailAddress, periods]
 	);
 
-	const personSelectHandler = (id: number) => {
-		navigation.navigate('Profile', { id });
-	};
-
 	const taskFABActions: {
 		[key in FABActionsKeys]: FABAction;
 	} = {
@@ -455,7 +451,7 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) => {
 		updateMembers: {
 			icon: 'account-multiple-plus',
 			onPress: () =>
-				navigation.navigate('NewTaskMembers', {
+				navigation.navigate('UpdateTaskMembers', {
 					newTask: false,
 					id: id,
 				}),
@@ -511,6 +507,7 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) => {
 				}
 			>
 				<DetailsScreenInfo
+					navigation={navigation}
 					error={error}
 					name={task?.name!}
 					description={task?.description!}
@@ -519,7 +516,6 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) => {
 					createAt={task?.createAt!}
 					owner={task?.owner}
 					members={task?.members}
-					onPersonPress={personSelectHandler}
 					additionalInfo={
 						task ? (
 							<>
@@ -544,9 +540,14 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) => {
 											<Link
 												onPress={() =>
 													navigation.navigate(
-														'FlatDetails',
+														'FlatsStack',
 														{
-															id: task!.flatId!,
+															screen:
+																'FlatDetails',
+															params: {
+																id: task!
+																	.flatId!,
+															},
 														}
 													)
 												}

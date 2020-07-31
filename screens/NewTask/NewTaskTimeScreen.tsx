@@ -15,7 +15,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { Theme } from 'react-native-paper/lib/typescript/src/types';
 import moment from 'moment';
 import {
-	NewTaskTimeScreenNavigationProps,
+	NewTaskTimeScreenNavigationProp,
 	NewTaskTimeScreenRouteProps,
 } from '../../types/navigationTypes';
 import { StateError } from '../../store/ReactTypes/customReactTypes';
@@ -33,7 +33,7 @@ import { TaskPeriodUnit } from '../../constants/task';
 
 interface Props {
 	theme: Theme;
-	navigation: NewTaskTimeScreenNavigationProps;
+	navigation: NewTaskTimeScreenNavigationProp;
 	route: NewTaskTimeScreenRouteProps;
 }
 

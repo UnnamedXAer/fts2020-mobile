@@ -12,11 +12,15 @@ import { withTheme, Paragraph, Divider, Title } from 'react-native-paper';
 import { Theme } from 'react-native-paper/lib/typescript/src/types';
 import Header from '../../../components/UI/Header';
 import CustomButton from '../../../components/UI/CustomButton';
-import { NewFlatInfoScreenNavigationProps } from '../../../types/navigationTypes';
+import {
+	NewFlatInfoScreenNavigationProp,
+	NewFlatInfoScreenRouteProps,
+} from '../../../types/navigationTypes';
 
 interface Props {
 	theme: Theme;
-	navigation: NewFlatInfoScreenNavigationProps;
+	navigation: NewFlatInfoScreenNavigationProp;
+	route: NewFlatInfoScreenRouteProps;
 }
 
 const NewFlatInfoScreen: React.FC<Props> = ({ theme, navigation }) => {
@@ -29,23 +33,25 @@ const NewFlatInfoScreen: React.FC<Props> = ({ theme, navigation }) => {
 		>
 			<Header style={styles.header}>New Flat Info</Header>
 			<View style={styles.inputContainer}>
-				<Title style={{textAlign: 'center', marginTop: 16}}>What is the "Flat"?</Title>
+				<Title style={{ textAlign: 'center', marginTop: 16 }}>
+					What is the "Flat"?
+				</Title>
 				<Paragraph style={styles.infoParagraph}>
-					Every "Flat" represent a group of people most likely living together
-					in apartment. That flats could be used to track repetitive tasks such
-					as weekly cleaning or taking out the trash where those tasks are
-					executed in queue by members.
+					Every "Flat" represent a group of people most likely living
+					together in apartment. That flats could be used to track
+					repetitive tasks such as weekly cleaning or taking out the
+					trash where those tasks are executed in queue by members.
 				</Paragraph>
 				<Divider />
 				<Paragraph style={styles.infoParagraphHelper}>
-					Members for the flat could be invited on one of next screens or later
-					from flat details options.
+					Members for the flat could be invited on one of next screens
+					or later from flat details options.
 				</Paragraph>
 				<Divider />
 				<Paragraph style={styles.infoParagraphHelper}>
-					Flat name or description do not required real informations they are
-					just for you and your flatmates to easily corelate place with flat in
-					application.
+					Flat name or description do not required real informations
+					they are just for you and your flatmates to easily corelate
+					place with flat in application.
 				</Paragraph>
 			</View>
 			<View style={styles.actions}>

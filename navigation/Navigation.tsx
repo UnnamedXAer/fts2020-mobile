@@ -2,8 +2,11 @@ import 'react-native-gesture-handler';
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import {
+	createStackNavigator,
+	HeaderBackButton,
+} from '@react-navigation/stack';
+import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import FlatsScreen from '../screens/Flat/FlatsScreen';
 import RootState from '../store/storeTypes';
@@ -11,14 +14,19 @@ import User from '../models/user';
 import { tryAuthorize, logOut } from '../store/actions/auth';
 import LoadingScreen from '../screens/Auth/LoadingScreen';
 import { navigationContainerTheme } from '../config/theme';
-import Link from '../components/UI/Link';
-import { RootStackParamList } from '../types/navigationTypes';
+import {
+	FlatsStackParamList,
+	TasksStackParamList,
+	ProfileStackParamList,
+	DrawerParamList,
+	BottomTabParamList,
+} from '../types/navigationTypes';
 import TaskDetailsScreen from '../screens/Task/TaskDetailsScreen';
 import NewFlatInfoScreen from '../screens/Flat/NewFlat/NewFlatInfoScreen';
 import NewFlatScreen from '../screens/Flat/NewFlat/NewFlatScreen';
 import NewTaskNameScreen from '../screens/NewTask/NewTaskNameScreen';
 import NewTaskTimeScreen from '../screens/NewTask/NewTaskTimeScreen';
-import NewTaskMembersScreen from '../screens/Task/TaskMembersUpdateScreen';
+import UpdateTaskMembersScreen from '../screens/Task/UpdateTaskMembersScreen';
 import UserTasksScreen from '../screens/Task/UserTasksScreen';
 import { readSaveShowInactive } from '../store/actions/tasks';
 import FlatDetailsScreen from '../screens/Flat/FlatDetailsScreen';
@@ -29,39 +37,27 @@ import ProfileScreen from '../screens/Profile/ProfileScreen';
 import ChangePasswordScreen from '../screens/Auth/ChangePasswordScreen';
 import CurrentPeriodsScreen from '../screens/CurrentPeriods/CurrentPeriodsScreen';
 import AboutScreen from '../screens/About/AboutScreen';
-import { TouchableWithoutFeedback } from 'react-native';
 
-const Drawer = createDrawerNavigator /*<DrawerParamList>*/();
+const Drawer = createDrawerNavigator<DrawerParamList>();
 const DrawerNavigator = ({ loggedUser }: { loggedUser: User }) => {
 	return (
 		<Drawer.Navigator>
 			<Drawer.Screen
-				name="FlatsAndTasks"
+				name="FlatsAndTasksBottomTab"
 				options={{ title: 'Flats & Tasks' }}
 				component={BottomTabNavigator}
 			/>
 			<Drawer.Screen name="ProfileStack" options={{ title: 'Profile' }}>
-				{() => <ProfileStackNavigator loggedUser={loggedUser} />}
+				{(props) => (
+					<ProfileStackNavigator {...props} loggedUser={loggedUser} />
+				)}
 			</Drawer.Screen>
 			<Drawer.Screen
 				name="About"
 				options={{ title: 'About' }}
 				component={AboutScreen}
 			/>
-			<Drawer.Screen
-				name="SignOut"
-				options={{ title: 'Sign Out' }}
-
-				// component={() => (
-				// 	<TouchableWithoutFeedback
-				// 		onPress={
-				// 			() =>{
-				// 				console.log(
-				// 					'logged out'
-				// 				) /*dispatch(logOut()*)*/}
-				// 		}
-				// )} />
-			>
+			<Drawer.Screen name="SignOut" options={{ title: 'Sign Out' }}>
 				{() => {
 					const dispatch = useDispatch();
 					console.log('logged out');
@@ -75,22 +71,22 @@ const DrawerNavigator = ({ loggedUser }: { loggedUser: User }) => {
 	);
 };
 
-const BottomTab = createBottomTabNavigator /*<BottomTabParamList>*/();
+const BottomTab = createMaterialBottomTabNavigator<BottomTabParamList>();
 const BottomTabNavigator = () => {
 	return (
 		<BottomTab.Navigator>
 			<BottomTab.Screen
-				name="UserTasks"
+				name="TasksStack"
 				options={{ title: 'Your Tasks' }}
-				component={RootStackNavigator}
+				component={TasksStackNavigator}
 			/>
 			<BottomTab.Screen
-				name="Flats"
+				name="FlatsStack"
 				options={{ title: 'Your Flats' }}
-				component={RootStackNavigator}
+				component={FlatsStackNavigator}
 			/>
 			<BottomTab.Screen
-				name="CurrentPeriods"
+				name="CurrentPeriodsStack"
 				options={{ title: 'Your Current Periods' }}
 				component={CurrentPeriodsScreen}
 			/>
@@ -98,87 +94,99 @@ const BottomTabNavigator = () => {
 	);
 };
 
-// const FlatsStack = createStackNavigator /*<FlatsStackParamList>*/();
-// const FlatsStackNavigator = () => {
-// 	return (
-// 		<FlatsStack.Navigator initialRouteName="Flats">
-// 			<FlatsStack.Screen
-// 				name="Flats"
-// 				options={{ title: 'Your Flats' }}
-// 				component={FlatsScreen}
-// 			/>
-// 			<FlatsStack.Screen
-// 				name="FlatDetails"
-// 				options={{ title: 'View Flat' }}
-// 				component={FlatDetailsScreen}
-// 			/>
-// 			<FlatsStack.Screen
-// 				name="NewFlatInfo"
-// 				options={{ title: 'Add Flat' }}
-// 				component={NewFlatInfoScreen}
-// 			/>
-// 			<FlatsStack.Screen
-// 				name="NewFlat"
-// 				options={{ title: 'Add Flat' }}
-// 				component={NewFlatScreen}
-// 			/>
-// 			<FlatsStack.Screen
-// 				name="InviteMembers"
-// 				options={{ title: 'Invite Members' }}
-// 				component={InviteMembersScreen}
-// 			/>
-// 		</FlatsStack.Navigator>
-// 	);
-// };
-
-// const TasksStack = createStackNavigator /*<TasksStackParamList>*/();
-// const TasksStackNavigator = () => {
-// 	return (
-// 		<TasksStack.Navigator initialRouteName="UserTasks">
-// 			<TasksStack.Screen
-// 				name="UserTasks"
-// 				options={{ title: 'Your Tasks' }}
-// 				component={UserTasksScreen}
-// 			/>
-// 			<TasksStack.Screen
-// 				name="TaskDetails"
-// 				options={{ title: 'View Task' }}
-// 				component={TaskDetailsScreen}
-// 			/>
-// 			<TasksStack.Screen
-// 				name="NewTaskName"
-// 				options={{ title: 'New Task' }}
-// 				component={NewTaskNameScreen}
-// 			/>
-// 			<TasksStack.Screen
-// 				name="NewTaskTime"
-// 				options={{ title: 'New Task' }}
-// 				component={NewTaskTimeScreen}
-// 			/>
-// 			<TasksStack.Screen
-// 				name="NewTaskMembers"
-// 				options={(props) => ({
-// 					title: ((props.route.params as unknown) as {
-// 						newTask: boolean;
-// 					}).newTask
-// 						? 'New Task'
-// 						: 'Update Task',
-// 				})}
-// 				component={NewTaskMembersScreen}
-// 			/>
-// 		</TasksStack.Navigator>
-// 	);
-// };
-
-const ProfileStack = createStackNavigator /*<ProfileStackParamList>*/();
-const ProfileStackNavigator = ({ loggedUser }: { loggedUser: User }) => {
+const FlatsStack = createStackNavigator<FlatsStackParamList>();
+const FlatsStackNavigator = () => {
 	return (
-		<ProfileStack.Navigator initialRouteName="Profile">
+		<FlatsStack.Navigator initialRouteName="Flats">
+			<FlatsStack.Screen
+				name="Flats"
+				options={{ title: 'Your Flats' }}
+				component={FlatsScreen}
+			/>
+			<FlatsStack.Screen
+				name="FlatDetails"
+				options={{ title: 'View Flat' }}
+				component={FlatDetailsScreen}
+			/>
+			<FlatsStack.Screen
+				name="NewFlatInfo"
+				options={{ title: 'Add Flat' }}
+				component={NewFlatInfoScreen}
+			/>
+			<FlatsStack.Screen
+				name="NewFlat"
+				options={{ title: 'Add Flat' }}
+				component={NewFlatScreen}
+			/>
+			<FlatsStack.Screen
+				name="InviteMembers"
+				options={{ title: 'Invite Members' }}
+				component={InviteMembersScreen}
+			/>
+		</FlatsStack.Navigator>
+	);
+};
+
+const TasksStack = createStackNavigator<TasksStackParamList>();
+const TasksStackNavigator = () => {
+	return (
+		<TasksStack.Navigator initialRouteName="UserTasks">
+			<TasksStack.Screen
+				name="UserTasks"
+				options={{ title: 'Your Tasks' }}
+				component={UserTasksScreen}
+			/>
+			<TasksStack.Screen
+				name="TaskDetails"
+				options={{ title: 'View Task' }}
+				component={TaskDetailsScreen}
+			/>
+			<TasksStack.Screen
+				name="NewTaskName"
+				options={{ title: 'New Task' }}
+				component={NewTaskNameScreen}
+			/>
+			<TasksStack.Screen
+				name="NewTaskTime"
+				options={{ title: 'New Task' }}
+				component={NewTaskTimeScreen}
+			/>
+			<TasksStack.Screen
+				name="UpdateTaskMembers"
+				options={(props) => ({
+					title: ((props.route.params as unknown) as {
+						newTask: boolean;
+					}).newTask
+						? 'New Task'
+						: 'Update Task',
+				})}
+				component={UpdateTaskMembersScreen}
+			/>
+		</TasksStack.Navigator>
+	);
+};
+
+const ProfileStack = createStackNavigator<ProfileStackParamList>();
+const ProfileStackNavigator = ({
+	navigation,
+	loggedUser,
+}: {
+	navigation: any;
+	loggedUser: User;
+}) => {
+	return (
+		<ProfileStack.Navigator>
 			<ProfileStack.Screen
-				name="ProfileDetails"
+				name="Profile"
 				initialParams={{ id: loggedUser.id }}
 				options={{
 					title: 'View Profile',
+					headerLeft: (props) => (
+						<HeaderBackButton
+							{...props}
+							onPress={() => navigation.goBack()}
+						/>
+					),
 				}}
 				component={ProfileScreen}
 			/>
@@ -190,93 +198,6 @@ const ProfileStackNavigator = ({ loggedUser }: { loggedUser: User }) => {
 				component={ChangePasswordScreen}
 			/>
 		</ProfileStack.Navigator>
-	);
-};
-
-const RootStack = createStackNavigator<RootStackParamList>();
-const RootStackNavigator = () => {
-	const dispatch = useDispatch();
-	const loggedUser = useSelector((state: RootState) => state.auth.user!);
-	return (
-		<RootStack.Navigator
-			screenOptions={{
-				headerRight: (props) => (
-					<Link onPress={() => dispatch(logOut())}>
-						{loggedUser.emailAddress}
-					</Link>
-				),
-			}}
-			initialRouteName="Flats"
-		>
-			<RootStack.Screen
-				name="Flats"
-				options={{ title: 'Your Flats' }}
-				component={FlatsScreen}
-			/>
-			<RootStack.Screen
-				name="UserTasks"
-				options={{ title: 'Your Tasks' }}
-				component={UserTasksScreen}
-			/>
-			<RootStack.Screen
-				name="FlatDetails"
-				options={{ title: 'View Flat' }}
-				component={FlatDetailsScreen}
-			/>
-			<RootStack.Screen
-				name="NewFlatInfo"
-				options={{ title: 'Add Flat' }}
-				component={NewFlatInfoScreen}
-			/>
-			<RootStack.Screen
-				name="NewFlat"
-				options={{ title: 'Add Flat' }}
-				component={NewFlatScreen}
-			/>
-			<RootStack.Screen
-				name="InviteMembers"
-				options={{ title: 'Invite Members' }}
-				component={InviteMembersScreen}
-			/>
-			<RootStack.Screen
-				name="TaskDetails"
-				options={{ title: 'View Task' }}
-				component={TaskDetailsScreen}
-			/>
-			<RootStack.Screen
-				name="NewTaskName"
-				options={{ title: 'New Task' }}
-				component={NewTaskNameScreen}
-			/>
-			<RootStack.Screen
-				name="NewTaskTime"
-				options={{ title: 'New Task' }}
-				component={NewTaskTimeScreen}
-			/>
-			<RootStack.Screen
-				name="NewTaskMembers"
-				options={(props) => ({
-					title: props.route.params.newTask
-						? 'New Task'
-						: 'Update Task',
-				})}
-				component={NewTaskMembersScreen}
-			/>
-			{/* <RootStack.Screen
-				name="Profile"
-				options={{
-					title: 'View Profile',
-				}}
-				component={ProfileScreen}
-			/>
-			<RootStack.Screen
-				name="ChangePassword"
-				options={{
-					title: 'Change Password',
-				}}
-				component={ChangePasswordScreen}
-			/> */}
-		</RootStack.Navigator>
 	);
 };
 

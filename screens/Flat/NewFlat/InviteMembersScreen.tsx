@@ -21,7 +21,7 @@ import {
 import { Theme } from 'react-native-paper/lib/typescript/src/types';
 import CustomButton from '../../../components/UI/CustomButton';
 import {
-	InviteMembersScreenNavigationProps,
+	InviteMembersScreenNavigationProp,
 	InviteMembersScreenRouteProps,
 } from '../../../types/navigationTypes';
 import { StateError } from '../../../store/ReactTypes/customReactTypes';
@@ -40,7 +40,7 @@ import { mapApiUserDataToModel } from '../../../store/mapAPIToModel/mapUser';
 
 interface Props {
 	theme: Theme;
-	navigation: InviteMembersScreenNavigationProps;
+	navigation: InviteMembersScreenNavigationProp;
 	route: InviteMembersScreenRouteProps;
 }
 

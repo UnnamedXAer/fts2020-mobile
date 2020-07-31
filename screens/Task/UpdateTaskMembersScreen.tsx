@@ -12,7 +12,7 @@ import { withTheme, Avatar, Chip, Text, IconButton, Colors } from 'react-native-
 import Toast from 'react-native-simple-toast';
 import { Theme } from 'react-native-paper/lib/typescript/src/types';
 import {
-	NewTaskMembersScreenNavigationProps,
+	UpdateTaskMembersScreenNavigationProp,
 	NewTaskMembersScreenRouteProps,
 } from '../../types/navigationTypes';
 import { StateError } from '../../store/ReactTypes/customReactTypes';
@@ -28,11 +28,11 @@ import { clearTaskPeriods } from '../../store/actions/periods';
 
 interface Props {
 	theme: Theme;
-	navigation: NewTaskMembersScreenNavigationProps;
+	navigation: UpdateTaskMembersScreenNavigationProp;
 	route: NewTaskMembersScreenRouteProps;
 }
 
-const NewTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => {
+const UpdateTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 	const isNewTask = route.params.newTask;
 	const dispatch = useDispatch();
 
@@ -343,4 +343,4 @@ const styles = StyleSheet.create({
 		alignItems: 'flex-end',
 	},
 });
-export default withTheme(NewTaskMembersScreen);
+export default withTheme(UpdateTaskMembersScreen);

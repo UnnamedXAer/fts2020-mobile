@@ -20,13 +20,13 @@ import NotificationCard from '../../components/UI/NotificationCard';
 import CustomButton from '../../components/UI/CustomButton';
 import Stepper from '../../components/UI/Stepper';
 import {
-	NewTaskNameScreenNavigationProps,
+	NewTaskNameScreenNavigationProp,
 	NewTaskNameScreenRouteProps,
 } from '../../types/navigationTypes';
 
 interface Props {
 	theme: Theme;
-	navigation: NewTaskNameScreenNavigationProps;
+	navigation: NewTaskNameScreenNavigationProp;
 	route: NewTaskNameScreenRouteProps;
 }
 

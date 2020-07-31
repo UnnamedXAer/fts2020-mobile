@@ -8,12 +8,12 @@ import { fetchFlatTasks, fetchTaskMembers } from '../../store/actions/tasks';
 import HttpErrorParser from '../../utils/parseError';
 import Task from '../../models/task';
 import NotificationCard from '../UI/NotificationCard';
-import { FlatDetailsScreenNavigationProps } from '../../types/navigationTypes';
+import { FlatDetailsScreenNavigationProp } from '../../types/navigationTypes';
 
 interface Props {
 	flatId: number | undefined;
 	theme: Theme;
-	navigation: FlatDetailsScreenNavigationProps;
+	navigation: FlatDetailsScreenNavigationProp;
 	refresh: boolean;
 }
 
@@ -108,7 +108,10 @@ const FlatTasksList: React.FC<Props> = ({
 	}, [dispatch, flatId, membersError, membersLoading, selectedTaskId, tasks]);
 
 	const taskSelectHandler = (id: number) => {
-		navigation.navigate('TaskDetails', { id: id });
+		navigation.navigate('TasksStack', {
+			screen: 'TaskDetails',
+			params: { id },
+		});
 	};
 
 	let content: JSX.Element;

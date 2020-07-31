@@ -25,12 +25,12 @@ import useForm, {
 } from '../../hooks/useForm';
 import {
 	ChangePasswordScreenRouteProps,
-	ChangePasswordScreenNavigationProps,
+	ChangePasswordScreenNavigationProp,
 } from '../../types/navigationTypes';
 
 interface Props {
 	route: ChangePasswordScreenRouteProps;
-	navigation: ChangePasswordScreenNavigationProps;
+	navigation: ChangePasswordScreenNavigationProp;
 	theme: Theme;
 }
 
@@ -51,7 +51,9 @@ const RegistrationScreen: React.FC<Props> = ({ theme, navigation }) => {
 	const [success, setSuccess] = useState(false);
 
 	const passwordInpRef: MutableRefObject<TextInputType | null> = useRef(null);
-	const confirmPasswordInpRef: MutableRefObject<TextInputType | null> = useRef(null);
+	const confirmPasswordInpRef: MutableRefObject<TextInputType | null> = useRef(
+		null
+	);
 
 	const isMounted = useRef(true);
 	useEffect(() => {
@@ -177,7 +179,10 @@ const RegistrationScreen: React.FC<Props> = ({ theme, navigation }) => {
 	};
 
 	return (
-		<KeyboardAvoidingView style={styles.keyboardAvoidingView} behavior="height">
+		<KeyboardAvoidingView
+			style={styles.keyboardAvoidingView}
+			behavior="height"
+		>
 			<TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
 				<ScrollView
 					contentContainerStyle={[
@@ -193,7 +198,9 @@ const RegistrationScreen: React.FC<Props> = ({ theme, navigation }) => {
 							secureTextEntry
 							returnKeyType="next"
 							returnKeyLabel="next"
-							onSubmitEditing={() => passwordInpRef!.current!.focus()}
+							onSubmitEditing={() =>
+								passwordInpRef!.current!.focus()
+							}
 							disabled={loading}
 							formState={formState}
 							textChanged={fieldTextChangeHandler}
@@ -237,7 +244,9 @@ const RegistrationScreen: React.FC<Props> = ({ theme, navigation }) => {
 					<View style={styles.errorContainer}>
 						{(formState.formError !== null || success) && (
 							<NotificationCard
-								severity={formState.formError ? 'error' : 'success'}
+								severity={
+									formState.formError ? 'error' : 'success'
+								}
 							>
 								{formState.formError
 									? formState.formError

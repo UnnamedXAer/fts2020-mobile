@@ -206,7 +206,6 @@ const InviteMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 			}
 			setInputValue('');
 			setInputError(false);
-			inputRef.current!.focus();
 		} else {
 			if (inputValue.length > 0) {
 				setInputError(true);

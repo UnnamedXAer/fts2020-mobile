@@ -8,7 +8,14 @@ import {
 	TouchableWithoutFeedback,
 	Keyboard,
 } from 'react-native';
-import { withTheme, Avatar, Chip, Text, IconButton, Colors } from 'react-native-paper';
+import {
+	withTheme,
+	Avatar,
+	Chip,
+	Text,
+	IconButton,
+	Colors,
+} from 'react-native-paper';
 import Toast from 'react-native-simple-toast';
 import { Theme } from 'react-native-paper/lib/typescript/src/types';
 import { StateError } from '../../store/ReactTypes/customReactTypes';
@@ -30,14 +37,19 @@ interface Props {
 	route: NewTaskMembersScreenRouteProps;
 }
 
-const UpdateTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => {
+const UpdateTaskMembersScreen: React.FC<Props> = ({
+	theme,
+	navigation,
+	route,
+}) => {
 	const isNewTask = route.params.newTask;
 	const dispatch = useDispatch();
 
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<StateError>(null);
 	const task = useSelector(
-		(state: RootState) => state.tasks.tasks.find((x) => x.id === route.params.id)!
+		(state: RootState) =>
+			state.tasks.tasks.find((x) => x.id === route.params.id)!
 	);
 	const flatMembers = useSelector(
 		(state: RootState) =>
@@ -48,7 +60,9 @@ const UpdateTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) 
 		isNewTask ? [...flatMembers!] : [...task.members!]
 	);
 	const [selectedFlatMembers, setSelectedFlatMembers] = useState<User[]>([]);
-	const [selectedAddedMembers, setSelectedAddedMembers] = useState<User[]>([]);
+	const [selectedAddedMembers, setSelectedAddedMembers] = useState<User[]>(
+		[]
+	);
 
 	const isMounted = useRef(true);
 	useEffect(() => {
@@ -62,7 +76,9 @@ const UpdateTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) 
 		if (selectedFlatMembers.length === 0) {
 			Toast.show('Select flat members to assign.');
 		} else {
-			setAddedMembers((prevState) => prevState.concat(selectedFlatMembers));
+			setAddedMembers((prevState) =>
+				prevState.concat(selectedFlatMembers)
+			);
 			setSelectedFlatMembers([]);
 		}
 	};
@@ -125,7 +141,8 @@ const UpdateTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) 
 				const errCode = httpError.getCode();
 				let msg: string;
 				if (errCode === 422) {
-					msg = 'Sorry, something went wrong. Please try again later.';
+					msg =
+						'Sorry, something went wrong. Please try again later.';
 				} else {
 					msg = httpError.getMessage();
 				}
@@ -148,20 +165,23 @@ const UpdateTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) 
 						{ backgroundColor: theme.colors.surface },
 					]}
 				>
-					<Stepper steps={3} currentStep={2} />
+					{isNewTask && <Stepper steps={3} currentStep={3} />}
 					<Header style={styles.header}>
 						{isNewTask ? 'Set' : 'Update'} Task - Members
 					</Header>
 					<View style={styles.inputContainer}>
 						<Text>Unassigned flat members</Text>
 					</View>
-					<View style={[styles.inputContainer, styles.membersContainer]}>
+					<View
+						style={[styles.inputContainer, styles.membersContainer]}
+					>
 						{flatMembers.length !== addedMembers.length ? (
 							flatMembers
 								.filter(
 									(x) =>
 										addedMembers.findIndex(
-											(addedMember) => addedMember.id === x.id
+											(addedMember) =>
+												addedMember.id === x.id
 										) === -1
 								)
 								.map((member) => (
@@ -170,13 +190,19 @@ const UpdateTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) 
 										style={styles.chip}
 										textStyle={
 											member.id === task.createBy
-												? { color: theme.colors.placeholder }
+												? {
+														color:
+															theme.colors
+																.placeholder,
+												  }
 												: void 0
 										}
 										avatar={
 											member.avatarUrl ? (
 												<Avatar.Image
-													source={{ uri: member.avatarUrl }}
+													source={{
+														uri: member.avatarUrl,
+													}}
 													size={24}
 												/>
 											) : (
@@ -187,10 +213,15 @@ const UpdateTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) 
 											)
 										}
 										mode="flat"
-										selected={selectedFlatMembers.includes(member)}
-										onPress={() => selectFlatMemberHandler(member)}
+										selected={selectedFlatMembers.includes(
+											member
+										)}
+										onPress={() =>
+											selectFlatMemberHandler(member)
+										}
 									>
-										{member.id === task.createBy && '[You] '}
+										{member.id === task.createBy &&
+											'[You] '}
 										{member.emailAddress}
 									</Chip>
 								))
@@ -200,7 +231,9 @@ const UpdateTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) 
 							</NotificationCard>
 						)}
 					</View>
-					<View style={[styles.inputContainer, styles.membersActions]}>
+					<View
+						style={[styles.inputContainer, styles.membersActions]}
+					>
 						<IconButton
 							icon="arrow-up-bold-outline"
 							color={
@@ -221,7 +254,10 @@ const UpdateTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) 
 						></IconButton>
 					</View>
 					<View
-						style={[styles.inputContainer, styles.assignedTitleInfoContainer]}
+						style={[
+							styles.inputContainer,
+							styles.assignedTitleInfoContainer,
+						]}
 					>
 						<Text>Assigned people</Text>
 						<Text style={styles.assignedTitleInfo}>
@@ -232,7 +268,9 @@ const UpdateTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) 
 							)
 						</Text>
 					</View>
-					<View style={[styles.inputContainer, styles.membersContainer]}>
+					<View
+						style={[styles.inputContainer, styles.membersContainer]}
+					>
 						{addedMembers.map((member) => (
 							<Chip
 								key={member.id}
@@ -263,7 +301,9 @@ const UpdateTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) 
 					</View>
 					<View style={styles.inputContainer}>
 						{error && (
-							<NotificationCard severity="error">{error}</NotificationCard>
+							<NotificationCard severity="error">
+								{error}
+							</NotificationCard>
 						)}
 					</View>
 					<View style={styles.actions}>
@@ -272,7 +312,9 @@ const UpdateTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) 
 							onPress={() => {
 								if (isNewTask) {
 									navigation.popToTop();
-									navigation.push('TaskDetails', { id: task.id! });
+									navigation.push('TaskDetails', {
+										id: task.id!,
+									});
 								} else {
 									navigation.goBack();
 								}

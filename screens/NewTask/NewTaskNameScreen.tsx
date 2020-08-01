@@ -165,7 +165,7 @@ const NewTaskNameScreen: React.FC<Props> = ({ theme, route, navigation }) => {
 					<View style={styles.actions}>
 						<CustomButton
 							accent
-							onPress={() => navigation.popToTop()}
+							onPress={() => navigation.pop()}
 							disabled={loading}
 						>
 							CANCEL

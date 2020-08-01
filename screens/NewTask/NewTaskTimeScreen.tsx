@@ -249,7 +249,7 @@ const NewTaskTimeScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 					<View style={styles.actions}>
 						<CustomButton
 							accent
-							onPress={() => navigation.popToTop()}
+							onPress={() => navigation.pop(2)}
 							disabled={loading}
 						>
 							CANCEL

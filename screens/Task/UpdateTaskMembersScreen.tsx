@@ -311,7 +311,7 @@ const UpdateTaskMembersScreen: React.FC<Props> = ({
 							accent
 							onPress={() => {
 								if (isNewTask) {
-									navigation.popToTop();
+									navigation.pop();
 									navigation.push('TaskDetails', {
 										id: task.id!,
 									});

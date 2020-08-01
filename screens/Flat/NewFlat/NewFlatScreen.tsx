@@ -214,7 +214,7 @@ const NewFlatScreen: React.FC<Props> = ({ theme, navigation }) => {
 						</CustomButton>
 						<CustomButton
 							onPress={submitHandler}
-							disabled={loading}
+							loading={loading}
 						>
 							NEXT
 						</CustomButton>

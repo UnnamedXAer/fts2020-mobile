@@ -1,21 +1,11 @@
 import React from 'react';
-import {
-	StyleSheet,
-	View,
-	ScrollView,
-	KeyboardAvoidingView,
-	TouchableWithoutFeedback,
-	Keyboard,
-	StatusBar,
-} from 'react-native';
+import { StyleSheet, View, ScrollView } from 'react-native';
 import { withTheme, Paragraph, Divider, Title } from 'react-native-paper';
 import { Theme } from 'react-native-paper/lib/typescript/src/types';
 import Header from '../../../components/UI/Header';
 import CustomButton from '../../../components/UI/CustomButton';
-import {
-	NewFlatInfoScreenNavigationProp,
-	NewFlatInfoScreenRouteProps,
-} from '../../../types/navigationTypes';
+import { NewFlatInfoScreenNavigationProp } from '../../../types/rootNavigationTypes';
+import { NewFlatInfoScreenRouteProps } from '../../../types/rootRoutePropTypes';
 
 interface Props {
 	theme: Theme;
@@ -58,7 +48,7 @@ const NewFlatInfoScreen: React.FC<Props> = ({ theme, navigation }) => {
 				<CustomButton accent onPress={() => navigation.goBack()}>
 					CANCEL
 				</CustomButton>
-				<CustomButton onPress={() => navigation.navigate('NewFlat')}>
+				<CustomButton onPress={() => navigation.push('NewFlat')}>
 					NEXT
 				</CustomButton>
 			</View>

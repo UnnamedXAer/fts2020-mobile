@@ -1,4 +1,10 @@
-import React, { MutableRefObject, useRef, useState, useCallback, useEffect } from 'react';
+import React, {
+	MutableRefObject,
+	useRef,
+	useState,
+	useCallback,
+	useEffect,
+} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
 	StyleSheet,
@@ -20,10 +26,6 @@ import {
 } from 'react-native-paper';
 import { Theme } from 'react-native-paper/lib/typescript/src/types';
 import CustomButton from '../../../components/UI/CustomButton';
-import {
-	InviteMembersScreenNavigationProp,
-	InviteMembersScreenRouteProps,
-} from '../../../types/navigationTypes';
 import { StateError } from '../../../store/ReactTypes/customReactTypes';
 import RootState from '../../../store/storeTypes';
 import User from '../../../models/user';
@@ -37,6 +39,8 @@ import HttpErrorParser from '../../../utils/parseError';
 import NotificationCard from '../../../components/UI/NotificationCard';
 import { APIUser } from '../../../store/apiTypes';
 import { mapApiUserDataToModel } from '../../../store/mapAPIToModel/mapUser';
+import { InviteMembersScreenNavigationProp } from '../../../types/rootNavigationTypes';
+import { InviteMembersScreenRouteProps } from '../../../types/rootRoutePropTypes';
 
 interface Props {
 	theme: Theme;
@@ -56,7 +60,8 @@ const InviteMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 	const [inputError, setInputError] = useState(false);
 	const loggedUser = useSelector((state: RootState) => state.auth.user)!;
 	const flatMembers = useSelector(
-		(state: RootState) => state.flats.flats.find((x) => x.id === flatId)?.members
+		(state: RootState) =>
+			state.flats.flats.find((x) => x.id === flatId)?.members
 	);
 	const users = useSelector((state: RootState) => state.users.users);
 	const [membersEmails, setMembersEmails] = React.useState<
@@ -85,7 +90,9 @@ const InviteMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 
 	const removeMemberHandler = (email: NewFlatMember['emailAddress']) => {
 		setMembers((prevMembers) => {
-			const updatedMembers = prevMembers.filter((x) => x.emailAddress !== email);
+			const updatedMembers = prevMembers.filter(
+				(x) => x.emailAddress !== email
+			);
 			return updatedMembers;
 		});
 
@@ -100,7 +107,9 @@ const InviteMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 
 	const getUserByEmail = useCallback(
 		async (email: NewFlatMember['emailAddress']) => {
-			let user = users.find((x) => x.emailAddress.toLowerCase() === email);
+			let user = users.find(
+				(x) => x.emailAddress.toLowerCase() === email
+			);
 
 			if (!user) {
 				const url = `/users?emailAddress=${email}`;
@@ -166,7 +175,9 @@ const InviteMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 		);
 
 		setMembers((prevSate) => {
-			const idx = prevSate.findIndex((x) => x.emailAddress === user.emailAddress);
+			const idx = prevSate.findIndex(
+				(x) => x.emailAddress === user.emailAddress
+			);
 			const updatedState = [...prevSate];
 			const updatedUser = new User(
 				user.id,
@@ -265,7 +276,10 @@ const InviteMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 	};
 
 	return (
-		<KeyboardAvoidingView style={styles.keyboardAvoidingView} behavior="height">
+		<KeyboardAvoidingView
+			style={styles.keyboardAvoidingView}
+			behavior="height"
+		>
 			<TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
 				<ScrollView
 					contentContainerStyle={[
@@ -275,7 +289,9 @@ const InviteMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 				>
 					<View style={styles.inputContainer}>
 						<List.Accordion
-							onPress={() => setExpanded((prevState) => !prevState)}
+							onPress={() =>
+								setExpanded((prevState) => !prevState)
+							}
 							expanded={expanded}
 							titleStyle={[
 								{
@@ -286,10 +302,10 @@ const InviteMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 							title="Members invitations"
 						>
 							<Paragraph style={styles.infoParagraph}>
-								Add users by entering their email address. These users
-								will receive an email asking them to accept the
-								invitation. Invitation will be sent also to people not
-								registered in FTS2020.
+								Add users by entering their email address. These
+								users will receive an email asking them to
+								accept the invitation. Invitation will be sent
+								also to people not registered in FTS2020.
 							</Paragraph>
 						</List.Accordion>
 						<Divider />
@@ -317,7 +333,9 @@ const InviteMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 								disabled={loading}
 								value={inputValue}
 								error={inputError}
-								ref={inputRef as MutableRefObject<TextInputType>}
+								ref={
+									inputRef as MutableRefObject<TextInputType>
+								}
 								onSubmitEditing={emailSubmitHandler}
 								onChangeText={setInputValue}
 								onBlur={inputBlurHandler}
@@ -336,7 +354,10 @@ const InviteMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 						</View>
 						<HelperText
 							style={{
-								color: theme.colors[inputError ? 'error' : 'placeholder'],
+								color:
+									theme.colors[
+										inputError ? 'error' : 'placeholder'
+									],
 							}}
 						>
 							{inputError
@@ -357,7 +378,9 @@ const InviteMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 					</View>
 					{error && (
 						<View style={{ width: '90%' }}>
-							<NotificationCard severity="error">{error}</NotificationCard>
+							<NotificationCard severity="error">
+								{error}
+							</NotificationCard>
 						</View>
 					)}
 					<View style={styles.actions}>
@@ -366,7 +389,9 @@ const InviteMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 							accent
 							onPress={() => {
 								if (isNewFlat) {
-									navigation.replace('FlatDetails', { id: flatId });
+									navigation.replace('FlatDetails', {
+										id: flatId,
+									});
 								} else {
 									navigation.pop();
 								}

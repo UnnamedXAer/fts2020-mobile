@@ -12,10 +12,6 @@ import moment from 'moment';
 import RootState from '../../store/storeTypes';
 import { StateError } from '../../store/ReactTypes/customReactTypes';
 import {
-	TaskDetailsScreenRouteProps,
-	TaskDetailsScreenNavigationProp,
-} from '../../types/navigationTypes';
-import {
 	fetchTaskOwner,
 	fetchTaskMembers,
 	updateTask,
@@ -41,6 +37,8 @@ import AlertSnackbar, {
 import PeriodCompleteText from '../../components/Task/PeriodCompleteText';
 import Link from '../../components/UI/Link';
 import { Theme } from 'react-native-paper/lib/typescript/src/types';
+import { TaskDetailsScreenRouteProps } from '../../types/rootRoutePropTypes';
+import { TaskDetailsScreenNavigationProp } from '../../types/rootNavigationTypes';
 
 type FABActionsKeys = 'resetPeriods' | 'updateMembers' | 'closeTask';
 
@@ -451,7 +449,7 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) => {
 		updateMembers: {
 			icon: 'account-multiple-plus',
 			onPress: () =>
-				navigation.navigate('UpdateTaskMembers', {
+				navigation.push('UpdateTaskMembers', {
 					newTask: false,
 					id: id,
 				}),
@@ -539,15 +537,10 @@ const TaskDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) => {
 										{task ? (
 											<Link
 												onPress={() =>
-													navigation.navigate(
-														'FlatsStack',
+													navigation.push(
+														'FlatDetails',
 														{
-															screen:
-																'FlatDetails',
-															params: {
-																id: task!
-																	.flatId!,
-															},
+															id: task!.flatId!,
 														}
 													)
 												}

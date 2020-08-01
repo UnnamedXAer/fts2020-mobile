@@ -20,15 +20,13 @@ import {
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSelector, useDispatch } from 'react-redux';
 import { Placeholder } from 'rn-placeholder';
-import { Shine, PlaceholderLine } from '../../components/UI/Placeholder/Placeholder';
+import {
+	Shine,
+	PlaceholderLine,
+} from '../../components/UI/Placeholder/Placeholder';
 import moment from 'moment';
 import RootState from '../../store/storeTypes';
 import { StateError } from '../../store/ReactTypes/customReactTypes';
-import {
-	ProfileScreenNavigationProp,
-	ProfileScreenRouteProps,
-} from '../../types/navigationTypes';
-
 import HttpErrorParser from '../../utils/parseError';
 import AlertDialog, {
 	AlertDialogData,
@@ -42,6 +40,8 @@ import { Theme } from 'react-native-paper/lib/typescript/src/types';
 import { fetchUser, updateUser } from '../../store/actions/users';
 import validateAuthFormField from '../../utils/validation';
 import User from '../../models/user';
+import { ProfileScreenRouteProps } from '../../types/profileRoutePropTypes';
+import { ProfileScreenNavigationProp } from '../../types/profileNavigationTypes';
 
 const { width, height } = Dimensions.get('window');
 const avatarWidth = width / (width < height ? 2.6 : 4);
@@ -63,7 +63,9 @@ const getEditedPropLabel = (fieldName: EditableFields) =>
 const ProfileScreen: React.FC<Props> = ({ route, navigation, theme }) => {
 	const dispatch = useDispatch();
 	const id = route.params.id;
-	const isLoggedUser = useSelector((state: RootState) => state.auth.user!.id === id);
+	const isLoggedUser = useSelector(
+		(state: RootState) => state.auth.user!.id === id
+	);
 	const user = useSelector((state: RootState) =>
 		state.users.users.find((x) => x.id === id)
 	);
@@ -73,7 +75,10 @@ const ProfileScreen: React.FC<Props> = ({ route, navigation, theme }) => {
 	const editInpRef: MutableRefObject<TextInputType | null> = useRef(null);
 	const [editValue, setEditValue] = useState('');
 	const [editError, setEditError] = useState<StateError>(null);
-	const [editedFieldName, setEditedFieldName] = useState<EditableFields | null>(null);
+	const [
+		editedFieldName,
+		setEditedFieldName,
+	] = useState<EditableFields | null>(null);
 
 	const [dialogData, setDialogData] = useState<AlertDialogData>({
 		content: '',
@@ -216,7 +221,10 @@ const ProfileScreen: React.FC<Props> = ({ route, navigation, theme }) => {
 		if (editedFieldName === 'emailAddress') {
 			value = value.toLocaleLowerCase();
 		}
-		if (user![editedFieldName!] !== undefined && user![editedFieldName!] === value) {
+		if (
+			user![editedFieldName!] !== undefined &&
+			user![editedFieldName!] === value
+		) {
 			return closeDialogAlertHandler();
 		}
 
@@ -259,10 +267,15 @@ const ProfileScreen: React.FC<Props> = ({ route, navigation, theme }) => {
 			if (isMounted.current) {
 				const error = new HttpErrorParser(err);
 				const fieldsErrors = error.getFieldsErrors();
-				const fieldError = fieldsErrors.find((x) => x.param === editedFieldName);
+				const fieldError = fieldsErrors.find(
+					(x) => x.param === editedFieldName
+				);
 				const msg = fieldError?.msg || error.getMessage();
 				setEditError(msg);
-				setDialogData((prevState) => ({ ...prevState, loading: false }));
+				setDialogData((prevState) => ({
+					...prevState,
+					loading: false,
+				}));
 			}
 		}
 	};
@@ -270,7 +283,11 @@ const ProfileScreen: React.FC<Props> = ({ route, navigation, theme }) => {
 	return (
 		<>
 			<ScrollView style={styles.screen}>
-				{error && <NotificationCard severity="error">{error}</NotificationCard>}
+				{error && (
+					<NotificationCard severity="error">
+						{error}
+					</NotificationCard>
+				)}
 
 				<View style={styles.container}>
 					<TouchableWithoutFeedback
@@ -302,7 +319,9 @@ const ProfileScreen: React.FC<Props> = ({ route, navigation, theme }) => {
 				<View>
 					{user ? (
 						<View style={styles.userNamesContainer}>
-							<Headline onPress={() => onFieldEdit('emailAddress')}>
+							<Headline
+								onPress={() => onFieldEdit('emailAddress')}
+							>
 								{user!.emailAddress}
 							</Headline>
 							<Title onPress={() => onFieldEdit('userName')}>
@@ -357,7 +376,9 @@ const ProfileScreen: React.FC<Props> = ({ route, navigation, theme }) => {
 						<View style={styles.container}>
 							<Link
 								style={{ padding: 8 }}
-								onPress={() => navigation.navigate('ChangePassword')}
+								onPress={() =>
+									navigation.push('ChangePassword')
+								}
 							>
 								Change Password
 							</Link>

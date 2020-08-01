@@ -11,10 +11,6 @@ import {
 import { withTheme, Avatar, Chip, Text, IconButton, Colors } from 'react-native-paper';
 import Toast from 'react-native-simple-toast';
 import { Theme } from 'react-native-paper/lib/typescript/src/types';
-import {
-	UpdateTaskMembersScreenNavigationProp,
-	NewTaskMembersScreenRouteProps,
-} from '../../types/navigationTypes';
 import { StateError } from '../../store/ReactTypes/customReactTypes';
 import HttpErrorParser from '../../utils/parseError';
 import Header from '../../components/UI/Header';
@@ -25,6 +21,8 @@ import User from '../../models/user';
 import Stepper from '../../components/UI/Stepper';
 import { updatedTaskMembers } from '../../store/actions/tasks';
 import { clearTaskPeriods } from '../../store/actions/periods';
+import { UpdateTaskMembersScreenNavigationProp } from '../../types/rootNavigationTypes';
+import { NewTaskMembersScreenRouteProps } from '../../types/rootRoutePropTypes';
 
 interface Props {
 	theme: Theme;
@@ -274,7 +272,7 @@ const UpdateTaskMembersScreen: React.FC<Props> = ({ theme, navigation, route }) 
 							onPress={() => {
 								if (isNewTask) {
 									navigation.popToTop();
-									navigation.navigate('TaskDetails', { id: task.id! });
+									navigation.push('TaskDetails', { id: task.id! });
 								} else {
 									navigation.goBack();
 								}

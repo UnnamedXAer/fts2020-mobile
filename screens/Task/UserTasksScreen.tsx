@@ -27,12 +27,12 @@ import {
 	PlaceholderLine,
 	Shine,
 } from '../../components/UI/Placeholder/Placeholder';
-import { UserTasksScreenNavigationProp } from '../../types/navigationTypes';
 import {
 	fetchUserTasks,
 	setShowInactiveTasks,
 } from '../../store/actions/tasks';
 import { UserTask } from '../../models/task';
+import { UserTasksScreenNavigationProp } from '../../types/userTasksNavigationTypes';
 
 interface Props {
 	theme: Theme;
@@ -95,7 +95,7 @@ const UserTasksScreen: React.FC<Props> = ({ theme, navigation }) => {
 	};
 
 	const taskSelectHandler = (id: number) => {
-		navigation.navigate('TaskDetails', { id: id });
+		navigation.push('TaskDetails', { id: id });
 	};
 
 	const showInactiveChangeHandler = async () => {
@@ -195,10 +195,7 @@ const UserTasksScreen: React.FC<Props> = ({ theme, navigation }) => {
 										{
 											text: 'Your Flats',
 											onPress: () =>
-												navigation.navigate(
-													'FlatsStack',
-													{ screen: 'Flats' }
-												),
+												navigation.jumpTo('Flats'),
 										},
 										' section and create task for a flat.',
 									]}

@@ -15,11 +15,10 @@ import { tryAuthorize, logOut } from '../store/actions/auth';
 import LoadingScreen from '../screens/Auth/LoadingScreen';
 import { navigationContainerTheme } from '../config/theme';
 import {
-	FlatsStackParamList,
-	TasksStackParamList,
 	ProfileStackParamList,
 	DrawerParamList,
 	BottomTabParamList,
+	RootStackParamList,
 } from '../types/navigationTypes';
 import TaskDetailsScreen from '../screens/Task/TaskDetailsScreen';
 import NewFlatInfoScreen from '../screens/Flat/NewFlat/NewFlatInfoScreen';
@@ -41,11 +40,11 @@ import AboutScreen from '../screens/About/AboutScreen';
 const Drawer = createDrawerNavigator<DrawerParamList>();
 const DrawerNavigator = ({ loggedUser }: { loggedUser: User }) => {
 	return (
-		<Drawer.Navigator>
+		<Drawer.Navigator initialRouteName="RootStack">
 			<Drawer.Screen
-				name="FlatsAndTasksBottomTab"
+				name="RootStack"
 				options={{ title: 'Flats & Tasks' }}
-				component={BottomTabNavigator}
+				component={RootStackNavigator}
 			/>
 			<Drawer.Screen name="ProfileStack" options={{ title: 'Profile' }}>
 				{(props) => (
@@ -76,17 +75,17 @@ const BottomTabNavigator = () => {
 	return (
 		<BottomTab.Navigator>
 			<BottomTab.Screen
-				name="TasksStack"
+				name="UserTasks"
 				options={{ title: 'Your Tasks' }}
-				component={TasksStackNavigator}
+				component={UserTasksScreen}
 			/>
 			<BottomTab.Screen
-				name="FlatsStack"
+				name="Flats"
 				options={{ title: 'Your Flats' }}
-				component={FlatsStackNavigator}
+				component={FlatsScreen}
 			/>
 			<BottomTab.Screen
-				name="CurrentPeriodsStack"
+				name="CurrentPeriods"
 				options={{ title: 'Your Current Periods' }}
 				component={CurrentPeriodsScreen}
 			/>
@@ -94,75 +93,60 @@ const BottomTabNavigator = () => {
 	);
 };
 
-const FlatsStack = createStackNavigator<FlatsStackParamList>();
-const FlatsStackNavigator = () => {
+const RootStack = createStackNavigator<RootStackParamList>();
+const RootStackNavigator = () => {
 	return (
-		<FlatsStack.Navigator initialRouteName="Flats">
-			<FlatsStack.Screen
-				name="Flats"
-				options={{ title: 'Your Flats' }}
-				component={FlatsScreen}
+		<RootStack.Navigator initialRouteName="BottomTab">
+			<RootStack.Screen
+				name="BottomTab"
+				options={{ title: 'FTS 2020' }}
+				component={BottomTabNavigator}
 			/>
-			<FlatsStack.Screen
+			<RootStack.Screen
 				name="FlatDetails"
 				options={{ title: 'View Flat' }}
 				component={FlatDetailsScreen}
 			/>
-			<FlatsStack.Screen
+			<RootStack.Screen
 				name="NewFlatInfo"
 				options={{ title: 'Add Flat' }}
 				component={NewFlatInfoScreen}
 			/>
-			<FlatsStack.Screen
+			<RootStack.Screen
 				name="NewFlat"
 				options={{ title: 'Add Flat' }}
 				component={NewFlatScreen}
 			/>
-			<FlatsStack.Screen
+			<RootStack.Screen
 				name="InviteMembers"
 				options={{ title: 'Invite Members' }}
 				component={InviteMembersScreen}
 			/>
-		</FlatsStack.Navigator>
-	);
-};
-
-const TasksStack = createStackNavigator<TasksStackParamList>();
-const TasksStackNavigator = () => {
-	return (
-		<TasksStack.Navigator initialRouteName="UserTasks">
-			<TasksStack.Screen
-				name="UserTasks"
-				options={{ title: 'Your Tasks' }}
-				component={UserTasksScreen}
-			/>
-			<TasksStack.Screen
+			<RootStack.Screen
 				name="TaskDetails"
 				options={{ title: 'View Task' }}
 				component={TaskDetailsScreen}
 			/>
-			<TasksStack.Screen
+			<RootStack.Screen
 				name="NewTaskName"
 				options={{ title: 'New Task' }}
 				component={NewTaskNameScreen}
 			/>
-			<TasksStack.Screen
+			<RootStack.Screen
 				name="NewTaskTime"
 				options={{ title: 'New Task' }}
 				component={NewTaskTimeScreen}
 			/>
-			<TasksStack.Screen
+			<RootStack.Screen
 				name="UpdateTaskMembers"
 				options={(props) => ({
-					title: ((props.route.params as unknown) as {
-						newTask: boolean;
-					}).newTask
+					title: props.route.params.newTask
 						? 'New Task'
 						: 'Update Task',
 				})}
 				component={UpdateTaskMembersScreen}
 			/>
-		</TasksStack.Navigator>
+		</RootStack.Navigator>
 	);
 };
 

@@ -12,10 +12,8 @@ import { withTheme } from 'react-native-paper';
 import { Theme } from 'react-native-paper/lib/typescript/src/types';
 import Header from '../../../components/UI/Header';
 import CustomButton from '../../../components/UI/CustomButton';
-import {
-	NewFlatScreenNavigationProp,
-	NewFlatScreenRouteProps,
-} from '../../../types/navigationTypes';
+import { NewFlatScreenNavigationProp } from '../../../types/rootNavigationTypes';
+import { NewFlatScreenRouteProps } from '../../../types/rootRoutePropTypes';
 import Input from '../../../components/UI/Input';
 import useForm, {
 	createInitialState,
@@ -69,7 +67,7 @@ const NewFlatScreen: React.FC<Props> = ({ theme, navigation }) => {
 		if (flatId) {
 			if (isMounted.current) {
 				navigation.popToTop();
-				navigation.navigate('InviteMembers', {
+				navigation.push('InviteMembers', {
 					flatId,
 					isNewFlat: true,
 				});

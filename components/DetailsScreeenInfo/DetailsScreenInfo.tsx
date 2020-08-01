@@ -17,7 +17,7 @@ import NotificationCard from '../UI/NotificationCard';
 import {
 	FlatDetailsScreenNavigationProp,
 	TaskDetailsScreenNavigationProp,
-} from '../../types/navigationTypes';
+} from '../../types/rootNavigationTypes';
 
 interface Props {
 	navigation:
@@ -55,8 +55,7 @@ const DetailsScreenInfo: React.FC<Props> = ({
 	const theme = useTheme();
 
 	const personSelectHandler = (id: number) => {
-		// TODO
-		(navigation.navigate as any)('ProfileStack', {
+		navigation.navigate('ProfileStack', {
 			screen: 'Profile',
 			params: { id },
 		});

@@ -14,10 +14,6 @@ import { withTheme, HelperText, TextInput } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Theme } from 'react-native-paper/lib/typescript/src/types';
 import moment from 'moment';
-import {
-	NewTaskTimeScreenNavigationProp,
-	NewTaskTimeScreenRouteProps,
-} from '../../types/navigationTypes';
 import { StateError } from '../../store/ReactTypes/customReactTypes';
 import { TaskData } from '../../models/task';
 import HttpErrorParser from '../../utils/parseError';
@@ -30,6 +26,8 @@ import { getRandomInt } from '../../utils/random';
 import { createTask } from '../../store/actions/tasks';
 import RootState from '../../store/storeTypes';
 import { TaskPeriodUnit } from '../../constants/task';
+import { NewTaskTimeScreenNavigationProp } from '../../types/rootNavigationTypes';
+import { NewTaskTimeScreenRouteProps } from '../../types/rootRoutePropTypes';
 
 interface Props {
 	theme: Theme;
@@ -54,7 +52,9 @@ const NewTaskTimeScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 	const [startDate, setStartDate] = useState(defaultStartDay);
 	const [endDate, setEndDate] = useState(defaultEndDay);
 	const [datesError, setDatesError] = useState<StateError>(null);
-	const [tmpId] = useState(String.fromCharCode(getRandomInt(97, 123)) + Date.now());
+	const [tmpId] = useState(
+		String.fromCharCode(getRandomInt(97, 123)) + Date.now()
+	);
 	const newCreatedTaskId = useSelector(
 		(state: RootState) => state.tasks.createdTasksTmpIds[tmpId]
 	);
@@ -70,7 +70,10 @@ const NewTaskTimeScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 	useEffect(() => {
 		if (newCreatedTaskId) {
 			navigation.pop();
-			navigation.replace('NewTaskMembers', { id: newCreatedTaskId, newTask: true });
+			navigation.replace('UpdateTaskMembers', {
+				id: newCreatedTaskId,
+				newTask: true,
+			});
 		}
 	}, [newCreatedTaskId, navigation]);
 
@@ -196,7 +199,10 @@ const NewTaskTimeScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 							error={Boolean(periodValueError)}
 							onBlur={periodValueBlurHandler}
 						/>
-						<HelperText type="error" visible={Boolean(periodValueError)}>
+						<HelperText
+							type="error"
+							visible={Boolean(periodValueError)}
+						>
 							{periodValueError}
 						</HelperText>
 					</View>
@@ -235,7 +241,9 @@ const NewTaskTimeScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 					</View>
 					<View style={styles.inputContainer}>
 						{error && (
-							<NotificationCard severity="error">{error}</NotificationCard>
+							<NotificationCard severity="error">
+								{error}
+							</NotificationCard>
 						)}
 					</View>
 					<View style={styles.actions}>
@@ -254,7 +262,11 @@ const NewTaskTimeScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 						<DateTimePicker
 							display="default"
 							is24Hour
-							value={datePickerField === 'startDate' ? startDate : endDate}
+							value={
+								datePickerField === 'startDate'
+									? startDate
+									: endDate
+							}
 							minimumDate={defaultStartDay}
 							mode="date"
 							onChange={(ev, date) =>

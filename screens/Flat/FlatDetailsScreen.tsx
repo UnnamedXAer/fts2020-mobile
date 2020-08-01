@@ -18,7 +18,6 @@ import {
 	fetchFlat,
 } from '../../store/actions/flats';
 import FlatTasksList from '../../components/Flat/FlatTasksList';
-import { FlatDetailsScreenNavigationProp, FlatDetailsScreenRouteProps } from '../../types/navigationTypes';
 import { FABAction } from '../../types/types';
 import DetailsScreenInfo from '../../components/DetailsScreeenInfo/DetailsScreenInfo';
 import AlertDialog, {
@@ -30,6 +29,8 @@ import AlertSnackbar, {
 import HttpErrorParser from '../../utils/parseError';
 import { FlatData } from '../../models/flat';
 import FlatInvitationsList from '../../components/Flat/FlatInvitationsList/FlatInvitationsList';
+import { FlatDetailsScreenRouteProps } from '../../types/rootRoutePropTypes';
+import { FlatDetailsScreenNavigationProp } from '../../types/rootNavigationTypes';
 
 type FABActionsKeys = 'addTask' | 'leaveFlat' | 'inviteMembers' | 'closeFlat';
 
@@ -429,12 +430,8 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) => {
 		addTask: {
 			icon: 'table-plus',
 			onPress: () => {
-				// navigation.navigate('NewTaskName', {
-				// 	flatId: id,
-				// });
-				navigation.navigate('TasksStack', {
-					screen: 'NewTaskName',
-					params: { flatId: id },
+				navigation.push('NewTaskName', {
+					flatId: id,
 				});
 			},
 			label: 'Add Task',
@@ -467,7 +464,7 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) => {
 		inviteMembers: {
 			icon: 'account-multiple-plus',
 			onPress: () =>
-				navigation.navigate('InviteMembers', {
+				navigation.push('InviteMembers', {
 					flatId: id,
 					isNewFlat: false,
 				}),

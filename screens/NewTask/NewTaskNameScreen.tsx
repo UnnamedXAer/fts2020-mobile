@@ -12,17 +12,18 @@ import {
 import { withTheme } from 'react-native-paper';
 import { Theme } from 'react-native-paper/lib/typescript/src/types';
 import Header from '../../components/UI/Header';
-import useForm, { createInitialState, FormActionTypes } from '../../hooks/useForm';
+import useForm, {
+	createInitialState,
+	FormActionTypes,
+} from '../../hooks/useForm';
 import { StateError } from '../../store/ReactTypes/customReactTypes';
 import { validateTaskFields } from '../../utils/validation';
 import Input from '../../components/UI/Input';
 import NotificationCard from '../../components/UI/NotificationCard';
 import CustomButton from '../../components/UI/CustomButton';
 import Stepper from '../../components/UI/Stepper';
-import {
-	NewTaskNameScreenNavigationProp,
-	NewTaskNameScreenRouteProps,
-} from '../../types/navigationTypes';
+import { NewTaskNameScreenNavigationProp } from '../../types/rootNavigationTypes';
+import { NewTaskNameScreenRouteProps } from '../../types/rootRoutePropTypes';
 
 interface Props {
 	theme: Theme;
@@ -52,7 +53,10 @@ const NewTaskNameScreen: React.FC<Props> = ({ theme, route, navigation }) => {
 		};
 	}, []);
 
-	const fieldTextChangeHandler = (fieldName: NewTaskFormFields, txt: string) => {
+	const fieldTextChangeHandler = (
+		fieldName: NewTaskFormFields,
+		txt: string
+	) => {
 		dispatchForm({
 			fieldId: fieldName,
 			value: txt,
@@ -124,7 +128,9 @@ const NewTaskNameScreen: React.FC<Props> = ({ theme, route, navigation }) => {
 							keyboardType="default"
 							returnKeyType="next"
 							returnKeyLabel="next"
-							onSubmitEditing={() => descriptionInpRef!.current!.focus()}
+							onSubmitEditing={() =>
+								descriptionInpRef!.current!.focus()
+							}
 							disabled={loading}
 							formState={formState}
 							textChanged={fieldTextChangeHandler}
@@ -151,7 +157,9 @@ const NewTaskNameScreen: React.FC<Props> = ({ theme, route, navigation }) => {
 					</View>
 					<View style={styles.inputContainer}>
 						{error && (
-							<NotificationCard severity="error">{error}</NotificationCard>
+							<NotificationCard severity="error">
+								{error}
+							</NotificationCard>
 						)}
 					</View>
 					<View style={styles.actions}>
@@ -162,7 +170,10 @@ const NewTaskNameScreen: React.FC<Props> = ({ theme, route, navigation }) => {
 						>
 							CANCEL
 						</CustomButton>
-						<CustomButton onPress={submitHandler} disabled={loading}>
+						<CustomButton
+							onPress={submitHandler}
+							disabled={loading}
+						>
 							NEXT
 						</CustomButton>
 					</View>

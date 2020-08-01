@@ -27,12 +27,7 @@ import {
 	PlaceholderLine,
 	Shine,
 } from '../../components/UI/Placeholder/Placeholder';
-import { CurrentPeriodsScreenNavigationProp } from '../../types/navigationTypes';
-import {
-	fetchUserTasks,
-	setShowInactiveTasks,
-} from '../../store/actions/tasks';
-import { UserTask } from '../../models/task';
+import { CurrentPeriodsScreenNavigationProp } from '../../types/currentPeriodsNavigationTypes';
 
 interface Props {
 	theme: Theme;

@@ -25,9 +25,12 @@ import HttpErrorParser from '../../utils/parseError';
 import Flat from '../../models/flat';
 import NotificationCard from '../../components/UI/NotificationCard';
 import { StateError } from '../../store/ReactTypes/customReactTypes';
-import { FlatsScreenNavigationProp } from '../../types/navigationTypes';
 import { Placeholder } from 'rn-placeholder';
-import { PlaceholderLine, Shine } from '../../components/UI/Placeholder/Placeholder';
+import {
+	PlaceholderLine,
+	Shine,
+} from '../../components/UI/Placeholder/Placeholder';
+import { FlatsScreenNavigationProp } from '../../types/flatsNavigationType';
 
 interface Props {
 	theme: Theme;
@@ -36,7 +39,9 @@ interface Props {
 
 const FlatsScreen: React.FC<Props> = ({ theme, navigation }) => {
 	const dispatch = useDispatch();
-	const showInactive = useSelector((state: RootState) => state.flats.showInactive);
+	const showInactive = useSelector(
+		(state: RootState) => state.flats.showInactive
+	);
 	const flats = useSelector((state: RootState) => {
 		if (!showInactive) {
 			return state.flats.flats.filter((x) => x.active === true);
@@ -44,7 +49,9 @@ const FlatsScreen: React.FC<Props> = ({ theme, navigation }) => {
 			return state.flats.flats;
 		}
 	});
-	const flatsLoadTime = useSelector((state: RootState) => state.flats.flatsLoadTime);
+	const flatsLoadTime = useSelector(
+		(state: RootState) => state.flats.flatsLoadTime
+	);
 	const [loading, setLoading] = useState(flatsLoadTime === 0);
 	const [error, setError] = useState<StateError>(null);
 	const [refreshing, setRefreshing] = useState(false);
@@ -76,7 +83,7 @@ const FlatsScreen: React.FC<Props> = ({ theme, navigation }) => {
 	};
 
 	const flatSelectHandler = (id: number) => {
-		navigation.navigate('FlatDetails', { id: id });
+		navigation.push('FlatDetails', { id: id });
 	};
 
 	const showInactiveChangeHandler = async () => {
@@ -166,7 +173,9 @@ const FlatsScreen: React.FC<Props> = ({ theme, navigation }) => {
 									<PlaceholderLine
 										height={64}
 										noMargin
-										style={{ borderRadius: theme.roundness }}
+										style={{
+											borderRadius: theme.roundness,
+										}}
 									/>
 									<Divider style={{ marginVertical: 16 }} />
 									<PlaceholderLine height={64} noMargin />
@@ -179,7 +188,9 @@ const FlatsScreen: React.FC<Props> = ({ theme, navigation }) => {
 										'You are not a member of any active flat. ',
 										{
 											onPress: () =>
-												navigation.navigate('NewFlatInfo'),
+												navigation.navigate(
+													'NewFlatInfo'
+												),
 											text: 'Add ',
 										},
 										'your first flat or find one.',

@@ -65,17 +65,20 @@ const DetailsScreenInfo: React.FC<Props> = ({
 			{error && (
 				<NotificationCard severity="error">{error}</NotificationCard>
 			)}
-			<View style={styles.container}>
+			<View style={[styles.container, styles.headerContainer]}>
 				{name ? (
 					<>
 						{active === false && (
 							<Headline
-								style={{ color: theme.colors.placeholder }}
+								style={[
+									styles.headerText,
+									{ color: theme.colors.placeholder },
+								]}
 							>
 								[Inactive]{' '}
 							</Headline>
 						)}
-						<Headline>{name}</Headline>
+						<Headline style={styles.headerText}>{name}</Headline>
 					</>
 				) : (
 					<Placeholder Animation={Shine}>
@@ -138,6 +141,12 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		paddingTop: 24,
 		justifyContent: 'center',
+	},
+	headerContainer: {
+		marginHorizontal: 8,
+	},
+	headerText: {
+		textAlign: 'center',
 	},
 	section: {
 		paddingHorizontal: 8,

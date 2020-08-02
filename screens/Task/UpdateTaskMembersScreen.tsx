@@ -94,7 +94,7 @@ const UpdateTaskMembersScreen: React.FC<Props> = ({
 					onBackPress
 				);
 			};
-		}, [isNewTask])
+		}, [isNewTask, id])
 	);
 
 	const addMembersHandler = () => {

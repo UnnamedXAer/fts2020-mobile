@@ -24,8 +24,10 @@ const MembersList: React.FC<Props> = ({
 	ownerId,
 }) => {
 	const sendMailHandler = (id: number) => {
-		const emailAddress = members!.find((x) => x.id === id)!;
-		Linking.openURL(`mailto:${emailAddress}?subject=FTS2020%20-%20member%20message`);
+		const { emailAddress } = members!.find((x) => x.id === id)!;
+		Linking.openURL(
+			`mailto:${emailAddress}?subject=FTS2020%20-%20member%20message`
+		);
 	};
 
 	return (

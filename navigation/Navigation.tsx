@@ -143,6 +143,22 @@ const RootStackNavigator = () => {
 					title: props.route.params.newTask
 						? 'New Task'
 						: 'Update Task',
+					headerLeft: (btnProps) => (
+						<HeaderBackButton
+							{...btnProps}
+							onPress={
+								props.route.params.newTask
+									? () =>
+											props.navigation.replace(
+												'TaskDetails',
+												{
+													id: props.route.params.id,
+												}
+											)
+									: btnProps.onPress
+							}
+						/>
+					),
 				})}
 				component={UpdateTaskMembersScreen}
 			/>

@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
 	StyleSheet,
@@ -7,6 +7,7 @@ import {
 	KeyboardAvoidingView,
 	TouchableWithoutFeedback,
 	Keyboard,
+	BackHandler,
 } from 'react-native';
 import {
 	withTheme,
@@ -17,6 +18,7 @@ import {
 	Colors,
 } from 'react-native-paper';
 import Toast from 'react-native-simple-toast';
+import { useFocusEffect } from '@react-navigation/native';
 import { Theme } from 'react-native-paper/lib/typescript/src/types';
 import { StateError } from '../../store/ReactTypes/customReactTypes';
 import HttpErrorParser from '../../utils/parseError';
@@ -42,7 +44,7 @@ const UpdateTaskMembersScreen: React.FC<Props> = ({
 	navigation,
 	route,
 }) => {
-	const isNewTask = route.params.newTask;
+	const { newTask: isNewTask, id } = route.params;
 	const dispatch = useDispatch();
 
 	const [loading, setLoading] = useState(false);
@@ -71,6 +73,29 @@ const UpdateTaskMembersScreen: React.FC<Props> = ({
 			isMounted.current = false;
 		};
 	}, []);
+
+	useFocusEffect(
+		useCallback(() => {
+			const onBackPress = () => {
+				if (isNewTask) {
+					navigation.replace('TaskDetails', {
+						id,
+					});
+					return true;
+				}
+				return false;
+			};
+
+			BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+			return () => {
+				BackHandler.removeEventListener(
+					'hardwareBackPress',
+					onBackPress
+				);
+			};
+		}, [isNewTask])
+	);
 
 	const addMembersHandler = () => {
 		if (selectedFlatMembers.length === 0) {

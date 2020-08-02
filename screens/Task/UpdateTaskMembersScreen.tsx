@@ -16,6 +16,7 @@ import {
 	Text,
 	IconButton,
 	Colors,
+	ActivityIndicator,
 } from 'react-native-paper';
 import Toast from 'react-native-simple-toast';
 import { useFocusEffect } from '@react-navigation/native';
@@ -32,6 +33,7 @@ import { updatedTaskMembers } from '../../store/actions/tasks';
 import { clearTaskPeriods } from '../../store/actions/periods';
 import { UpdateTaskMembersScreenNavigationProp } from '../../types/rootNavigationTypes';
 import { NewTaskMembersScreenRouteProps } from '../../types/rootRoutePropTypes';
+import { fetchFlat, fetchFlatMembers } from '../../store/actions/flats';
 
 interface Props {
 	theme: Theme;
@@ -46,18 +48,19 @@ const UpdateTaskMembersScreen: React.FC<Props> = ({
 }) => {
 	const { newTask: isNewTask, id } = route.params;
 	const dispatch = useDispatch();
-
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<StateError>(null);
 	const task = useSelector(
 		(state: RootState) =>
 			state.tasks.tasks.find((x) => x.id === route.params.id)!
 	);
-	const flatMembers = useSelector(
-		(state: RootState) =>
-			state.flats.flats.find((x) => x.id === task.flatId)!.members!
+	const flatId = task.flatId!;
+	const flat = useSelector((state: RootState) =>
+		state.flats.flats.find((x) => x.id === task.flatId)
 	);
-
+	const flatMembers = flat?.members;
+	const [loadingFlatMembers, setLoadingFlatMembers] = useState(false);
+	const [errorFlatMembers, setErrorFlatMembers] = useState<StateError>(null);
 	const [addedMembers, setAddedMembers] = useState(
 		isNewTask ? [...flatMembers!] : [...task.members!]
 	);
@@ -96,6 +99,33 @@ const UpdateTaskMembersScreen: React.FC<Props> = ({
 			};
 		}, [isNewTask, id])
 	);
+
+	useEffect(() => {
+		if (!loadingFlatMembers && !errorFlatMembers && !flatMembers) {
+			const loadFlatMembers = async () => {
+				setLoadingFlatMembers(true);
+				try {
+					if (!flat) {
+						await dispatch(fetchFlat(flatId));
+					}
+					await dispatch(fetchFlatMembers(flatId));
+				} catch (err) {
+					if (isMounted.current) {
+						const httpError = new HttpErrorParser(err);
+						const msg = httpError.getMessage();
+						setErrorFlatMembers(
+							`Couldn't get members of the flat due to following error:\n${msg}\
+							\n\nPlease try later.`
+						);
+					}
+				}
+				if (isMounted.current) {
+					setLoadingFlatMembers(false);
+				}
+			};
+			loadFlatMembers();
+		}
+	}, [loadingFlatMembers, errorFlatMembers, flatMembers, flat, flatId]);
 
 	const addMembersHandler = () => {
 		if (selectedFlatMembers.length === 0) {
@@ -191,6 +221,7 @@ const UpdateTaskMembersScreen: React.FC<Props> = ({
 					]}
 				>
 					{isNewTask && <Stepper steps={3} currentStep={3} />}
+
 					<Header style={styles.header}>
 						{isNewTask ? 'Set' : 'Update'} Task - Members
 					</Header>
@@ -200,7 +231,21 @@ const UpdateTaskMembersScreen: React.FC<Props> = ({
 					<View
 						style={[styles.inputContainer, styles.membersContainer]}
 					>
-						{flatMembers.length !== addedMembers.length ? (
+						{errorFlatMembers ? (
+							<NotificationCard severity="error">
+								{errorFlatMembers}
+							</NotificationCard>
+						) : loadingFlatMembers ? (
+							<View
+								style={{
+									width: '100%',
+									justifyContent: 'center',
+								}}
+							>
+								<ActivityIndicator />
+							</View>
+						) : flatMembers &&
+						  flatMembers.length !== addedMembers.length ? (
 							flatMembers
 								.filter(
 									(x) =>
@@ -267,6 +312,7 @@ const UpdateTaskMembersScreen: React.FC<Props> = ({
 									: theme.colors.accent
 							}
 							onPress={removeMembersHandler}
+							disabled={!!errorFlatMembers}
 						></IconButton>
 						<IconButton
 							icon="arrow-down-bold-outline"
@@ -276,6 +322,7 @@ const UpdateTaskMembersScreen: React.FC<Props> = ({
 									: theme.colors.primary
 							}
 							onPress={addMembersHandler}
+							disabled={!!errorFlatMembers}
 						></IconButton>
 					</View>
 					<View
@@ -347,7 +394,11 @@ const UpdateTaskMembersScreen: React.FC<Props> = ({
 						>
 							{isNewTask ? 'LATER' : 'CANCEL'}
 						</CustomButton>
-						<CustomButton onPress={submitHandler} loading={loading}>
+						<CustomButton
+							onPress={submitHandler}
+							loading={loading}
+							disabled={!!errorFlatMembers}
+						>
 							{isNewTask ? 'COMPLETE' : 'UPDATE'}
 						</CustomButton>
 					</View>

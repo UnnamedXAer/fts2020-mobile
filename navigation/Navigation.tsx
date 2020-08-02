@@ -119,7 +119,27 @@ const RootStackNavigator = () => {
 			/>
 			<RootStack.Screen
 				name="InviteMembers"
-				options={{ title: 'Invite Members' }}
+				options={(props) => ({
+					title: 'Invite Members',
+					headerLeft: (btnProps) => (
+						<HeaderBackButton
+							{...btnProps}
+							onPress={
+								props.route.params.isNewFlat
+									? () =>
+											props.navigation.replace(
+												'FlatDetails',
+												{
+													id:
+														props.route.params
+															.flatId,
+												}
+											)
+									: btnProps.onPress
+							}
+						/>
+					),
+				})}
 				component={InviteMembersScreen}
 			/>
 			<RootStack.Screen

@@ -14,6 +14,7 @@ import {
 	TouchableWithoutFeedback,
 	Keyboard,
 	TextInput as TextInputType,
+	BackHandler,
 } from 'react-native';
 import {
 	withTheme,
@@ -24,6 +25,7 @@ import {
 	HelperText,
 	IconButton,
 } from 'react-native-paper';
+import { useFocusEffect } from '@react-navigation/native';
 import { Theme } from 'react-native-paper/lib/typescript/src/types';
 import CustomButton from '../../../components/UI/CustomButton';
 import { StateError } from '../../../store/ReactTypes/customReactTypes';
@@ -79,6 +81,29 @@ const InviteMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 			isMounted.current = false;
 		};
 	}, []);
+
+	useFocusEffect(
+		useCallback(() => {
+			const onBackPress = () => {
+				if (isNewFlat) {
+					navigation.replace('FlatDetails', {
+						id: flatId,
+					});
+					return true;
+				}
+				return false;
+			};
+
+			BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+			return () => {
+				BackHandler.removeEventListener(
+					'hardwareBackPress',
+					onBackPress
+				);
+			};
+		}, [isNewFlat, flatId])
+	);
 
 	const inputBlurHandler = () => {
 		if (inputValue.length > 0) {
@@ -396,7 +421,7 @@ const InviteMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 								}
 							}}
 						>
-							{isNewFlat ? 'LATER' : 'BACK'}
+							{isNewFlat ? 'LATER' : 'CANCEL'}
 						</CustomButton>
 						<CustomButton
 							onPress={sendInvitationsHandler}

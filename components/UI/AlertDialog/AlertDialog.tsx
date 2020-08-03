@@ -30,10 +30,9 @@ interface Props {
 const AlertDialog: React.FC<Props> = (props) => {
 	const { open, onDismiss, actions, content, title, loading } = props.data;
 	const theme = useTheme();
-	
 	return (
 		<Portal>
-			<Dialog visible={open} onDismiss={onDismiss}>
+			<Dialog visible={open} onDismiss={onDismiss} dismissable={!loading}>
 				<Dialog.Title>{title}</Dialog.Title>
 				<Dialog.Content>
 					{typeof content === 'string' ? (

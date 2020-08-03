@@ -34,17 +34,21 @@ interface Props {
 const newTaskFormFields = ['name', 'description'] as const;
 export type NewTaskFormFields = typeof newTaskFormFields[number];
 
-const initialState: any = createInitialState<NewTaskFormFields>({
-	name: '',
-	description: '',
-});
-
-const NewTaskNameScreen: React.FC<Props> = ({ theme, route, navigation }) => {
+const NewTaskNameScreen: React.FC<Props> = ({
+	theme,
+	route: { params },
+	navigation,
+}) => {
 	const dispatch = useDispatch();
 	const descriptionInpRef: MutableRefObject<TextInput | null> = useRef(null);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<StateError>(null);
-	const [formState, dispatchForm] = useForm<NewTaskFormFields>(initialState);
+	const [formState, dispatchForm] = useForm<NewTaskFormFields>(
+		createInitialState<NewTaskFormFields>({
+			name: params.name || '',
+			description: params.description || '',
+		})
+	);
 	const isMounted = useRef(true);
 	useEffect(() => {
 		isMounted.current = true;
@@ -100,7 +104,8 @@ const NewTaskNameScreen: React.FC<Props> = ({ theme, route, navigation }) => {
 			return;
 		}
 		navigation.push('NewTaskTime', {
-			flatId: route.params.flatId,
+			...params,
+			flatId: params.flatId,
 			...formState.values,
 		});
 	};

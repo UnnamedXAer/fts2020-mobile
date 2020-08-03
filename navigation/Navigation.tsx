@@ -36,6 +36,8 @@ import ProfileScreen from '../screens/Profile/ProfileScreen';
 import ChangePasswordScreen from '../screens/Auth/ChangePasswordScreen';
 import CurrentPeriodsScreen from '../screens/CurrentPeriods/CurrentPeriodsScreen';
 import AboutScreen from '../screens/About/AboutScreen';
+import { NewTaskTimeScreenNavigationProp } from '../types/rootNavigationTypes';
+import { NewTaskTimeScreenRouteProps } from '../types/rootRoutePropTypes';
 
 const Drawer = createDrawerNavigator<DrawerParamList>();
 const DrawerNavigator = ({ loggedUser }: { loggedUser: User }) => {
@@ -154,7 +156,27 @@ const RootStackNavigator = () => {
 			/>
 			<RootStack.Screen
 				name="NewTaskTime"
-				options={{ title: 'New Task' }}
+				options={({
+					navigation,
+					route: { params },
+				}: {
+					navigation: NewTaskTimeScreenNavigationProp;
+					route: NewTaskTimeScreenRouteProps;
+				}) => {
+					return {
+						title: 'New Task',
+						headerLeft: (bntProps) => (
+							<HeaderBackButton
+								{...bntProps}
+								onPress={() =>
+									navigation.replace('NewTaskName', {
+										...params,
+									})
+								}
+							/>
+						),
+					};
+				}}
 				component={NewTaskTimeScreen}
 			/>
 			<RootStack.Screen

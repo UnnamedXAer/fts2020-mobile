@@ -2,10 +2,7 @@ import 'react-native-gesture-handler';
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { NavigationContainer } from '@react-navigation/native';
-import {
-	createStackNavigator,
-	HeaderBackButton,
-} from '@react-navigation/stack';
+import { createStackNavigator, HeaderBackButton } from '@react-navigation/stack';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import FlatsScreen from '../screens/Flat/FlatsScreen';
@@ -47,9 +44,7 @@ const DrawerNavigator = ({ loggedUser }: { loggedUser: User }) => {
 				component={RootStackNavigator}
 			/>
 			<Drawer.Screen name="ProfileStack" options={{ title: 'Profile' }}>
-				{(props) => (
-					<ProfileStackNavigator {...props} loggedUser={loggedUser} />
-				)}
+				{(props) => <ProfileStackNavigator {...props} loggedUser={loggedUser} />}
 			</Drawer.Screen>
 			<Drawer.Screen
 				name="About"
@@ -76,17 +71,20 @@ const BottomTabNavigator = () => {
 		<BottomTab.Navigator>
 			<BottomTab.Screen
 				name="UserTasks"
-				options={{ title: 'Your Tasks' }}
+				options={{ title: 'Your Tasks', tabBarIcon: 'all-inclusive' }}
 				component={UserTasksScreen}
 			/>
 			<BottomTab.Screen
 				name="Flats"
-				options={{ title: 'Your Flats' }}
+				options={{ title: 'Your Flats', tabBarIcon: 'home-city-outline' }}
 				component={FlatsScreen}
 			/>
 			<BottomTab.Screen
 				name="CurrentPeriods"
-				options={{ title: 'Your Current Periods' }}
+				options={{
+					title: 'Your Current Periods',
+					tabBarIcon: 'format-list-checks',
+				}}
 				component={CurrentPeriodsScreen}
 			/>
 		</BottomTab.Navigator>
@@ -127,14 +125,9 @@ const RootStackNavigator = () => {
 							onPress={
 								props.route.params.isNewFlat
 									? () =>
-											props.navigation.replace(
-												'FlatDetails',
-												{
-													id:
-														props.route.params
-															.flatId,
-												}
-											)
+											props.navigation.replace('FlatDetails', {
+												id: props.route.params.flatId,
+											})
 									: btnProps.onPress
 							}
 						/>
@@ -160,21 +153,16 @@ const RootStackNavigator = () => {
 			<RootStack.Screen
 				name="UpdateTaskMembers"
 				options={(props) => ({
-					title: props.route.params.newTask
-						? 'New Task'
-						: 'Update Task',
+					title: props.route.params.newTask ? 'New Task' : 'Update Task',
 					headerLeft: (btnProps) => (
 						<HeaderBackButton
 							{...btnProps}
 							onPress={
 								props.route.params.newTask
 									? () =>
-											props.navigation.replace(
-												'TaskDetails',
-												{
-													id: props.route.params.id,
-												}
-											)
+											props.navigation.replace('TaskDetails', {
+												id: props.route.params.id,
+											})
 									: btnProps.onPress
 							}
 						/>
@@ -223,9 +211,7 @@ const ProfileStackNavigator = ({
 
 const AppNavitaionContainer = () => {
 	const [loading, setLoading] = useState(true);
-	const loggedUser = useSelector<RootState, User | null>(
-		(state) => state.auth.user
-	);
+	const loggedUser = useSelector<RootState, User | null>((state) => state.auth.user);
 	const [isLogIn, setIsLogIn] = useState(true);
 	const dispatch = useDispatch();
 
@@ -252,15 +238,11 @@ const AppNavitaionContainer = () => {
 				<DrawerNavigator loggedUser={loggedUser} />
 			) : isLogIn ? (
 				<LogInScreen
-					toggleAuthScreen={() =>
-						setIsLogIn((prevState) => !prevState)
-					}
+					toggleAuthScreen={() => setIsLogIn((prevState) => !prevState)}
 				/>
 			) : (
 				<RegistrationScreen
-					toggleAuthScreen={() =>
-						setIsLogIn((prevState) => !prevState)
-					}
+					toggleAuthScreen={() => setIsLogIn((prevState) => !prevState)}
 				/>
 			)}
 		</NavigationContainer>

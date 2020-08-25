@@ -2,16 +2,16 @@ import User from '../models/user';
 import { Action } from 'redux';
 import Flat from '../models/flat';
 import Task, { UserTask } from '../models/task';
-import { Period } from '../models/period';
+import { Period, CurrentPeriod } from '../models/period';
 import { InvitationPresentation } from '../models/invitation';
 
 export type RootState = {
 	auth: AuthState;
 	flats: FlatsState;
-	invitations: InvitationsState
+	invitations: InvitationsState;
 	tasks: TasksState;
 	users: UsersState;
-	periods: PeriodsState
+	periods: PeriodsState;
 };
 
 export type AuthState = {
@@ -46,9 +46,10 @@ export type TasksState = {
 
 export type PeriodsState = {
 	taskPeriods: {
-		[taskId: number]: Period[] | undefined
-	}
-}
+		[taskId: number]: Period[];// | undefined;
+	};
+	currentPeriods: CurrentPeriod[] | null;
+};
 
 export type AppReducer<TState, AType = string, APayload = any> = (
 	state: TState,
@@ -61,7 +62,6 @@ type StoreActionPayload<T> = {
 	payload: T;
 };
 
-export type StoreAction<P = any, A = string> = StoreActionPayload<P> &
-	Action<A>;
+export type StoreAction<P = any, A = string> = StoreActionPayload<P> & Action<A>;
 
 export default RootState;

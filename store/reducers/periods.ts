@@ -3,16 +3,18 @@ import { TaskPeriodsActionTypes } from '../actions/actionTypes';
 import {
 	SetTaskPeriodsActionPayload,
 	CompletePeriodActionPayload,
+	SetCurrentPeriodsActionPayload,
 } from '../actions/periods';
 
 const initialState: PeriodsState = {
 	taskPeriods: {},
+	currentPeriods: null,
 };
 
-const setTaskPeriods: SimpleReducer<
-	PeriodsState,
-	SetTaskPeriodsActionPayload
-> = (state, action) => {
+const setTaskPeriods: SimpleReducer<PeriodsState, SetTaskPeriodsActionPayload> = (
+	state,
+	action
+) => {
 	const { periods, taskId } = action.payload;
 
 	const updatedPeriods = { ...state.taskPeriods };
@@ -25,21 +27,42 @@ const setTaskPeriods: SimpleReducer<
 	};
 };
 
-const completePeriod: SimpleReducer<
-	PeriodsState,
-	CompletePeriodActionPayload
-> = (state, action) => {
+const setCurrentPeriods: SimpleReducer<PeriodsState, SetCurrentPeriodsActionPayload> = (
+	state,
+	action
+) => {
+	const { periods } = action.payload;
+	const updatedCurrentPeriods = [...periods];
+
+	return {
+		...state,
+		currentPeriods: updatedCurrentPeriods,
+	};
+};
+
+const completePeriod: SimpleReducer<PeriodsState, CompletePeriodActionPayload> = (
+	state,
+	action
+) => {
 	const { period, taskId } = action.payload;
 
 	const updatedPeriods = { ...state.taskPeriods };
-	const updatedTaskPeriods = [...updatedPeriods[taskId]];
-	const periodIdx = updatedTaskPeriods.findIndex((x) => x.id === period.id);
-	updatedTaskPeriods[periodIdx] = period;
-	updatedPeriods[taskId] = updatedTaskPeriods;
+	let updatedCurrentPeriods = null;
+	if (updatedPeriods[taskId]) {
+		const updatedTaskPeriods = [...updatedPeriods[taskId]];
+		const periodIdx = updatedTaskPeriods.findIndex((x) => x.id === period.id);
+		updatedTaskPeriods[periodIdx] = period;
+		updatedPeriods[taskId] = updatedTaskPeriods;
+	}
+
+	if (state.currentPeriods) {
+		updatedCurrentPeriods = state.currentPeriods.filter((x) => x.id !== period.id);
+	}
 
 	return {
 		...state,
 		taskPeriods: updatedPeriods,
+		currentPeriods: updatedCurrentPeriods,
 	};
 };
 
@@ -53,6 +76,7 @@ const clearTaskPeriods: SimpleReducer<PeriodsState, { taskId: number }> = (
 	return {
 		...state,
 		taskPeriods: updatedPeriods,
+		currentPeriods: null,
 	};
 };
 
@@ -69,6 +93,8 @@ const reducer: AppReducer<PeriodsState, TaskPeriodsActionTypes> = (
 	switch (action.type) {
 		case TaskPeriodsActionTypes.SetTaskPeriods:
 			return setTaskPeriods(state, action);
+		case TaskPeriodsActionTypes.SetCurrentPeriods:
+			return setCurrentPeriods(state, action);
 		case TaskPeriodsActionTypes.CompletePeriod:
 			return completePeriod(state, action);
 		case TaskPeriodsActionTypes.ClearTaskPeriods:

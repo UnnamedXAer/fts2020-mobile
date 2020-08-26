@@ -27,7 +27,6 @@ export const fetchUserInvitations = (): ThunkAction<
 		try {
 			const { data } = await axios.get<APIInvitationPresentation[]>(url);
 			const invitations = data.map((x) => new InvitationPresentation(x));
-
 			dispatch({
 				type: InvitationsActionTypes.SetUserInvitations,
 				payload: invitations,
@@ -44,9 +43,7 @@ export const fetchUserInvitation = (
 	return async (dispatch) => {
 		const url = `/invitations/${token}`;
 		try {
-			const { data, status } = await axios.get<APIInvitationPresentation>(
-				url
-			);
+			const { data, status } = await axios.get<APIInvitationPresentation>(url);
 			if (status === 200) {
 				const invitation = new InvitationPresentation(data);
 				dispatch({
@@ -83,9 +80,7 @@ export const answerUserInvitations = (
 			});
 			const state = getState();
 			const loggedUser = state.auth.user!;
-			const invitation = state.invitations.userInvitations.find(
-				(x) => x.id === id
-			);
+			const invitation = state.invitations.userInvitations.find((x) => x.id === id);
 
 			if (invitation) {
 				dispatch({

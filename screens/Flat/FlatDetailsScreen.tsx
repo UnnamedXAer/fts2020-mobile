@@ -395,7 +395,7 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) => {
 		}
 	}, [flat, dispatch, loadingElements, elementsErrors]);
 
-	const invitataionSelectHandler = (id: number) => {
+	const invitationSelectHandler = (id: number) => {
 		// open modal with options
 	};
 
@@ -523,7 +523,7 @@ const FlatDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) => {
 				<View style={styles.section}>
 					<FlatInvitationsList
 						invitations={flat?.invitations}
-						onSelect={invitataionSelectHandler}
+						onSelect={invitationSelectHandler}
 					/>
 				</View>
 				<Divider style={styles.divider} />

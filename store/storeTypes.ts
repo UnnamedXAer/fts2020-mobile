@@ -8,10 +8,10 @@ import { InvitationPresentation } from '../models/invitation';
 export type RootState = {
 	auth: AuthState;
 	flats: FlatsState;
-	invitations: InvitationsState
+	invitations: InvitationsState;
 	tasks: TasksState;
 	users: UsersState;
-	periods: PeriodsState
+	periods: PeriodsState;
 };
 
 export type AuthState = {
@@ -31,8 +31,7 @@ export type FlatsState = {
 };
 
 export type InvitationsState = {
-	userInvitations: InvitationPresentation[];
-	userInvitationsLoadTime: number;
+	userInvitations: InvitationPresentation[] | null;
 };
 
 export type TasksState = {
@@ -46,9 +45,9 @@ export type TasksState = {
 
 export type PeriodsState = {
 	taskPeriods: {
-		[taskId: number]: Period[] | undefined
-	}
-}
+		[taskId: number]: Period[] | undefined;
+	};
+};
 
 export type AppReducer<TState, AType = string, APayload = any> = (
 	state: TState,
@@ -61,7 +60,6 @@ type StoreActionPayload<T> = {
 	payload: T;
 };
 
-export type StoreAction<P = any, A = string> = StoreActionPayload<P> &
-	Action<A>;
+export type StoreAction<P = any, A = string> = StoreActionPayload<P> & Action<A>;
 
 export default RootState;

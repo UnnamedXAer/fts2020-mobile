@@ -5,6 +5,7 @@ import flatsReducer from './reducers/flats';
 import tasksReducer from './reducers/tasks';
 import taskPeriodsReducer from './reducers/periods';
 import usersReducer from './reducers/users';
+import invitationsReducer from './reducers/invitations';
 
 const rootReducer = combineReducers({
 	auth: authReducer,
@@ -12,13 +13,11 @@ const rootReducer = combineReducers({
 	tasks: tasksReducer,
 	users: usersReducer,
 	periods: taskPeriodsReducer,
+	invitations: invitationsReducer,
 });
 
 const middleware = [ReduxThunk];
 
-const store = createStore(
-	rootReducer,
-	applyMiddleware(...middleware)
-);
+const store = createStore(rootReducer, applyMiddleware(...middleware));
 
 export default store;

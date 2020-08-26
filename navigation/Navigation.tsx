@@ -2,10 +2,7 @@ import 'react-native-gesture-handler';
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { NavigationContainer } from '@react-navigation/native';
-import {
-	createStackNavigator,
-	HeaderBackButton,
-} from '@react-navigation/stack';
+import { createStackNavigator, HeaderBackButton } from '@react-navigation/stack';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import FlatsScreen from '../screens/Flat/FlatsScreen';
@@ -19,6 +16,7 @@ import {
 	DrawerParamList,
 	BottomTabParamList,
 	RootStackParamList,
+	InvitationsStackParamList,
 } from '../types/navigationTypes';
 import TaskDetailsScreen from '../screens/Task/TaskDetailsScreen';
 import NewFlatInfoScreen from '../screens/Flat/NewFlat/NewFlatInfoScreen';
@@ -36,6 +34,7 @@ import ProfileScreen from '../screens/Profile/ProfileScreen';
 import ChangePasswordScreen from '../screens/Auth/ChangePasswordScreen';
 import CurrentPeriodsScreen from '../screens/CurrentPeriods/CurrentPeriodsScreen';
 import AboutScreen from '../screens/About/AboutScreen';
+import InvitationsScreen from '../screens/Invitations/InvitationsScreen';
 
 const Drawer = createDrawerNavigator<DrawerParamList>();
 const DrawerNavigator = ({ loggedUser }: { loggedUser: User }) => {
@@ -46,10 +45,11 @@ const DrawerNavigator = ({ loggedUser }: { loggedUser: User }) => {
 				options={{ title: 'Flats & Tasks' }}
 				component={RootStackNavigator}
 			/>
+			<Drawer.Screen name="InvitationsStack" options={{ title: 'Invitations' }}>
+				{(props) => <InvitationsStackNavigator {...props} />}
+			</Drawer.Screen>
 			<Drawer.Screen name="ProfileStack" options={{ title: 'Profile' }}>
-				{(props) => (
-					<ProfileStackNavigator {...props} loggedUser={loggedUser} />
-				)}
+				{(props) => <ProfileStackNavigator {...props} loggedUser={loggedUser} />}
 			</Drawer.Screen>
 			<Drawer.Screen
 				name="About"
@@ -127,14 +127,9 @@ const RootStackNavigator = () => {
 							onPress={
 								props.route.params.isNewFlat
 									? () =>
-											props.navigation.replace(
-												'FlatDetails',
-												{
-													id:
-														props.route.params
-															.flatId,
-												}
-											)
+											props.navigation.replace('FlatDetails', {
+												id: props.route.params.flatId,
+											})
 									: btnProps.onPress
 							}
 						/>
@@ -160,21 +155,16 @@ const RootStackNavigator = () => {
 			<RootStack.Screen
 				name="UpdateTaskMembers"
 				options={(props) => ({
-					title: props.route.params.newTask
-						? 'New Task'
-						: 'Update Task',
+					title: props.route.params.newTask ? 'New Task' : 'Update Task',
 					headerLeft: (btnProps) => (
 						<HeaderBackButton
 							{...btnProps}
 							onPress={
 								props.route.params.newTask
 									? () =>
-											props.navigation.replace(
-												'TaskDetails',
-												{
-													id: props.route.params.id,
-												}
-											)
+											props.navigation.replace('TaskDetails', {
+												id: props.route.params.id,
+											})
 									: btnProps.onPress
 							}
 						/>
@@ -221,11 +211,30 @@ const ProfileStackNavigator = ({
 	);
 };
 
-const AppNavitaionContainer = () => {
-	const [loading, setLoading] = useState(true);
-	const loggedUser = useSelector<RootState, User | null>(
-		(state) => state.auth.user
+const InvitationsStack = createStackNavigator<InvitationsStackParamList>();
+const InvitationsStackNavigator = ({ navigation }: { navigation: any }) => {
+	return (
+		<InvitationsStack.Navigator>
+			<InvitationsStack.Screen
+				name="Invitations"
+				options={{
+					title: 'Invitations',
+					headerLeft: (props) => (
+						<HeaderBackButton
+							{...props}
+							onPress={() => navigation.goBack()}
+						/>
+					),
+				}}
+				component={InvitationsScreen}
+			/>
+		</InvitationsStack.Navigator>
 	);
+};
+
+const AppNavigationContainer = () => {
+	const [loading, setLoading] = useState(true);
+	const loggedUser = useSelector<RootState, User | null>((state) => state.auth.user);
 	const [isLogIn, setIsLogIn] = useState(true);
 	const dispatch = useDispatch();
 
@@ -252,19 +261,15 @@ const AppNavitaionContainer = () => {
 				<DrawerNavigator loggedUser={loggedUser} />
 			) : isLogIn ? (
 				<LogInScreen
-					toggleAuthScreen={() =>
-						setIsLogIn((prevState) => !prevState)
-					}
+					toggleAuthScreen={() => setIsLogIn((prevState) => !prevState)}
 				/>
 			) : (
 				<RegistrationScreen
-					toggleAuthScreen={() =>
-						setIsLogIn((prevState) => !prevState)
-					}
+					toggleAuthScreen={() => setIsLogIn((prevState) => !prevState)}
 				/>
 			)}
 		</NavigationContainer>
 	);
 };
 
-export default AppNavitaionContainer;
+export default AppNavigationContainer;

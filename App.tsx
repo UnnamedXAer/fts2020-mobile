@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { AppLoading } from 'expo';
 import { Provider as StoreProvider } from 'react-redux';
 import { Provider as PaperProvider } from 'react-native-paper';
-import AppNavitaionContainer from './navigation/Navigation';
+import AppNavigationContainer from './navigation/Navigation';
 import store from './store/store';
 import { paperTheme } from './config/theme';
 
@@ -18,7 +18,7 @@ export default function App() {
 	return (
 		<StoreProvider store={store}>
 			<PaperProvider theme={paperTheme}>
-				<AppNavitaionContainer />
+				<AppNavigationContainer />
 			</PaperProvider>
 		</StoreProvider>
 	);

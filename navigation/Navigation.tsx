@@ -16,6 +16,7 @@ import {
 	DrawerParamList,
 	BottomTabParamList,
 	RootStackParamList,
+	InvitationsStackParamList,
 } from '../types/navigationTypes';
 import TaskDetailsScreen from '../screens/Task/TaskDetailsScreen';
 import NewFlatInfoScreen from '../screens/Flat/NewFlat/NewFlatInfoScreen';
@@ -35,6 +36,7 @@ import CurrentPeriodsScreen from '../screens/CurrentPeriods/CurrentPeriodsScreen
 import AboutScreen from '../screens/About/AboutScreen';
 import { NewTaskTimeScreenNavigationProp } from '../types/rootNavigationTypes';
 import { NewTaskTimeScreenRouteProps } from '../types/rootRoutePropTypes';
+import InvitationsScreen from '../screens/Invitations/InvitationsScreen';
 
 const Drawer = createDrawerNavigator<DrawerParamList>();
 const DrawerNavigator = ({ loggedUser }: { loggedUser: User }) => {
@@ -45,6 +47,9 @@ const DrawerNavigator = ({ loggedUser }: { loggedUser: User }) => {
 				options={{ title: 'Flats & Tasks' }}
 				component={RootStackNavigator}
 			/>
+			<Drawer.Screen name="InvitationsStack" options={{ title: 'Invitations' }}>
+				{(props) => <InvitationsStackNavigator {...props} />}
+			</Drawer.Screen>
 			<Drawer.Screen name="ProfileStack" options={{ title: 'Profile' }}>
 				{(props) => <ProfileStackNavigator {...props} loggedUser={loggedUser} />}
 			</Drawer.Screen>
@@ -231,7 +236,28 @@ const ProfileStackNavigator = ({
 	);
 };
 
-const AppNavitaionContainer = () => {
+const InvitationsStack = createStackNavigator<InvitationsStackParamList>();
+const InvitationsStackNavigator = ({ navigation }: { navigation: any }) => {
+	return (
+		<InvitationsStack.Navigator>
+			<InvitationsStack.Screen
+				name="Invitations"
+				options={{
+					title: 'Invitations',
+					headerLeft: (props) => (
+						<HeaderBackButton
+							{...props}
+							onPress={() => navigation.goBack()}
+						/>
+					),
+				}}
+				component={InvitationsScreen}
+			/>
+		</InvitationsStack.Navigator>
+	);
+};
+
+const AppNavigationContainer = () => {
 	const [loading, setLoading] = useState(true);
 	const loggedUser = useSelector<RootState, User | null>((state) => state.auth.user);
 	const [isLogIn, setIsLogIn] = useState(true);
@@ -271,4 +297,4 @@ const AppNavitaionContainer = () => {
 	);
 };
 
-export default AppNavitaionContainer;
+export default AppNavigationContainer;

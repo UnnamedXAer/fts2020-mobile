@@ -31,8 +31,7 @@ export type FlatsState = {
 };
 
 export type InvitationsState = {
-	userInvitations: InvitationPresentation[];
-	userInvitationsLoadTime: number;
+	userInvitations: InvitationPresentation[] | null;
 };
 
 export type TasksState = {

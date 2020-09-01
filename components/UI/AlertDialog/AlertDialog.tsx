@@ -7,11 +7,12 @@ import {
 	useTheme,
 	ActivityIndicator,
 } from 'react-native-paper';
+import { Theme } from 'react-native-paper/lib/typescript/src/types';
 
 type AlertDialogAction = {
 	label: string;
 	onPress: () => void | Promise<void>;
-	color?: 'primary' | 'accent';
+	color?: keyof Theme['colors'];
 };
 
 export type AlertDialogData = {

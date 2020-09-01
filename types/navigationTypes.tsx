@@ -1,4 +1,8 @@
-import { RootStackParams, ProfileStackParams } from './navigationParamsTypes';
+import {
+	RootStackParams,
+	ProfileStackParams,
+	InvitationsStackParams,
+} from './navigationParamsTypes';
 import { TaskPeriodUnit } from '../constants/task';
 
 export type NestedNavigatorParams<ParamList> = {
@@ -49,6 +53,10 @@ export type ProfileStackParamList = {
 	ChangePassword: undefined;
 };
 
+export type InvitationsStackParamList = {
+	Invitations: undefined;
+};
+
 export type BottomTabParamList = {
 	UserTasks: undefined;
 	Flats: undefined;
@@ -57,6 +65,7 @@ export type BottomTabParamList = {
 
 export type DrawerParamList = {
 	RootStack: RootStackParams;
+	InvitationsStack: InvitationsStackParams;
 	ProfileStack: ProfileStackParams;
 	About: undefined;
 	SignOut: undefined;

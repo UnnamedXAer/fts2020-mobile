@@ -43,6 +43,7 @@ import { APIUser } from '../../../store/apiTypes';
 import { mapApiUserDataToModel } from '../../../store/mapAPIToModel/mapUser';
 import { InviteMembersScreenNavigationProp } from '../../../types/rootNavigationTypes';
 import { InviteMembersScreenRouteProps } from '../../../types/rootRoutePropTypes';
+import { addFlatInvitations } from '../../../store/actions/flats';
 
 interface Props {
 	theme: Theme;
@@ -279,9 +280,7 @@ const InviteMembersScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 		setError(null);
 		setLoading(true);
 		try {
-			await axios.post(`/flats/${flatId}/members/invite`, {
-				members: emails,
-			});
+			await dispatch(addFlatInvitations(emails, flatId));
 			if (inputRef.current) {
 				if (isNewFlat) {
 					navigation.replace('FlatDetails', { id: flatId });

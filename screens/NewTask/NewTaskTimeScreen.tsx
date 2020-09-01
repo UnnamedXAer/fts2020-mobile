@@ -198,6 +198,7 @@ const NewTaskTimeScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 							onChangeText={periodValueTextChangeHandler}
 							error={Boolean(periodValueError)}
 							onBlur={periodValueBlurHandler}
+							selectTextOnFocus
 						/>
 						<HelperText
 							type="error"

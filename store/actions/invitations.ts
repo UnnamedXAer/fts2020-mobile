@@ -1,5 +1,5 @@
 import axios from '../../axios/axios';
-import { InvitationsActionTypes } from './actionTypes';
+import { InvitationsActionTypes, FlatsActionTypes } from './actionTypes';
 import { ThunkAction } from 'redux-thunk';
 import RootState from '../storeTypes';
 import { APIInvitation, APIInvitationPresentation } from '../apiTypes';
@@ -67,10 +67,11 @@ export const answerUserInvitations = (
 	Promise<void>,
 	RootState,
 	any,
-	{
-		type: InvitationsActionTypes.SetUserInvitation;
-		payload: InvitationPresentation;
-	}
+	| {
+			type: InvitationsActionTypes.SetUserInvitation;
+			payload: InvitationPresentation;
+	  }
+	| { type: FlatsActionTypes.ClearState }
 > => {
 	return async (dispatch, getState) => {
 		const url = `/invitations/${id}`;
@@ -80,7 +81,15 @@ export const answerUserInvitations = (
 			});
 			const state = getState();
 			const loggedUser = state.auth.user!;
-			const invitation = state.invitations.userInvitations.find((x) => x.id === id);
+			const invitation = state.invitations.userInvitations!.find(
+				(x) => x.id === id
+			);
+
+			if (action === InvitationAction.ACCEPT) {
+				dispatch({
+					type: FlatsActionTypes.ClearState,
+				});
+			}
 
 			if (invitation) {
 				dispatch({

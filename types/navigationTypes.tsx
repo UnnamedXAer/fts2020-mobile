@@ -1,4 +1,5 @@
 import { RootStackParams, ProfileStackParams } from './navigationParamsTypes';
+import { TaskPeriodUnit } from '../constants/task';
 
 export type NestedNavigatorParams<ParamList> = {
 	[K in keyof ParamList]: undefined extends ParamList[K]
@@ -19,11 +20,21 @@ export type RootStackParamList = {
 	InviteMembers: { flatId: number; isNewFlat: boolean };
 	NewTaskName: {
 		flatId: number;
+		name?: string;
+		description?: string;
+		periodUnit?: TaskPeriodUnit;
+		periodValue?: string;
+		startDate?: Date;
+		endDate?: Date;
 	};
 	NewTaskTime: {
 		flatId: number;
 		name: string;
 		description: string;
+		periodUnit?: TaskPeriodUnit;
+		periodValue?: string;
+		startDate?: Date;
+		endDate?: Date;
 	};
 	UpdateTaskMembers: {
 		id: number;

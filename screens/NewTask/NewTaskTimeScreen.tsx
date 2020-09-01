@@ -42,15 +42,25 @@ const NewTaskTimeScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 	const dispatch = useDispatch();
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<StateError>(null);
-	const [periodUnit, setPeriodUnit] = useState(TaskPeriodUnit.WEEK);
-	const [periodValue, setPeriodValue] = useState('1');
+	const [periodUnit, setPeriodUnit] = useState(
+		route.params.periodUnit || TaskPeriodUnit.WEEK
+	);
+	const [periodValue, setPeriodValue] = useState(
+		route.params.periodValue || '1'
+	);
 	const [periodValueError, setPeriodValueError] = useState<StateError>(null);
 	const [periodValueTouched, setPeriodValueTouched] = useState(false);
 	const [datePickerField, setDatePickerField] = useState<
 		'startDate' | 'endDate' | null
 	>(null);
-	const [startDate, setStartDate] = useState(defaultStartDay);
-	const [endDate, setEndDate] = useState(defaultEndDay);
+	const [startDate, setStartDate] = useState(
+		route.params.startDate
+			? new Date(route.params.startDate)
+			: defaultStartDay
+	);
+	const [endDate, setEndDate] = useState(
+		route.params.endDate ? new Date(route.params.endDate) : defaultEndDay
+	);
 	const [datesError, setDatesError] = useState<StateError>(null);
 	const [tmpId] = useState(
 		String.fromCharCode(getRandomInt(97, 123)) + Date.now()
@@ -77,6 +87,11 @@ const NewTaskTimeScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 		}
 	}, [newCreatedTaskId, navigation]);
 
+	const periodUnitPickHandler = (val: TaskPeriodUnit) => {
+		setPeriodUnit(val);
+		navigation.setParams({ periodUnit: val });
+	};
+
 	const periodValueTextChangeHandler = (text: string) => {
 		const sanitizedVal = text.replace(/[^0-9]/g, '');
 		if (periodValueTouched)
@@ -84,6 +99,7 @@ const NewTaskTimeScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 				setPeriodValueError('Value must be greater than 0.');
 			} else setPeriodValueError(null);
 		setPeriodValue(sanitizedVal);
+		navigation.setParams({ periodValue: sanitizedVal });
 	};
 
 	const periodValueBlurHandler = () => {
@@ -100,6 +116,7 @@ const NewTaskTimeScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 		setDatePickerField(null);
 		let datesOk = true;
 		if (date) {
+			navigation.setParams({ [fieldName]: date.toISOString() });
 			if (fieldName === 'startDate') {
 				setStartDate(date);
 				datesOk = date < endDate;
@@ -184,7 +201,7 @@ const NewTaskTimeScreen: React.FC<Props> = ({ theme, navigation, route }) => {
 								{ label: 'Month', value: TaskPeriodUnit.MONTH },
 							]}
 							selectedValue={periodUnit}
-							onChange={setPeriodUnit}
+							onChange={periodUnitPickHandler}
 							disabled={loading}
 							label="Period duration unit"
 						/>

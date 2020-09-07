@@ -298,9 +298,9 @@ const CurrentPeriodsScreen: React.FC<Props> = ({ theme, navigation }) => {
 									<PlaceholderLine height={64} />
 								</Placeholder>
 							) : (
-								<NotificationCard
-									childrens={['Currently You have nothing to do 😎.']}
-								/>
+								<NotificationCard>
+									Currently You have nothing to do 😎.
+								</NotificationCard>
 							)}
 						</View>
 					) : null

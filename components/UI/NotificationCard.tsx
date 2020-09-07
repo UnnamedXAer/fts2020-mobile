@@ -23,16 +23,16 @@ const NotificationCard: React.FC<Props> = ({
 	fontSize = 18,
 }) => {
 	const theme = useTheme();
-	let serverityTextStyle: TextStyle;
-	let serverityCardStyle: ViewStyle;
+	let severityTextStyle: TextStyle;
+	let severityCardStyle: ViewStyle;
 	let notificationIcon: React.ReactElement | null = null;
 
 	switch (severity) {
 		case 'info':
-			serverityCardStyle = {
+			severityCardStyle = {
 				backgroundColor: 'rgb(232, 244, 253)',
 			};
-			serverityTextStyle = {
+			severityTextStyle = {
 				color: 'rgb(13, 60, 97)',
 			};
 			notificationIcon = (
@@ -44,10 +44,10 @@ const NotificationCard: React.FC<Props> = ({
 			);
 			break;
 		case 'error':
-			serverityCardStyle = {
+			severityCardStyle = {
 				backgroundColor: 'rgb(253, 236, 234)',
 			};
-			serverityTextStyle = {
+			severityTextStyle = {
 				color: 'rgb(97, 26, 21)',
 			};
 			notificationIcon = (
@@ -59,10 +59,10 @@ const NotificationCard: React.FC<Props> = ({
 			);
 			break;
 		case 'warning':
-			serverityCardStyle = {
+			severityCardStyle = {
 				backgroundColor: 'rgb(255, 244, 229)',
 			};
-			serverityTextStyle = {
+			severityTextStyle = {
 				color: 'rgb(102, 60, 0)',
 			};
 			notificationIcon = (
@@ -70,10 +70,10 @@ const NotificationCard: React.FC<Props> = ({
 			);
 			break;
 		case 'success':
-			serverityCardStyle = {
+			severityCardStyle = {
 				backgroundColor: 'rgb(237, 247, 237)',
 			};
-			serverityTextStyle = {
+			severityTextStyle = {
 				color: 'rgb(30, 70, 32)',
 			};
 			notificationIcon = (
@@ -89,19 +89,19 @@ const NotificationCard: React.FC<Props> = ({
 	}
 
 	return (
-		<Card style={[styles.card, serverityCardStyle]} onPress={onPress}>
+		<Card style={[styles.card, severityCardStyle]} onPress={onPress}>
 			<View style={styles.container}>
 				{!hideIcon && notificationIcon}
 				{children && (
-					<Paragraph style={[styles.text, serverityTextStyle, { fontSize }]}>
+					<Paragraph style={[styles.text, severityTextStyle, { fontSize }]}>
 						{children}
 					</Paragraph>
 				)}
 				{childrens && (
-					<Paragraph style={[styles.text, serverityTextStyle, { fontSize }]}>
+					<Paragraph style={[styles.text, severityTextStyle, { fontSize }]}>
 						{childrens.map((child, i) =>
 							typeof child === 'string' ? (
-								<Text key={i}>{child}</Text>
+								<Text style={severityTextStyle} key={i}>{child}</Text>
 							) : (
 								<Text
 									key={i}

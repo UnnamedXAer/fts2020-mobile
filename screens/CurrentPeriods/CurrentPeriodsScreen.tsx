@@ -14,11 +14,10 @@ import {
 	Paragraph,
 	Headline,
 	Divider,
-	Checkbox,
-	Text,
 } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
 import { Placeholder } from 'rn-placeholder';
+import moment from 'moment';
 import RootState from '../../store/storeTypes';
 import HttpErrorParser from '../../utils/parseError';
 import NotificationCard from '../../components/UI/NotificationCard';
@@ -27,7 +26,6 @@ import { PlaceholderLine, Shine } from '../../components/UI/Placeholder/Placehol
 import { CurrentPeriodsScreenNavigationProp } from '../../types/currentPeriodsNavigationTypes';
 import { CurrentPeriod, Period } from '../../models/period';
 import { fetchCurrentPeriods, completePeriod } from '../../store/actions/periods';
-import moment from 'moment';
 import AlertDialog, {
 	AlertDialogData,
 } from '../../components/UI/AlertDialog/AlertDialog';
@@ -79,7 +77,6 @@ const CurrentPeriodsScreen: React.FC<Props> = ({ theme, navigation }) => {
 				setLoading(true);
 				try {
 					await dispatch(fetchCurrentPeriods());
-					throw new Error('Networking not working :(');
 				} catch (err) {
 					if (isMounted.current) {
 						const httpError = new HttpErrorParser(err);

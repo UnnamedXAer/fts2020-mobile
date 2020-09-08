@@ -8,7 +8,7 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import FlatsScreen from '../screens/Flat/FlatsScreen';
 import RootState from '../store/storeTypes';
 import User from '../models/user';
-import { tryAuthorize, logOut } from '../store/actions/auth';
+import { tryAuthorize } from '../store/actions/auth';
 import LoadingScreen from '../screens/Auth/LoadingScreen';
 import { navigationContainerTheme } from '../config/theme';
 import {
@@ -37,11 +37,17 @@ import AboutScreen from '../screens/About/AboutScreen';
 import { NewTaskTimeScreenNavigationProp } from '../types/rootNavigationTypes';
 import { NewTaskTimeScreenRouteProps } from '../types/rootRoutePropTypes';
 import InvitationsScreen from '../screens/Invitations/InvitationsScreen';
+import DrawerContent from './DrawerContent';
 
 const Drawer = createDrawerNavigator<DrawerParamList>();
 const DrawerNavigator = ({ loggedUser }: { loggedUser: User }) => {
 	return (
-		<Drawer.Navigator initialRouteName="RootStack">
+		<Drawer.Navigator
+			initialRouteName="RootStack"
+			drawerContent={(props) => (
+				<DrawerContent {...props} loggedUser={loggedUser} />
+			)}
+		>
 			<Drawer.Screen
 				name="RootStack"
 				options={{ title: 'Flats & Tasks' }}
@@ -58,16 +64,6 @@ const DrawerNavigator = ({ loggedUser }: { loggedUser: User }) => {
 				options={{ title: 'About' }}
 				component={AboutScreen}
 			/>
-			<Drawer.Screen name="SignOut" options={{ title: 'Sign Out' }}>
-				{() => {
-					const dispatch = useDispatch();
-					console.log('logged out');
-					useEffect(() => {
-						(async () => await dispatch(logOut()))();
-					}, []);
-					return null;
-				}}
-			</Drawer.Screen>
 		</Drawer.Navigator>
 	);
 };

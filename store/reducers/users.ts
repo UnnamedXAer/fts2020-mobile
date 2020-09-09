@@ -23,6 +23,10 @@ const setUser: SimpleReducer<UsersState, User> = (state, action) => {
 	};
 };
 
+const clearState: SimpleReducer<UsersState, undefined> = (state, action) => {
+	return { ...initialState };
+};
+
 const reducer: AppReducer<UsersState, UsersActionTypes> = (
 	state = initialState,
 	action
@@ -30,6 +34,8 @@ const reducer: AppReducer<UsersState, UsersActionTypes> = (
 	switch (action.type) {
 		case UsersActionTypes.SetUser:
 			return setUser(state, action);
+		case UsersActionTypes.ClearState:
+			return clearState(state, action);
 		default:
 			return state;
 	}

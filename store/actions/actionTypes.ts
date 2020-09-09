@@ -50,4 +50,5 @@ export enum TaskPeriodsActionTypes {
 export enum UsersActionTypes {
 	SetUser = 'USER_SET',
 	UpdateUser = 'USER_UPDATE',
+	ClearState = 'USER_CLEAR_STATE',
 }

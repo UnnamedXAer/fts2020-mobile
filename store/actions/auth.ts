@@ -9,6 +9,8 @@ import {
 	FlatsActionTypes,
 	AuthActionTypes,
 	UsersActionTypes,
+	InvitationsActionTypes,
+	TaskPeriodsActionTypes,
 } from './actionTypes';
 import RootState from '../storeTypes';
 import User from '../../models/user';
@@ -51,16 +53,27 @@ export const authorize = (
 				payload: user,
 			});
 
-			await AsyncStorage.multiSet([['loggedUser', JSON.stringify(user)], ['expirationTime', '' + expirationTime]]);
+			await AsyncStorage.multiSet([
+				['loggedUser', JSON.stringify(user)],
+				['expirationTime', '' + expirationTime],
+			]);
 		} catch (err) {
 			throw err;
 		}
 	};
 };
 
-export const tryAuthorize = (): ThunkAction<Promise<void>, RootState, any, AuthorizeAction | FetchUserAction> => {
+export const tryAuthorize = (): ThunkAction<
+	Promise<void>,
+	RootState,
+	any,
+	AuthorizeAction | FetchUserAction
+> => {
 	return async (dispatch) => {
-		const [[_, savedUser], [_2, savedExpirationTime]] = await AsyncStorage.multiGet(['loggedUser', 'expirationTime']);
+		const [[_, savedUser], [_2, savedExpirationTime]] = await AsyncStorage.multiGet([
+			'loggedUser',
+			'expirationTime',
+		]);
 		const expirationTime = savedExpirationTime ? +savedExpirationTime : 0;
 
 		if (
@@ -92,15 +105,10 @@ export const tryAuthorize = (): ThunkAction<Promise<void>, RootState, any, Autho
 		} else {
 			throw new Error('Auto-authorization was not possible.');
 		}
-	}
+	};
 };
 
-export const logOut = (): ThunkAction<
-	Promise<void>,
-	RootState,
-	any,
-	AuthorizeAction
-> => {
+export const logOut = (): ThunkAction<Promise<void>, RootState, any, AuthorizeAction> => {
 	return async (dispatch) => {
 		const clearState = () => {
 			dispatch({
@@ -111,6 +119,15 @@ export const logOut = (): ThunkAction<
 			});
 			dispatch({
 				type: FlatsActionTypes.ClearState,
+			});
+			dispatch({
+				type: InvitationsActionTypes.ClearState,
+			});
+			dispatch({
+				type: TaskPeriodsActionTypes.ClearState,
+			});
+			dispatch({
+				type: UsersActionTypes.ClearState,
 			});
 		};
 
@@ -132,16 +149,20 @@ export const logOut = (): ThunkAction<
 
 export const updateLoggedUser = (
 	user: User
-): ThunkAction<Promise<void>, RootState, any, { payload: User, type: AuthActionTypes.SetLoggedUser }> => {
+): ThunkAction<
+	Promise<void>,
+	RootState,
+	any,
+	{ payload: User; type: AuthActionTypes.SetLoggedUser }
+> => {
 	return async (dispatch) => {
-
 		await AsyncStorage.setItem('loggedUser', JSON.stringify(user));
 
 		dispatch({
 			type: AuthActionTypes.SetLoggedUser,
 			payload: user,
 		});
-	}
+	};
 };
 
 export const updatePassword = (

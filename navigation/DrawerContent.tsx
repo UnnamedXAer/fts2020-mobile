@@ -6,7 +6,7 @@ import {
 	Paragraph,
 } from 'react-native-paper';
 import { View } from 'react-native';
-import { Octicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import {
 	DrawerContentScrollView,
 	DrawerItem,
@@ -61,7 +61,7 @@ const DrawerContent = (
 								color={color}
 							/>
 						)}
-						label="Flats&Tasks"
+						label="Flats & Tasks"
 						onPress={() => {
 							props.navigation.navigate('RootStack');
 						}}

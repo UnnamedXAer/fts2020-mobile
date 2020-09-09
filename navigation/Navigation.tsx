@@ -4,7 +4,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator, HeaderBackButton } from '@react-navigation/stack';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
-import { createDrawerNavigator } from '@react-navigation/drawer';
+import { createDrawerNavigator, DrawerNavigationProp } from '@react-navigation/drawer';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import FlatsScreen from '../screens/Flat/FlatsScreen';
 import RootState from '../store/storeTypes';
 import User from '../models/user';
@@ -95,12 +96,38 @@ const BottomTabNavigator = () => {
 };
 
 const RootStack = createStackNavigator<RootStackParamList>();
-const RootStackNavigator = () => {
+const RootStackNavigator = ({
+	navigation,
+}: {
+	navigation: DrawerNavigationProp<DrawerParamList>;
+}) => {
 	return (
 		<RootStack.Navigator initialRouteName="BottomTab">
 			<RootStack.Screen
 				name="BottomTab"
-				options={{ title: 'FTS 2020' }}
+				options={{
+					title: 'FTS 2020',
+					headerLeft: (headerLeftProps) => {
+						return (
+							<HeaderBackButton
+								{...headerLeftProps}
+								backImage={(props) => (
+									<MaterialCommunityIcons
+										name="menu"
+										color={props.tintColor}
+										size={24}
+										style={{
+											padding: 4,
+										}}
+									/>
+								)}
+								onPress={() => navigation.openDrawer()}
+								label="Menu"
+								truncatedLabel="M"
+							/>
+						);
+					},
+				}}
 				component={BottomTabNavigator}
 			/>
 			<RootStack.Screen

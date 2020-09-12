@@ -21,14 +21,18 @@ import AlertSnackbar, {
 	AlertSnackbarData,
 } from '../../components/UI/AlertSnackbar/AlertSnackbar';
 import { invitationInactiveStatuses, InvitationAction } from '../../constants/invitation';
+import { InvitationsScreenRouteProps } from '../../types/invitationsRoutePropTypes';
 
 interface Props {
 	theme: Theme;
 	navigation: InvitationsScreenNavigationProp;
+	route: InvitationsScreenRouteProps;
 }
 
-const InvitationsScreen: React.FC<Props> = ({ theme, navigation }) => {
+const InvitationsScreen: React.FC<Props> = ({ theme, route }) => {
 	const dispatch = useDispatch();
+	const token = route.params?.token;
+	console.log('invitations. token', token);
 	const invitations = useSelector((state: RootState) =>
 		state.invitations.userInvitations?.filter(
 			(x) => !invitationInactiveStatuses.includes(x.status)

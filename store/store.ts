@@ -1,6 +1,7 @@
 import { combineReducers, createStore, applyMiddleware } from 'redux';
 import ReduxThunk from 'redux-thunk';
 import authReducer from './reducers/auth';
+import appReducer from './reducers/app';
 import flatsReducer from './reducers/flats';
 import tasksReducer from './reducers/tasks';
 import taskPeriodsReducer from './reducers/periods';
@@ -9,6 +10,7 @@ import invitationsReducer from './reducers/invitations';
 
 const rootReducer = combineReducers({
 	auth: authReducer,
+	app: appReducer,
 	flats: flatsReducer,
 	tasks: tasksReducer,
 	users: usersReducer,

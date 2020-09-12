@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useCallback } from 'react';
 import {
 	Drawer as PaperDrawer,
 	Avatar,
@@ -11,16 +11,71 @@ import {
 	DrawerContentScrollView,
 	DrawerItem,
 	DrawerContentComponentProps,
-	DrawerContentOptions,
 } from '@react-navigation/drawer';
 import { useDispatch } from 'react-redux';
+import * as Linking from 'expo-linking';
 import User from '../models/user';
-import { logOut, setAppLoading } from '../store/actions/auth';
+import { logOut } from '../store/actions/auth';
+import { setAppLoading } from '../store/actions/app';
 
 const DrawerContent = (
-	props: DrawerContentComponentProps<DrawerContentOptions> & { loggedUser: User }
+	props: DrawerContentComponentProps & {
+		loggedUser: User;
+	}
 ) => {
 	const dispatch = useDispatch();
+
+	const linkHandler = useCallback(
+		(url: string | null) => {
+			if (url) {
+				const match = url.match(/\/--[\/]invitations\/[a-z0-9-]+/);
+				if (match?.index && match.index > -1) {
+					const token = match[0].substring(
+						match[0].lastIndexOf('/') + 1,
+						url.length
+					);
+					console.log('token', token);
+					props.navigation.navigate('InvitationsStack', {
+						screen: 'Invitations',
+						params: { token },
+					});
+				}
+			}
+		},
+		[props.navigation]
+	);
+
+	useEffect(() => {
+		const checkInitialUrl = async () => {
+			const initUrl = await Linking.getInitialURL();
+			linkHandler(initUrl);
+		};
+
+		checkInitialUrl();
+
+		const urlChangeHandler = (ev: Linking.EventType) => {
+			console.log('URL CHANGED: ', ev.url);
+			linkHandler(ev.url);
+		};
+
+		Linking.addEventListener('url', urlChangeHandler);
+
+		return () => {
+			Linking.removeEventListener('url', urlChangeHandler);
+		};
+	}, [linkHandler]);
+
+	// useEffect(() => {
+	// 	if (redirectTo?.path) {
+	// 		const redirect = { ...redirectTo };
+	// 		dispatch(setRedirect(null));
+
+	// 		console.log('about redirect');
+	// 		props.navigation.navigate(redirect.path, {
+	// 			token: redirect.token,
+	// 		});
+	// 	}
+	// }, [dispatch, props.navigation, redirectTo]);
 
 	return (
 		<View style={{ flex: 1 }}>

@@ -3,16 +3,15 @@ import { ThunkAction } from 'redux-thunk';
 import { Credentials } from '../../models/auth';
 import axios from '../../axios/axios';
 import {
-	AUTHORIZE,
-	LOGOUT,
 	TasksActionTypes,
 	FlatsActionTypes,
 	AuthActionTypes,
 	UsersActionTypes,
 	InvitationsActionTypes,
 	TaskPeriodsActionTypes,
+	AppActionTypes,
 } from './actionTypes';
-import RootState, { StoreAction } from '../storeTypes';
+import RootState from '../storeTypes';
 import User from '../../models/user';
 import { FetchUserAction } from './users';
 import { mapApiUserDataToModel } from '../mapAPIToModel/mapUser';
@@ -41,7 +40,7 @@ export const authorize = (
 			const expirationTime = Date.now() + data.expiresIn;
 
 			dispatch({
-				type: AUTHORIZE,
+				type: AuthActionTypes.Authorize,
 				payload: {
 					user,
 					expirationTime,
@@ -84,7 +83,7 @@ export const tryAuthorize = (): ThunkAction<
 			const userObj = JSON.parse(savedUser) as User;
 
 			dispatch({
-				type: AUTHORIZE,
+				type: AuthActionTypes.Authorize,
 				payload: {
 					user: userObj,
 					expirationTime,
@@ -112,7 +111,7 @@ export const logOut = (): ThunkAction<Promise<void>, RootState, any, AuthorizeAc
 	return async (dispatch) => {
 		const clearState = () => {
 			dispatch({
-				type: LOGOUT,
+				type: AuthActionTypes.LogOut,
 			});
 			dispatch({
 				type: TasksActionTypes.ClearState,
@@ -128,6 +127,9 @@ export const logOut = (): ThunkAction<Promise<void>, RootState, any, AuthorizeAc
 			});
 			dispatch({
 				type: UsersActionTypes.ClearState,
+			});
+			dispatch({
+				type: AppActionTypes.ClearState,
 			});
 		};
 
@@ -191,14 +193,5 @@ export const updatePassword = (
 		} catch (err) {
 			throw err;
 		}
-	};
-};
-
-export const setAppLoading = (
-	loading: boolean
-): StoreAction<boolean, AuthActionTypes.SetLoading> => {
-	return {
-		type: AuthActionTypes.SetLoading,
-		payload: loading,
 	};
 };

@@ -1,10 +1,13 @@
-export const AUTHORIZE = 'AUTHORIZE';
-export const LOGOUT = 'LOGOUT';
-
 export enum AuthActionTypes {
+	Authorize = 'AUTH_AUTHORIZE',
+	LogOut = 'AUTH_LOGOUT',
 	SetLoggedUser = 'AUTH_SET_LOGGEDUSER',
-	UpdatePassword = 'USER_UPDATE_PASSWORD',
-	SetLoading = 'AUTH_SET_LOADING',
+	UpdatePassword = 'AUTH_UPDATE_USER_PASSWORD',
+}
+
+export enum AppActionTypes {
+	SetLoading = 'APP_SET_LOADING',
+	ClearState = 'APP_CLEAR_STATE',
 }
 
 export enum FlatsActionTypes {

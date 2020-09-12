@@ -6,10 +6,11 @@ import { createStackNavigator, HeaderBackButton } from '@react-navigation/stack'
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import { createDrawerNavigator, DrawerNavigationProp } from '@react-navigation/drawer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import * as Linking from 'expo-linking';
 import FlatsScreen from '../screens/Flat/FlatsScreen';
 import RootState from '../store/storeTypes';
 import User from '../models/user';
-import { tryAuthorize, setAppLoading } from '../store/actions/auth';
+import { tryAuthorize } from '../store/actions/auth';
 import LoadingScreen from '../screens/Auth/LoadingScreen';
 import { navigationContainerTheme } from '../config/theme';
 import {
@@ -39,6 +40,7 @@ import { NewTaskTimeScreenNavigationProp } from '../types/rootNavigationTypes';
 import { NewTaskTimeScreenRouteProps } from '../types/rootRoutePropTypes';
 import InvitationsScreen from '../screens/Invitations/InvitationsScreen';
 import DrawerContent from './DrawerContent';
+import { setAppLoading } from '../store/actions/app';
 
 const Drawer = createDrawerNavigator<DrawerParamList>();
 const DrawerNavigator = ({ loggedUser }: { loggedUser: User }) => {
@@ -280,10 +282,16 @@ const InvitationsStackNavigator = ({ navigation }: { navigation: any }) => {
 	);
 };
 
+const prefix = Linking.makeUrl('/invitations/TOKEN');
 const AppNavigationContainer = () => {
-	const { user: loggedUser, loading } = useSelector((state: RootState) => state.auth);
+	const { user: loggedUser } = useSelector((state: RootState) => state.auth);
+	const { loading } = useSelector((state: RootState) => state.app);
 	const [isLogIn, setIsLogIn] = useState(true);
 	const dispatch = useDispatch();
+
+	const linking = {
+		prefixes: [prefix],
+	};
 
 	useEffect(() => {
 		if (!loggedUser) {
@@ -301,7 +309,14 @@ const AppNavigationContainer = () => {
 	}, [loggedUser]);
 
 	return (
-		<NavigationContainer theme={navigationContainerTheme}>
+		<NavigationContainer
+			theme={navigationContainerTheme}
+			linking={linking}
+			fallback={
+				<LoadingScreen />
+				// <Paragraph>Loading...</Paragraph>
+			}
+		>
 			{loading ? (
 				<LoadingScreen />
 			) : loggedUser ? (

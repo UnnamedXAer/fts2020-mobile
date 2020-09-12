@@ -7,6 +7,7 @@ import { InvitationPresentation } from '../models/invitation';
 
 export type RootState = {
 	auth: AuthState;
+	app: AppState;
 	flats: FlatsState;
 	invitations: InvitationsState;
 	tasks: TasksState;
@@ -17,6 +18,9 @@ export type RootState = {
 export type AuthState = {
 	user: User | null;
 	expirationTime: number | null;
+};
+
+export type AppState = {
 	loading: boolean;
 };
 

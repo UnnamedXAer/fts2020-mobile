@@ -12,6 +12,7 @@
     ],
     "assetBundlePatterns": [
       "**/*"
-    ]
+	],
+	"scheme": "fts"
   }
 }

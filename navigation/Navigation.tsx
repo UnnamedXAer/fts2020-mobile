@@ -9,7 +9,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import FlatsScreen from '../screens/Flat/FlatsScreen';
 import RootState from '../store/storeTypes';
 import User from '../models/user';
-import { tryAuthorize } from '../store/actions/auth';
+import { tryAuthorize, setAppLoading } from '../store/actions/auth';
 import LoadingScreen from '../screens/Auth/LoadingScreen';
 import { navigationContainerTheme } from '../config/theme';
 import {
@@ -281,8 +281,7 @@ const InvitationsStackNavigator = ({ navigation }: { navigation: any }) => {
 };
 
 const AppNavigationContainer = () => {
-	const [loading, setLoading] = useState(true);
-	const loggedUser = useSelector<RootState, User | null>((state) => state.auth.user);
+	const { user: loggedUser, loading } = useSelector((state: RootState) => state.auth);
 	const [isLogIn, setIsLogIn] = useState(true);
 	const dispatch = useDispatch();
 
@@ -292,12 +291,12 @@ const AppNavigationContainer = () => {
 				try {
 					await dispatch(tryAuthorize());
 				} catch (err) {}
-				setLoading(false);
+				setAppLoading(false);
 			};
 			tryRestoreSession();
 		} else {
 			dispatch(readSaveShowInactive());
-			setLoading(false);
+			setAppLoading(false);
 		}
 	}, [loggedUser]);
 

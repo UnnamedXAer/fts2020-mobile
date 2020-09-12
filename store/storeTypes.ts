@@ -17,6 +17,7 @@ export type RootState = {
 export type AuthState = {
 	user: User | null;
 	expirationTime: number | null;
+	loading: boolean;
 };
 
 export type UsersState = {
@@ -45,7 +46,7 @@ export type TasksState = {
 
 export type PeriodsState = {
 	taskPeriods: {
-		[taskId: number]: Period[];// | undefined;
+		[taskId: number]: Period[];
 	};
 	currentPeriods: CurrentPeriod[] | null;
 };

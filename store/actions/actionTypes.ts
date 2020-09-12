@@ -4,6 +4,7 @@ export const LOGOUT = 'LOGOUT';
 export enum AuthActionTypes {
 	SetLoggedUser = 'AUTH_SET_LOGGEDUSER',
 	UpdatePassword = 'USER_UPDATE_PASSWORD',
+	SetLoading = 'AUTH_SET_LOADING',
 }
 
 export enum FlatsActionTypes {

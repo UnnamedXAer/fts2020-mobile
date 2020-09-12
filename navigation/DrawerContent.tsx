@@ -15,7 +15,7 @@ import {
 } from '@react-navigation/drawer';
 import { useDispatch } from 'react-redux';
 import User from '../models/user';
-import { logOut } from '../store/actions/auth';
+import { logOut, setAppLoading } from '../store/actions/auth';
 
 const DrawerContent = (
 	props: DrawerContentComponentProps<DrawerContentOptions> & { loggedUser: User }
@@ -113,7 +113,15 @@ const DrawerContent = (
 						<MaterialCommunityIcons name="logout" size={size} color={color} />
 					)}
 					label="SignOut"
-					onPress={() => dispatch(logOut())}
+					onPress={async () => {
+						dispatch(setAppLoading(true));
+						await dispatch(logOut());
+						props.navigation.reset({
+							index: 0,
+							routes: [{ name: 'RootStack' }],
+						});
+						dispatch(setAppLoading(false));
+					}}
 				/>
 			</PaperDrawer.Section>
 		</View>

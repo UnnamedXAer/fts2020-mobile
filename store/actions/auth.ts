@@ -12,7 +12,7 @@ import {
 	InvitationsActionTypes,
 	TaskPeriodsActionTypes,
 } from './actionTypes';
-import RootState from '../storeTypes';
+import RootState, { StoreAction } from '../storeTypes';
 import User from '../../models/user';
 import { FetchUserAction } from './users';
 import { mapApiUserDataToModel } from '../mapAPIToModel/mapUser';
@@ -191,5 +191,14 @@ export const updatePassword = (
 		} catch (err) {
 			throw err;
 		}
+	};
+};
+
+export const setAppLoading = (
+	loading: boolean
+): StoreAction<boolean, AuthActionTypes.SetLoading> => {
+	return {
+		type: AuthActionTypes.SetLoading,
+		payload: loading,
 	};
 };

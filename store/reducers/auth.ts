@@ -5,6 +5,7 @@ import User from '../../models/user';
 const initialState: AuthState = {
 	user: null,
 	expirationTime: null,
+	loading: false,
 };
 
 type AuthActionPayload = { user: User; expirationTime: number };
@@ -21,16 +22,25 @@ const setLoggedUser: SimpleReducer<AuthState, User> = (state, action) => {
 	};
 };
 
-const logIn: Reducer = (_, action) => {
+const logIn: Reducer = (state, action) => {
 	return {
+		...state,
 		user: action.payload.user,
 		expirationTime: action.payload.expirationTime,
 	};
 };
 
-const logOut: Reducer<void> = () => {
+const logOut: Reducer<void> = (state) => {
 	return {
 		...initialState,
+		loading: state.loading,
+	};
+};
+
+const setLoading: Reducer<boolean> = (state, action) => {
+	return {
+		...state,
+		loading: action.payload,
 	};
 };
 
@@ -44,6 +54,8 @@ const reducer: AppReducer<AuthState> = (state = initialState, action) => {
 			return setLoggedUser(state, action);
 		case AuthActionTypes.UpdatePassword:
 			return state;
+		case AuthActionTypes.SetLoading:
+			return setLoading(state, action);
 		default:
 			return state;
 	}

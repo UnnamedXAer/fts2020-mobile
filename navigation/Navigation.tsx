@@ -41,6 +41,7 @@ import { NewTaskTimeScreenRouteProps } from '../types/rootRoutePropTypes';
 import InvitationsScreen from '../screens/Invitations/InvitationsScreen';
 import DrawerContent from './DrawerContent';
 import { setAppLoading } from '../store/actions/app';
+import InvitationDetailsScreen from '../screens/Invitations/InvitationDetailsScreen';
 
 const Drawer = createDrawerNavigator<DrawerParamList>();
 const DrawerNavigator = ({ loggedUser }: { loggedUser: User }) => {
@@ -278,6 +279,19 @@ const InvitationsStackNavigator = ({ navigation }: { navigation: any }) => {
 				}}
 				component={InvitationsScreen}
 			/>
+			<InvitationsStack.Screen
+				name="InvitationDetails"
+				options={{
+					title: 'View Invitation',
+					// headerLeft: (props) => (
+					// 	<HeaderBackButton
+					// 		{...props}
+					// 		onPress={() => navigation.goBack()}
+					// 	/>
+					// ),
+				}}
+				component={InvitationDetailsScreen}
+			/>
 		</InvitationsStack.Navigator>
 	);
 };
@@ -307,14 +321,13 @@ const AppNavigationContainer = () => {
 			setAppLoading(false);
 		}
 	}, [loggedUser]);
-
+	console.log('loading', loading);
 	return (
 		<NavigationContainer
 			theme={navigationContainerTheme}
 			linking={linking}
 			fallback={
 				<LoadingScreen />
-				// <Paragraph>Loading...</Paragraph>
 			}
 		>
 			{loading ? (

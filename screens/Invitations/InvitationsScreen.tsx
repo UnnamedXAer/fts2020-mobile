@@ -21,23 +21,20 @@ import AlertSnackbar, {
 	AlertSnackbarData,
 } from '../../components/UI/AlertSnackbar/AlertSnackbar';
 import { invitationInactiveStatuses, InvitationAction } from '../../constants/invitation';
-import { InvitationsScreenRouteProps } from '../../types/invitationsRoutePropTypes';
 
 interface Props {
 	theme: Theme;
 	navigation: InvitationsScreenNavigationProp;
-	route: InvitationsScreenRouteProps;
 }
 
-const InvitationsScreen: React.FC<Props> = ({ theme, route }) => {
+const InvitationsScreen: React.FC<Props> = ({ theme, navigation }) => {
 	const dispatch = useDispatch();
-	const token = route.params?.token;
-	console.log('invitations. token', token);
-	const invitations = useSelector((state: RootState) =>
-		state.invitations.userInvitations?.filter(
+	const { invitationsLoadTime, invitations } = useSelector((state: RootState) => ({
+		invitationsLoadTime: state.invitations.userInvitationsLoadTime,
+		invitations: state.invitations.userInvitations?.filter(
 			(x) => !invitationInactiveStatuses.includes(x.status)
-		)
-	);
+		),
+	}));
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<StateError>(null);
 	const [refreshing, setRefreshing] = useState(false);
@@ -76,13 +73,13 @@ const InvitationsScreen: React.FC<Props> = ({ theme, route }) => {
 	}, [dispatch]);
 
 	useEffect(() => {
-		if (!loading && error === null && !invitations) {
+		if (!loading && error === null && invitationsLoadTime === 0) {
 			setLoading(true);
 			loadInvitations().finally(() => {
 				isMounted.current && setLoading(false);
 			});
 		}
-	}, [loadInvitations]);
+	}, [loadInvitations, loading, error, invitationsLoadTime]);
 
 	const closeDialogAlertHandler = () =>
 		setDialogData((prevState) => ({
@@ -147,7 +144,11 @@ const InvitationsScreen: React.FC<Props> = ({ theme, route }) => {
 		}
 	};
 
-	const invitationSelectHandler = (id: number) => {
+	const invitationSelectHandler = (token: string) => {
+		navigation.navigate('InvitationDetails', { token });
+	};
+
+	const invitationLongPressHandler = (id: number) => {
 		const invitation = invitations!.find((x) => x.id === id)!;
 
 		setDialogData({
@@ -224,6 +225,7 @@ const InvitationsScreen: React.FC<Props> = ({ theme, route }) => {
 						<InvitationRenderItem
 							item={item}
 							onSelect={invitationSelectHandler}
+							onLongPress={invitationLongPressHandler}
 							theme={theme}
 						/>
 					)}

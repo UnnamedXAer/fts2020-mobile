@@ -3,7 +3,8 @@ import { InvitationsActionTypes } from '../actions/actionTypes';
 import { InvitationPresentation } from '../../models/invitation';
 
 const initialState: InvitationsState = {
-	userInvitations: null,
+	userInvitations: [],
+	userInvitationsLoadTime: 0,
 };
 
 const setUserInvitations: SimpleReducer<InvitationsState, InvitationPresentation[]> = (
@@ -13,6 +14,7 @@ const setUserInvitations: SimpleReducer<InvitationsState, InvitationPresentation
 	return {
 		...state,
 		userInvitations: action.payload,
+		userInvitationsLoadTime: Date.now(),
 	};
 };
 

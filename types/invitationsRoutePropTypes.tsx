@@ -1,7 +1,7 @@
 import { RouteProp } from '@react-navigation/native';
 import { InvitationsStackParamList } from './navigationTypes';
 
-export type InvitationsScreenRouteProps = RouteProp<
+export type InvitationDetailsScreenRouteProps = RouteProp<
 	InvitationsStackParamList,
-	'Invitations'
+	'InvitationDetails'
 >;

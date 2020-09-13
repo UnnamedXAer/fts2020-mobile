@@ -12,14 +12,21 @@ import { InvitationPresentation } from '../../models/invitation';
 interface Props {
 	item: InvitationPresentation;
 	theme: Theme;
-	onSelect: (id: number) => void;
+	onSelect: (token: string) => void;
+	onLongPress: (id: number) => void;
 }
 
-export const InvitationRenderItem: React.FC<Props> = ({ item, theme, onSelect }) => {
+export const InvitationRenderItem: React.FC<Props> = ({
+	item,
+	theme,
+	onSelect,
+	onLongPress,
+}) => {
 	return (
 		<TouchableHighlight
 			underlayColor={theme.colors.primary}
-			onPress={() => onSelect(item.id!)}
+			onPress={() => onSelect(item.token)}
+			onLongPress={() => onLongPress(item.id)}
 		>
 			<View style={styles.itemContainer}>
 				<View style={{ marginRight: 4 }}>
@@ -30,7 +37,7 @@ export const InvitationRenderItem: React.FC<Props> = ({ item, theme, onSelect })
 								: theme.colors.primary
 						}
 						style={{ backgroundColor: theme.colors.background }}
-						icon="all-inclusive"
+						icon="contact-mail-outline"
 					/>
 				</View>
 				<View style={{ flex: 1 }}>

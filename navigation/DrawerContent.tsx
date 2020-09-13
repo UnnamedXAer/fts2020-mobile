@@ -36,7 +36,7 @@ const DrawerContent = (
 					);
 					console.log('token', token);
 					props.navigation.navigate('InvitationsStack', {
-						screen: 'Invitations',
+						screen: 'InvitationDetails',
 						params: { token },
 					});
 				}
@@ -124,14 +124,16 @@ const DrawerContent = (
 					<DrawerItem
 						icon={({ color, size }) => (
 							<MaterialCommunityIcons
-								name="all-inclusive"
+								name="contact-mail-outline"
 								size={size}
 								color={color}
 							/>
 						)}
 						label="Invitations"
 						onPress={() => {
-							props.navigation.navigate('InvitationsStack');
+							props.navigation.navigate('InvitationsStack', {
+								screen: 'Invitations',
+							});
 						}}
 					/>
 					<DrawerItem

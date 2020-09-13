@@ -60,6 +60,7 @@ export const fetchUserInvitation = (
 		}
 	};
 };
+
 export const answerUserInvitations = (
 	id: InvitationPresentation['id'],
 	action: InvitationAction.ACCEPT | InvitationAction.REJECT

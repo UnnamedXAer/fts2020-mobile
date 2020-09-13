@@ -7,3 +7,8 @@ export type InvitationsScreenNavigationProp = CompositeNavigationProp<
 	StackNavigationProp<InvitationsStackParamList, 'Invitations'>,
 	DrawerNavigationProp<DrawerParamList>
 >;
+
+export type InvitationDetailsScreenNavigationProp = CompositeNavigationProp<
+	StackNavigationProp<InvitationsStackParamList, 'InvitationDetails'>,
+	DrawerNavigationProp<DrawerParamList>
+>;

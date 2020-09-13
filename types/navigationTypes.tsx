@@ -54,8 +54,9 @@ export type ProfileStackParamList = {
 };
 
 export type InvitationsStackParamList = {
-	Invitations: {
-		token?: string;
+	Invitations: undefined;
+	InvitationDetails: {
+		token: string;
 	};
 };
 

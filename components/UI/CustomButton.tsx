@@ -1,4 +1,4 @@
-import React, { RefObject } from 'react';
+import React from 'react';
 import {
 	ViewStyle,
 	TextStyle,
@@ -25,15 +25,42 @@ interface Props {
 	onPress: ((event: GestureResponderEvent) => void) &
 		(() => void | null | Promise<void>);
 	accent?: boolean;
+	color?: 'primary' | 'accent' | 'error';
 }
 
 const CustomButton = React.forwardRef<View, Props>((props, ref) => {
 	const { theme } = props;
+
+	let color = theme.colors[props.color || 'primary'];
+	let spinnerColor = color;
+	if (props.disabled || props.loading) {
+		color = theme.colors.disabled;
+	} else if (props.accent) {
+		color = theme.colors['accent'];
+		spinnerColor = color;
+	}
+
+	let rippleColor = Colors.teal100;
+	if (props.accent) {
+		rippleColor = Colors.orange100;
+	} else if (props.color) {
+		switch (props.color) {
+			case 'error':
+				rippleColor = Colors.red100;
+				break;
+			case 'accent':
+				rippleColor = Colors.orange100;
+				break;
+			default:
+				break;
+		}
+	}
+
 	return (
 		<TouchableRipple
 			style={props.style}
-			rippleColor={!props.accent ? Colors.teal100 : Colors.orange100}
-			underlayColor={!props.accent ? Colors.teal100 : Colors.orange100}
+			rippleColor={rippleColor}
+			underlayColor={rippleColor}
 			onPress={
 				props.onPress as
 					| (((event: GestureResponderEvent) => void) & (() => void | null))
@@ -46,12 +73,7 @@ const CustomButton = React.forwardRef<View, Props>((props, ref) => {
 					style={[
 						styles.text,
 						{
-							color:
-								props.disabled || props.loading
-									? theme.colors.disabled
-									: !props.accent
-									? theme.colors.primary
-									: theme.colors.accent,
+							color: color,
 						},
 						props.textStyle,
 					]}
@@ -60,12 +82,7 @@ const CustomButton = React.forwardRef<View, Props>((props, ref) => {
 				</Text>
 				<View style={styles.spinner}>
 					{props.loading && (
-						<ActivityIndicator
-							size="small"
-							color={
-								!props.accent ? theme.colors.primary : theme.colors.accent
-							}
-						/>
+						<ActivityIndicator size="small" color={spinnerColor} />
 					)}
 				</View>
 			</View>

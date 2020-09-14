@@ -57,6 +57,7 @@ export type InvitationsStackParamList = {
 	Invitations: undefined;
 	InvitationDetails: {
 		token: string;
+		openedByLink: boolean;
 	};
 };
 

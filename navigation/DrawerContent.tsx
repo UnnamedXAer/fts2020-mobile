@@ -34,10 +34,13 @@ const DrawerContent = (
 						match[0].lastIndexOf('/') + 1,
 						url.length
 					);
-					console.log('token', token);
+
 					props.navigation.navigate('InvitationsStack', {
 						screen: 'InvitationDetails',
-						params: { token },
+						params: {
+							token,
+							openedByLink: true,
+						},
 					});
 				}
 			}
@@ -64,18 +67,6 @@ const DrawerContent = (
 			Linking.removeEventListener('url', urlChangeHandler);
 		};
 	}, [linkHandler]);
-
-	// useEffect(() => {
-	// 	if (redirectTo?.path) {
-	// 		const redirect = { ...redirectTo };
-	// 		dispatch(setRedirect(null));
-
-	// 		console.log('about redirect');
-	// 		props.navigation.navigate(redirect.path, {
-	// 			token: redirect.token,
-	// 		});
-	// 	}
-	// }, [dispatch, props.navigation, redirectTo]);
 
 	return (
 		<View style={{ flex: 1 }}>

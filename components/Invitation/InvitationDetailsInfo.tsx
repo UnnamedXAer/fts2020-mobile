@@ -19,11 +19,18 @@ const InvitationDetailsInfo: React.FC<Props> = ({ theme, invitation }) => {
 				flexShrink: 1,
 			}}
 		>
-			<Paragraph>
-				[ {moment(invitation?.createAt).format('dddd, Do MMM YYYY')} ]
+			<Paragraph
+				style={{
+					textAlign: 'right',
+					color: theme.colors.placeholder,
+					fontStyle: 'italic',
+					fontSize: 12,
+				}}
+			>
+				{moment(invitation?.createAt).format('dddd, Do MMM YYYY')}
 			</Paragraph>
 			<Paragraph>
-				The user{' '}
+				User{' '}
 				<Text
 					style={{
 						fontWeight: 'bold',
@@ -31,25 +38,22 @@ const InvitationDetailsInfo: React.FC<Props> = ({ theme, invitation }) => {
 				>
 					{invitation.sender.emailAddress} ({invitation.sender.userName})
 				</Text>{' '}
-				invites you to join to the{' '}
-				<Text
-					style={{
-						fontWeight: 'bold',
-					}}
-				>
-					{invitation.flat.name}
-				</Text>{' '}
-				flat.
+				invites you to join to a flat.
 			</Paragraph>
 		</View>
 	) : (
-		<View>
-			{/* <Placeholder Animation={Shine}>
+		<View style={{ flex: 1 }}>
+			<Placeholder Animation={Shine}>
+				<PlaceholderLine
+					style={[
+						styles.invitationInfoPlaceholderLine,
+						styles.datePlaceholderLine,
+					]}
+				/>
 				<PlaceholderLine style={styles.invitationInfoPlaceholderLine} />
 				<PlaceholderLine style={styles.invitationInfoPlaceholderLine} />
 				<PlaceholderLine style={styles.invitationInfoPlaceholderLine} />
-				<PlaceholderLine style={styles.invitationInfoPlaceholderLine} />
-			</Placeholder> */}
+			</Placeholder>
 		</View>
 	);
 };
@@ -57,7 +61,12 @@ const InvitationDetailsInfo: React.FC<Props> = ({ theme, invitation }) => {
 const styles = StyleSheet.create({
 	invitationInfoPlaceholderLine: {
 		width: '90%',
-		height: 16,
+		height: 14,
+	},
+	datePlaceholderLine: {
+		width: '50%',
+		height: 12,
+		alignSelf: 'flex-end',
 	},
 	invitationTextWrapper: {},
 });

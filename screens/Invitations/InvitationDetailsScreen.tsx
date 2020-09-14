@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, View, RefreshControl, Dimensions } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { withTheme, Headline } from 'react-native-paper';
+import { withTheme, Headline, Paragraph } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
 import { Theme } from 'react-native-paper/lib/typescript/src/types';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -22,13 +22,32 @@ import { InvitationDetailsScreenRouteProps } from '../../types/invitationsRouteP
 import { InvitationDetailsScreenNavigationProp } from '../../types/invitationsNavigationTypes';
 import NotificationCard from '../../components/UI/NotificationCard';
 import CustomButton from '../../components/UI/CustomButton';
-import { InvitationAction } from '../../constants/invitation';
+import {
+	InvitationAction,
+	invitationInactiveStatuses,
+	InvitationStatus,
+} from '../../constants/invitation';
 import InvitationDetailsInfo from '../../components/Invitation/InvitationDetailsInfo';
+import InvitationDetailsFlatInfo from '../../components/Invitation/InvitationDetailsFlatInfo';
 
 interface Props {
 	route: InvitationDetailsScreenRouteProps;
 	navigation: InvitationDetailsScreenNavigationProp;
 	theme: Theme;
+}
+
+function validateInvitationStatus(status: InvitationStatus | undefined) {
+	let warning: string | null = null;
+	if (status) {
+		if ([InvitationStatus.ACCEPTED, InvitationStatus.REJECTED].includes(status)) {
+			warning = 'Invitation already ' + status.toLocaleLowerCase() + '.';
+		} else if (status === InvitationStatus.EXPIRED) {
+			warning = 'Invitation expired.';
+		} else if (status === InvitationStatus.CANCELED) {
+			warning = 'Invitation was cancelled.';
+		}
+	}
+	return warning;
 }
 
 const InvitationDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) => {
@@ -37,6 +56,7 @@ const InvitationDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) 
 	const invitation = useSelector((state: RootState) =>
 		state.invitations.userInvitations?.find((x) => x.token === token)
 	);
+	if (invitation) invitation.status = InvitationStatus.ACCEPTED;
 	const [invitationLoadTime, setInvitationLoadTime] = useState(
 		invitation ? Date.now() : 0
 	);
@@ -70,6 +90,27 @@ const InvitationDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) 
 
 	const refreshHandler = async () => {
 		setRefreshing(true);
+		try {
+			await dispatch(fetchUserInvitation(token));
+		} catch (err) {
+			if (isMounted.current) {
+				const error = new HttpErrorParser(err);
+				const msg = error.getMessage();
+				setSnackbarData({
+					open: true,
+					content: msg,
+					onClose: closeSnackbarAlertHandler,
+					severity: 'error',
+					action: {
+						label: 'X',
+						onPress: closeSnackbarAlertHandler,
+					},
+				});
+			}
+		}
+		if (isMounted.current) {
+			setRefreshing(false);
+		}
 	};
 
 	useEffect(() => {
@@ -86,13 +127,10 @@ const InvitationDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) 
 						setError(msg);
 					}
 				}
-				if (refreshing && isMounted.current) {
-					setRefreshing(false);
-				}
 			};
 			loadInvitation();
 		}
-	}, [dispatch, invitation, invitationLoadTime]);
+	}, [dispatch, invitation, invitationLoadTime, token]);
 
 	const closeDialogAlertHandler = () =>
 		setDialogData((prevState) => ({
@@ -124,6 +162,8 @@ const InvitationDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) 
 			}
 		}
 	};
+
+	const invitationStatusWarning = validateInvitationStatus(invitation?.status);
 
 	return (
 		<>
@@ -170,25 +210,59 @@ const InvitationDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) 
 								invitation={invitation}
 							/>
 						</View>
-						<View style={styles.infoContainer}>{/* here: Flat info */}</View>
-
-						{invitation && (
-							<View style={[styles.section, styles.actions]}>
-								<CustomButton
-									onPress={() => actionHandler(InvitationAction.REJECT)}
-									disabled={loadingAnswer}
-									color="error"
-								>
-									REJECT
-								</CustomButton>
-								<CustomButton
-									onPress={() => actionHandler(InvitationAction.ACCEPT)}
-									loading={loadingAnswer}
-								>
-									ACCEPT
-								</CustomButton>
+						<View style={styles.infoContainer}>
+							<View style={styles.avatarContainer}>
+								<View style={[styles.avatar]}>
+									<MaterialCommunityIcons
+										name="home-city-outline"
+										size={40}
+										color={theme.colors.primary}
+									/>
+								</View>
 							</View>
-						)}
+							<InvitationDetailsFlatInfo
+								flat={invitation?.flat}
+								theme={theme}
+							/>
+						</View>
+						{invitation ? (
+							invitationStatusWarning ? (
+								<View style={styles.section}>
+									<NotificationCard severity="warning">
+										{invitationStatusWarning}
+									</NotificationCard>
+								</View>
+							) : (
+								<>
+									<View style={styles.section}>
+										<Paragraph
+											style={{ textAlign: 'center', fontSize: 16 }}
+										>
+											Would you like to accept invitation?
+										</Paragraph>
+									</View>
+									<View style={[styles.section, styles.actions]}>
+										<CustomButton
+											onPress={() =>
+												actionHandler(InvitationAction.REJECT)
+											}
+											disabled={loadingAnswer}
+											color="error"
+										>
+											REJECT
+										</CustomButton>
+										<CustomButton
+											onPress={() =>
+												actionHandler(InvitationAction.ACCEPT)
+											}
+											loading={loadingAnswer}
+										>
+											ACCEPT
+										</CustomButton>
+									</View>
+								</>
+							)
+						) : null}
 					</>
 				)}
 			</ScrollView>
@@ -242,7 +316,6 @@ const styles = StyleSheet.create({
 		marginHorizontal: 16,
 	},
 	actions: {
-		marginTop: 24,
 		flexDirection: 'row',
 		justifyContent: 'center',
 	},

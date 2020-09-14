@@ -36,8 +36,14 @@ import ProfileScreen from '../screens/Profile/ProfileScreen';
 import ChangePasswordScreen from '../screens/Auth/ChangePasswordScreen';
 import CurrentPeriodsScreen from '../screens/CurrentPeriods/CurrentPeriodsScreen';
 import AboutScreen from '../screens/About/AboutScreen';
-import { NewTaskTimeScreenNavigationProp } from '../types/rootNavigationTypes';
-import { NewTaskTimeScreenRouteProps } from '../types/rootRoutePropTypes';
+import {
+	NewTaskTimeScreenNavigationProp,
+	InviteMembersScreenNavigationProp,
+} from '../types/rootNavigationTypes';
+import {
+	NewTaskTimeScreenRouteProps,
+	InviteMembersScreenRouteProps,
+} from '../types/rootRoutePropTypes';
 import InvitationsScreen from '../screens/Invitations/InvitationsScreen';
 import DrawerContent from './DrawerContent';
 import { setAppLoading } from '../store/actions/app';
@@ -57,9 +63,11 @@ const DrawerNavigator = ({ loggedUser }: { loggedUser: User }) => {
 				options={{ title: 'Flats & Tasks' }}
 				component={RootStackNavigator}
 			/>
-			<Drawer.Screen name="InvitationsStack" options={{ title: 'Invitations' }}>
-				{(props) => <InvitationsStackNavigator {...props} />}
-			</Drawer.Screen>
+			<Drawer.Screen
+				name="InvitationsStack"
+				options={{ title: 'Invitations' }}
+				component={InvitationsStackNavigator}
+			/>
 			<Drawer.Screen name="ProfileStack" options={{ title: 'Profile' }}>
 				{(props) => <ProfileStackNavigator {...props} loggedUser={loggedUser} />}
 			</Drawer.Screen>
@@ -150,22 +158,30 @@ const RootStackNavigator = ({
 			/>
 			<RootStack.Screen
 				name="InviteMembers"
-				options={(props) => ({
-					title: 'Invite Members',
-					headerLeft: (btnProps) => (
-						<HeaderBackButton
-							{...btnProps}
-							onPress={
-								props.route.params.isNewFlat
-									? () =>
-											props.navigation.replace('FlatDetails', {
-												id: props.route.params.flatId,
-											})
-									: btnProps.onPress
-							}
-						/>
-					),
-				})}
+				options={({
+					navigation,
+					route,
+				}: {
+					navigation: InviteMembersScreenNavigationProp;
+					route: InviteMembersScreenRouteProps;
+				}) => {
+					return {
+						title: 'Invite Members',
+						headerLeft: (btnProps) => (
+							<HeaderBackButton
+								{...btnProps}
+								onPress={
+									route.params.isNewFlat
+										? () =>
+												navigation.replace('FlatDetails', {
+													id: route.params.flatId,
+												})
+										: btnProps.onPress
+								}
+							/>
+						),
+					};
+				}}
 				component={InviteMembersScreen}
 			/>
 			<RootStack.Screen
@@ -232,7 +248,7 @@ const ProfileStackNavigator = ({
 	navigation,
 	loggedUser,
 }: {
-	navigation: any;
+	navigation: DrawerNavigationProp<DrawerParamList>;
 	loggedUser: User;
 }) => {
 	return (
@@ -263,7 +279,11 @@ const ProfileStackNavigator = ({
 };
 
 const InvitationsStack = createStackNavigator<InvitationsStackParamList>();
-const InvitationsStackNavigator = ({ navigation }: { navigation: any }) => {
+const InvitationsStackNavigator = ({
+	navigation,
+}: {
+	navigation: DrawerNavigationProp<DrawerParamList>;
+}) => {
 	return (
 		<InvitationsStack.Navigator>
 			<InvitationsStack.Screen
@@ -281,14 +301,23 @@ const InvitationsStackNavigator = ({ navigation }: { navigation: any }) => {
 			/>
 			<InvitationsStack.Screen
 				name="InvitationDetails"
-				options={{
-					title: 'View Invitation',
-					// headerLeft: (props) => (
-					// 	<HeaderBackButton
-					// 		{...props}
-					// 		onPress={() => navigation.goBack()}
-					// 	/>
-					// ),
+				options={(optionsProps) => {
+					return {
+						title: 'View Invitation',
+						headerLeft: (props) =>
+							optionsProps.route.params.openedByLink ? (
+								<HeaderBackButton
+									{...props}
+									onPress={() =>
+										navigation.navigate('RootStack', {
+											screen: 'BottomTab',
+										})
+									}
+								/>
+							) : (
+								<HeaderBackButton {...props} />
+							),
+					};
 				}}
 				component={InvitationDetailsScreen}
 			/>
@@ -321,14 +350,12 @@ const AppNavigationContainer = () => {
 			setAppLoading(false);
 		}
 	}, [loggedUser]);
-	console.log('loading', loading);
+
 	return (
 		<NavigationContainer
 			theme={navigationContainerTheme}
 			linking={linking}
-			fallback={
-				<LoadingScreen />
-			}
+			fallback={<LoadingScreen />}
 		>
 			{loading ? (
 				<LoadingScreen />

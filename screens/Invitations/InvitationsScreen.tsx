@@ -145,7 +145,10 @@ const InvitationsScreen: React.FC<Props> = ({ theme, navigation }) => {
 	};
 
 	const invitationSelectHandler = (token: string) => {
-		navigation.navigate('InvitationDetails', { token });
+		navigation.push('InvitationDetails', {
+			token,
+			openedByLink: false,
+		});
 	};
 
 	const invitationLongPressHandler = (id: number) => {

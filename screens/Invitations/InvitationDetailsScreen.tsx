@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, RefreshControl, Dimensions } from 'react-native';
+import { StyleSheet, View, RefreshControl } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { withTheme, Headline, Paragraph } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
@@ -8,9 +8,6 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import RootState from '../../store/storeTypes';
 import { StateError } from '../../store/ReactTypes/customReactTypes';
 import HttpErrorParser from '../../utils/parseError';
-import AlertDialog, {
-	AlertDialogData,
-} from '../../components/UI/AlertDialog/AlertDialog';
 import AlertSnackbar, {
 	AlertSnackbarData,
 } from '../../components/UI/AlertSnackbar/AlertSnackbar';
@@ -22,13 +19,10 @@ import { InvitationDetailsScreenRouteProps } from '../../types/invitationsRouteP
 import { InvitationDetailsScreenNavigationProp } from '../../types/invitationsNavigationTypes';
 import NotificationCard from '../../components/UI/NotificationCard';
 import CustomButton from '../../components/UI/CustomButton';
-import {
-	InvitationAction,
-	invitationInactiveStatuses,
-	InvitationStatus,
-} from '../../constants/invitation';
+import { InvitationAction, InvitationStatus } from '../../constants/invitation';
 import InvitationDetailsInfo from '../../components/Invitation/InvitationDetailsInfo';
 import InvitationDetailsFlatInfo from '../../components/Invitation/InvitationDetailsFlatInfo';
+import User from '../../models/user';
 
 interface Props {
 	route: InvitationDetailsScreenRouteProps;
@@ -56,7 +50,6 @@ const InvitationDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) 
 	const invitation = useSelector((state: RootState) =>
 		state.invitations.userInvitations?.find((x) => x.token === token)
 	);
-	if (invitation) invitation.status = InvitationStatus.ACCEPTED;
 	const [invitationLoadTime, setInvitationLoadTime] = useState(
 		invitation ? Date.now() : 0
 	);
@@ -65,14 +58,6 @@ const InvitationDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) 
 	const [error, setError] = useState<StateError>(null);
 	const [loadingAnswer, setAnswerLoading] = useState(false);
 	const [refreshing, setRefreshing] = useState(false);
-
-	const [dialogData, setDialogData] = useState<AlertDialogData>({
-		content: '',
-		onDismiss: () => {},
-		title: '',
-		loading: false,
-		open: false,
-	});
 
 	const [snackbarData, setSnackbarData] = useState<AlertSnackbarData>({
 		content: '',
@@ -101,6 +86,7 @@ const InvitationDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) 
 					content: msg,
 					onClose: closeSnackbarAlertHandler,
 					severity: 'error',
+					timeout: 3000,
 					action: {
 						label: 'X',
 						onPress: closeSnackbarAlertHandler,
@@ -132,12 +118,6 @@ const InvitationDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) 
 		}
 	}, [dispatch, invitation, invitationLoadTime, token]);
 
-	const closeDialogAlertHandler = () =>
-		setDialogData((prevState) => ({
-			...prevState,
-			open: prevState.loading,
-		}));
-
 	const closeSnackbarAlertHandler = () =>
 		setSnackbarData((prevState) => ({
 			...prevState,
@@ -149,15 +129,31 @@ const InvitationDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) 
 	) => {
 		setAnswerLoading(true);
 		try {
-			// await dispatch(answerUserInvitations(invitation!.id, action));
+			await dispatch(answerUserInvitations(invitation!.id, action));
 			if (isMounted.current) {
-				// setInvitationAnswerAction(action);
+				navigation.goBack();
+				if (action === InvitationAction.ACCEPT) {
+					navigation.navigate('RootStack', {
+						screen: 'FlatDetails',
+						params: { id: invitation!.flat.id! },
+					});
+				}
 			}
 		} catch (err) {
 			if (isMounted.current) {
 				const httpError = new HttpErrorParser(err);
 				const msg = httpError.getMessage();
-				setError(msg);
+				setSnackbarData({
+					open: true,
+					content: msg,
+					timeout: 3000,
+					onClose: closeSnackbarAlertHandler,
+					severity: 'error',
+					action: {
+						label: 'X',
+						onPress: closeSnackbarAlertHandler,
+					},
+				});
 				setAnswerLoading(false);
 			}
 		}
@@ -188,10 +184,15 @@ const InvitationDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) 
 						Flat Invitation
 					</Headline>
 				</View>
-				{error ? (
+				{error ||
+				(invitation &&
+					(invitation.invitedPerson as User).id !== loggedUser.id) ? (
 					<NotificationCard severity="error">
-						Could Not load invitation due to following error:{'\n'}
-						{error}
+						{invitation &&
+						invitation.invitedPerson !== loggedUser.emailAddress
+							? 'You do not have permissions to view or answer to this invitation.'
+							: 'Could Not load invitation due to following error:\n' +
+							  error}
 					</NotificationCard>
 				) : (
 					<>
@@ -266,7 +267,6 @@ const InvitationDetailsScreen: React.FC<Props> = ({ route, navigation, theme }) 
 					</>
 				)}
 			</ScrollView>
-			<AlertDialog data={dialogData} />
 			<AlertSnackbar data={snackbarData} />
 		</>
 	);

@@ -86,6 +86,7 @@ const DrawerContent = (
 								style={{
 									marginLeft: 16,
 									justifyContent: 'center',
+									flexShrink: 1
 								}}
 							>
 								<Paragraph style={{ fontWeight: 'bold' }}>

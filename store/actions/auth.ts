@@ -1,4 +1,4 @@
-import { AsyncStorage } from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
 import { ThunkAction } from 'redux-thunk';
 import { Credentials } from '../../models/auth';
 import axios from '../../axios/axios';

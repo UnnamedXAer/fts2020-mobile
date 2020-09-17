@@ -4,11 +4,11 @@ import Task, { UserTask, TaskData } from '../../models/task';
 import { ThunkAction } from 'redux-thunk';
 import RootState, { StoreAction } from '../storeTypes';
 import User from '../../models/user';
-import { AsyncStorage } from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
 import { APITask, APIUserTask, APIUser } from '../apiTypes';
 import {
 	mapApiTaskDataToModel,
-	mapApiUserTaskDataToModel
+	mapApiUserTaskDataToModel,
 } from '../mapAPIToModel/mapTask';
 import { mapApiUserDataToModel } from '../mapAPIToModel/mapUser';
 import { ClearTaskPeriodsAction, clearTaskPeriods } from './periods';
@@ -36,34 +36,38 @@ type SetTaskMembersAction = {
 	payload: { members: User[]; taskId: number };
 };
 
-export type ClearFlatTasksActionPayload = { flatId: number }
+export type ClearFlatTasksActionPayload = { flatId: number };
 type ClearFlatTasksAction = {
 	type: TasksActionTypes.ClearFlatTasks;
 	payload: ClearFlatTasksActionPayload;
 };
 
-export type ClearTaskActionPayload = { id: number }
+export type ClearTaskActionPayload = { id: number };
 type ClearTaskAction = {
 	type: TasksActionTypes.ClearTask;
 	payload: ClearTaskActionPayload;
 };
 
 export type SetShowInactiveTasksActionPayload = {
-	show: boolean
-}
+	show: boolean;
+};
 
 type SetShowInactiveTasksAction = {
 	type: TasksActionTypes.SetShowInactive;
 	payload: SetShowInactiveTasksActionPayload;
 };
 
-
-export type CreateTaskActionPayload = { task: Task, tmpId: string }
+export type CreateTaskActionPayload = { task: Task; tmpId: string };
 
 export const createTask = (
 	task: TaskData,
 	tmpId: string
-): ThunkAction<Promise<void>, RootState, any, StoreAction<CreateTaskActionPayload, string>> => {
+): ThunkAction<
+	Promise<void>,
+	RootState,
+	any,
+	StoreAction<CreateTaskActionPayload, string>
+> => {
 	return async (dispatch) => {
 		const url = `/flats/${task.flatId}/tasks`;
 		try {
@@ -80,7 +84,7 @@ export const createTask = (
 			const createdTask = mapApiTaskDataToModel(data);
 			dispatch({
 				type: TasksActionTypes.Add,
-				payload: { task: createdTask, tmpId }
+				payload: { task: createdTask, tmpId },
 			});
 		} catch (err) {
 			throw err;
@@ -130,12 +134,17 @@ export const fetchFlatTasks = (
 
 export const clearTask = (
 	id: number
-): ThunkAction<Promise<void>, RootState, any, ClearTaskAction | ClearTaskPeriodsAction> => {
+): ThunkAction<
+	Promise<void>,
+	RootState,
+	any,
+	ClearTaskAction | ClearTaskPeriodsAction
+> => {
 	return async (dispatch) => {
 		dispatch({
 			type: TasksActionTypes.ClearTask,
 			payload: {
-				id
+				id,
 			},
 		});
 		dispatch(clearTaskPeriods(id));
@@ -144,9 +153,16 @@ export const clearTask = (
 
 export const clearFlatTasks = (
 	id: number
-): ThunkAction<Promise<void>, RootState, any, ClearFlatTasksAction | ClearTaskPeriodsAction> => {
+): ThunkAction<
+	Promise<void>,
+	RootState,
+	any,
+	ClearFlatTasksAction | ClearTaskPeriodsAction
+> => {
 	return async (dispatch, getState) => {
-		const tasksIds = getState().tasks.tasks.filter(x => x.flatId === id).map(x => x.id!);
+		const tasksIds = getState()
+			.tasks.tasks.filter((x) => x.flatId === id)
+			.map((x) => x.id!);
 
 		dispatch({
 			type: TasksActionTypes.ClearFlatTasks,
@@ -154,7 +170,7 @@ export const clearFlatTasks = (
 				flatId: id,
 			},
 		});
-		tasksIds.forEach(async x => dispatch(clearTaskPeriods(x)))
+		tasksIds.forEach(async (x) => dispatch(clearTaskPeriods(x)));
 	};
 };
 
@@ -236,10 +252,7 @@ export const updateTask = (
 	Promise<void>,
 	RootState,
 	any,
-	StoreAction<
-		Task,
-		TasksActionTypes.SetTask | TasksActionTypes.SetUserTask
-	>
+	StoreAction<Task, TasksActionTypes.SetTask | TasksActionTypes.SetUserTask>
 > => {
 	return async (dispatch) => {
 		const url = `/tasks/${task.id}`;
@@ -286,8 +299,12 @@ export const updatedTaskMembers = (
 	};
 };
 
-export const readSaveShowInactive = (
-): ThunkAction<Promise<void>, RootState, any, SetShowInactiveTasksAction> => {
+export const readSaveShowInactive = (): ThunkAction<
+	Promise<void>,
+	RootState,
+	any,
+	SetShowInactiveTasksAction
+> => {
 	return async (dispatch, getState) => {
 		const userId = getState().auth.user!.id;
 
@@ -315,7 +332,10 @@ export const setShowInactiveTasks = (
 				payload: { show },
 			});
 			if (skipSaving !== true) {
-				await AsyncStorage.setItem('tasksShowInactive_' + userId, show ? '1' : '0');
+				await AsyncStorage.setItem(
+					'tasksShowInactive_' + userId,
+					show ? '1' : '0'
+				);
 			}
 		} catch (err) {
 			throw err;

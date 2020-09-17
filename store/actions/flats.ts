@@ -8,7 +8,7 @@ import {
 } from './actionTypes';
 import axios from '../../axios/axios';
 import User from '../../models/user';
-import { AsyncStorage } from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
 import Invitation from '../../models/invitation';
 import { APIFlat, APIInvitation } from '../apiTypes';
 import { mapAPIFlatDataToModel } from '../mapAPIToModel/mapFlat';

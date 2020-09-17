@@ -6,7 +6,6 @@ import { createStackNavigator, HeaderBackButton } from '@react-navigation/stack'
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import { createDrawerNavigator, DrawerNavigationProp } from '@react-navigation/drawer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import * as Linking from 'expo-linking';
 import FlatsScreen from '../screens/Flat/FlatsScreen';
 import RootState from '../store/storeTypes';
 import User from '../models/user';
@@ -325,36 +324,31 @@ const InvitationsStackNavigator = ({
 	);
 };
 
-const prefix = Linking.makeUrl('/invitations/TOKEN');
 const AppNavigationContainer = () => {
 	const { user: loggedUser } = useSelector((state: RootState) => state.auth);
 	const { loading } = useSelector((state: RootState) => state.app);
 	const [isLogIn, setIsLogIn] = useState(true);
 	const dispatch = useDispatch();
 
-	const linking = {
-		prefixes: [prefix],
-	};
-
 	useEffect(() => {
 		if (!loggedUser) {
 			const tryRestoreSession = async () => {
 				try {
 					await dispatch(tryAuthorize());
-				} catch (err) {}
-				setAppLoading(false);
+				} catch (err) {
+				}
+				dispatch(setAppLoading(false));
 			};
 			tryRestoreSession();
 		} else {
 			dispatch(readSaveShowInactive());
-			setAppLoading(false);
+			dispatch(setAppLoading(false));
 		}
-	}, [loggedUser]);
+	}, [loggedUser, dispatch]);
 
 	return (
 		<NavigationContainer
 			theme={navigationContainerTheme}
-			linking={linking}
 			fallback={<LoadingScreen />}
 		>
 			{loading ? (

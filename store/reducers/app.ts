@@ -3,7 +3,7 @@ import User from '../../models/user';
 import { AppActionTypes } from '../actions/actionTypes';
 
 const initialState: AppState = {
-	loading: false,
+	loading: true,
 };
 
 type AuthActionPayload = { user: User; expirationTime: number };

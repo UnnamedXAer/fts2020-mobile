@@ -94,16 +94,16 @@ const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 		}
 		setLoading(true);
 
-		const credentianls = new Credentials({
+		const credentials = new Credentials({
 			...formState.values,
 		});
 
 		try {
-			await dispatch(authorize(credentianls, true));
+			await dispatch(authorize(credentials, true));
 		} catch (err) {
-			const error = new HttpErrorParser(err);
-			let msg: string = error.getMessage();
-			const errArray = error.getFieldsErrors();
+			const httpError = new HttpErrorParser(err);
+			let msg = httpError.getMessage();
+			const errArray = httpError.getFieldsErrors();
 			errArray.forEach((x) => {
 				x.msg;
 				dispatchForm({

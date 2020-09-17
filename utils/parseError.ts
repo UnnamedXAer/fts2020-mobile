@@ -25,23 +25,28 @@ export default class HttpErrorParser {
 		}
 	}
 
-	getMessage() {
+	getMessage(): string {
 		this.checkError();
 		const code = this.getCode();
 		if (code === 404) {
 			return 'Recourses not found. Most likely the request address is incorrect.';
 		}
 		if (code === 422) {
-			return 'Please correct wrong entries.';
+			let msg = 'Please correct wrong entries.';
+			if (
+				this.getFieldsErrors().length === 0 &&
+				this.error?.response?.data.message
+			) {
+				msg = this.error.response.data.message;
+			}
+			return msg;
 		}
 		if (code === 401) {
 			return this.error!.response?.data.message || 'Un-Authorized access.';
 		}
 		if (code === 500) {
 			if (ENV === 'development') {
-				return (
-					this.error?.response?.data.message || this.error!.message
-				);
+				return this.error?.response?.data.message || this.error!.message;
 			} else {
 				return 'Sorry, something went wrong. Please try again later.';
 			}

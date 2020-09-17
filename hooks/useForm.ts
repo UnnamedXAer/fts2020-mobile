@@ -8,7 +8,7 @@ export enum FormActionTypes {
 	MarkAsTouched = 'MARK_AS_TOUCHED',
 	SetFormError = 'SET_FORM_ERROR',
 	SetAllTouched = 'SET_ALL_TOUCHED',
-	ResetForm = 'RESET_FORM'
+	ResetForm = 'RESET_FORM',
 }
 
 export type FormAction =
@@ -16,7 +16,7 @@ export type FormAction =
 	| SetErrorAction
 	| MarkAsTouchedAction
 	| SetErrorAction
-	| MarkAllasTouched
+	| MarkAllAsTouched
 	| SetFormErrorAction
 	| ResetFormAction;
 
@@ -47,7 +47,7 @@ interface MarkAsTouchedAction {
 	fieldId: string;
 }
 
-interface MarkAllasTouched {
+interface MarkAllAsTouched {
 	type: FormActionTypes.SetAllTouched;
 }
 
@@ -59,18 +59,15 @@ export interface FormState<T extends string = string> {
 	};
 	touches: {
 		[U in T]: boolean;
-	}
+	};
 }
 
-const formReducer = (
-	state: FormState,
-	action: FormAction
-): FormState => {
+const formReducer = (state: FormState, action: FormAction): FormState => {
 	switch (action.type) {
 		case FormActionTypes.UpdateValue:
 			const updatedValues = {
 				...state.values,
-				[action.fieldId]: action.value!
+				[action.fieldId]: action.value!,
 			};
 
 			const updatedErrorsOnValueChange = {
@@ -81,7 +78,7 @@ const formReducer = (
 			return {
 				...state,
 				values: updatedValues,
-				errors: updatedErrorsOnValueChange
+				errors: updatedErrorsOnValueChange,
 			};
 
 		case FormActionTypes.SetError:
@@ -97,17 +94,17 @@ const formReducer = (
 		case FormActionTypes.MarkAsTouched:
 			const updatedTouches = {
 				...state.touches,
-				[action.fieldId]: true
-			}
+				[action.fieldId]: true,
+			};
 			return {
 				...state,
-				touches: updatedTouches
-			}
+				touches: updatedTouches,
+			};
 		case FormActionTypes.SetFormError:
 			return {
 				...state,
-				formError: action.error
-			}
+				formError: action.error,
+			};
 		case FormActionTypes.SetAllTouched:
 			const updatedAllTouches: FormState['touches'] = {};
 
@@ -117,22 +114,24 @@ const formReducer = (
 
 			return {
 				...state,
-				touches: updatedAllTouches
-			}
+				touches: updatedAllTouches,
+			};
 		case FormActionTypes.ResetForm:
 			const _state = action.state;
 			return {
 				..._state,
 				values: _state.values,
 				errors: _state.errors,
-				touches: _state.touches
-			}
+				touches: _state.touches,
+			};
 		default:
 			return state;
 	}
 };
 
-const useForm = <T extends string>(initialState: FormState<T>): [FormState<T>, Dispatch<FormAction>] => {
+const useForm = <T extends string>(
+	initialState: FormState<T>
+): [FormState<T>, Dispatch<FormAction>] => {
 	const [state, dispatch] = useReducer<Reducer<FormState<T>, FormAction>>(
 		formReducer,
 		initialState
@@ -142,7 +141,6 @@ const useForm = <T extends string>(initialState: FormState<T>): [FormState<T>, D
 };
 
 export function createInitialState<T extends string>(
-	// initialValues: { [U in T]: any }
 	initialValues: { [U in T]: typeof initialValues[U] }
 ): FormState<T> {
 	const errors = {} as { [U in T]: StateError };
@@ -160,7 +158,7 @@ export function createInitialState<T extends string>(
 		values: { ...initialValues },
 		touches,
 		formError: null,
-	};
+	} as FormState<T>;
 }
 
 export default useForm;

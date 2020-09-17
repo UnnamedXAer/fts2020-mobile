@@ -20,7 +20,11 @@ import { useDispatch } from 'react-redux';
 import { authorize } from '../../store/actions/auth';
 import { Credentials } from '../../models/auth';
 import HttpErrorParser from '../../utils/parseError';
-import useForm, { FormActionTypes, createInitialState } from '../../hooks/useForm';
+import useForm, {
+	FormActionTypes,
+	createInitialState,
+	FormState,
+} from '../../hooks/useForm';
 
 interface Props {
 	theme: Theme;
@@ -30,7 +34,7 @@ interface Props {
 const formFields = ['emailAddress', 'password'] as const;
 type FormFields = typeof formFields[number];
 
-const initialState = createInitialState<FormFields>({
+const initialState: FormState<FormFields> = createInitialState<FormFields>({
 	emailAddress: '',
 	password: '',
 });

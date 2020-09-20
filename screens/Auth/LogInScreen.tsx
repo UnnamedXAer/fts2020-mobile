@@ -1,4 +1,4 @@
-import React, { useState, useRef, MutableRefObject } from 'react';
+import React, { useState, useRef, MutableRefObject, useEffect } from 'react';
 import {
 	StyleSheet,
 	View,
@@ -17,7 +17,7 @@ import CustomButton from '../../components/UI/CustomButton';
 import { StateError } from '../../store/ReactTypes/customReactTypes';
 import NotificationCard from '../../components/UI/NotificationCard';
 import { useDispatch } from 'react-redux';
-import { authorize } from '../../store/actions/auth';
+import { authorize, fetchLoggedUser } from '../../store/actions/auth';
 import { Credentials } from '../../models/auth';
 import HttpErrorParser from '../../utils/parseError';
 import useForm, {
@@ -25,10 +25,15 @@ import useForm, {
 	createInitialState,
 	FormState,
 } from '../../hooks/useForm';
+import { Linking } from 'expo';
+import { APP_SERVER_URL } from '../../config/env';
+
+export type ExternalProvider = 'Google' | 'GitHub';
 
 interface Props {
 	theme: Theme;
 	toggleAuthScreen: () => void;
+	externalProvider: ExternalProvider | null;
 }
 
 const formFields = ['emailAddress', 'password'] as const;
@@ -39,15 +44,36 @@ const initialState: FormState<FormFields> = createInitialState<FormFields>({
 	password: '',
 });
 
-const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
+const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen, externalProvider }) => {
+	const dispatch = useDispatch();
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<StateError>(null);
-
 	const [formState, dispatchForm] = useForm<FormFields>(initialState);
-
-	const dispatch = useDispatch();
-
 	const passwordInpRef: MutableRefObject<TextInput | null> = useRef(null);
+
+	const isMounted = useRef(true);
+	useEffect(() => {
+		isMounted.current = true;
+		return () => {
+			isMounted.current = false;
+		};
+	}, []);
+
+	useEffect(() => {
+		if (externalProvider) {
+			setLoading(true);
+			(async () => {
+				try {
+					await dispatch(fetchLoggedUser());
+				} catch (err) {
+					setError(
+						'Could not have authorize by ' + externalProvider + '.\n' + err
+					);
+					setLoading(false);
+				}
+			})();
+		}
+	}, [externalProvider, dispatch]);
 
 	const fieldTextChangeHandler = (fieldName: FormFields, txt: string) => {
 		dispatchForm({
@@ -173,6 +199,31 @@ const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 							loading={loading}
 						>
 							SIGN IN
+						</CustomButton>
+					</View>
+					<View>
+						<CustomButton
+							onPress={async () => {
+								try {
+									console.log('APP_SERVER_ULR', APP_SERVER_URL);
+									const isOpened = await Linking.openURL(
+										`${APP_SERVER_URL}/auth/github/login`
+									);
+									if (!isOpened) {
+										throw new Error(
+											'Could not start GitHub authorization process.'
+										);
+									}
+								} catch (err) {
+									if (isMounted.current) {
+										setError(
+											'Sorry, could not start GitHub authorization process. \nPlease try again later or use other sign method.'
+										);
+									}
+								}
+							}}
+						>
+							GitHub
 						</CustomButton>
 					</View>
 				</ScrollView>

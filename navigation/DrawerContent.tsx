@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React from 'react';
 import {
 	Drawer as PaperDrawer,
 	Avatar,
@@ -13,60 +13,22 @@ import {
 	DrawerContentComponentProps,
 } from '@react-navigation/drawer';
 import { useDispatch } from 'react-redux';
-import * as Linking from 'expo-linking';
 import User from '../models/user';
 import { logOut } from '../store/actions/auth';
 import { setAppLoading } from '../store/actions/app';
 
+export type RedirectTo = {
+	screen: string;
+	params?: RedirectTo |& { [key: string]: any };
+};
+
 const DrawerContent = (
 	props: DrawerContentComponentProps & {
 		loggedUser: User;
+		redirectTo: RedirectTo | null;
 	}
 ) => {
 	const dispatch = useDispatch();
-
-	const linkHandler = useCallback(
-		(url: string | null) => {
-			if (url) {
-				const match = url.match(/\/--[\/]invitations\/[a-z0-9-]+/);
-				if (match?.index && match.index > -1) {
-					const token = match[0].substring(
-						match[0].lastIndexOf('/') + 1,
-						url.length
-					);
-
-					props.navigation.navigate('InvitationsStack', {
-						screen: 'InvitationDetails',
-						params: {
-							token,
-							openedByLink: true,
-						},
-					});
-				}
-			}
-		},
-		[props.navigation]
-	);
-
-	useEffect(() => {
-		const checkInitialUrl = async () => {
-			const initUrl = await Linking.getInitialURL();
-			linkHandler(initUrl);
-		};
-
-		checkInitialUrl();
-
-		const urlChangeHandler = (ev: Linking.EventType) => {
-			console.log('URL CHANGED: ', ev.url);
-			linkHandler(ev.url);
-		};
-
-		Linking.addEventListener('url', urlChangeHandler);
-
-		return () => {
-			Linking.removeEventListener('url', urlChangeHandler);
-		};
-	}, [linkHandler]);
 
 	return (
 		<View style={{ flex: 1 }}>
@@ -86,7 +48,7 @@ const DrawerContent = (
 								style={{
 									marginLeft: 16,
 									justifyContent: 'center',
-									flexShrink: 1
+									flexShrink: 1,
 								}}
 							>
 								<Paragraph style={{ fontWeight: 'bold' }}>

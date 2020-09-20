@@ -15,6 +15,7 @@ import RootState from '../storeTypes';
 import User from '../../models/user';
 import { FetchUserAction } from './users';
 import { mapApiUserDataToModel } from '../mapAPIToModel/mapUser';
+import { APIUser } from '../apiTypes';
 
 type AuthorizeActionPayload = {
 	user: User;
@@ -34,6 +35,44 @@ export const authorize = (
 		const url = `/auth/${isLogIn ? 'login' : 'register'}`;
 		try {
 			const { data } = await axios.post(url, credentials);
+
+			const user = mapApiUserDataToModel(data.user);
+
+			const expirationTime = Date.now() + data.expiresIn;
+
+			dispatch({
+				type: AuthActionTypes.Authorize,
+				payload: {
+					user,
+					expirationTime,
+				},
+			});
+
+			dispatch({
+				type: UsersActionTypes.SetUser,
+				payload: user,
+			});
+
+			await AsyncStorage.multiSet([
+				['loggedUser', JSON.stringify(user)],
+				['expirationTime', '' + expirationTime],
+			]);
+		} catch (err) {
+			throw err;
+		}
+	};
+};
+
+export const fetchLoggedUser = (): ThunkAction<
+	Promise<void>,
+	RootState,
+	any,
+	AuthorizeAction | FetchUserAction
+> => {
+	return async (dispatch, _getState) => {
+		const url = `/auth/logged-user`;
+		try {
+			const { data } = await axios.get<{ user: APIUser; expiresIn: number }>(url);
 
 			const user = mapApiUserDataToModel(data.user);
 

@@ -1,11 +1,12 @@
 import 'react-native-gesture-handler';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator, HeaderBackButton } from '@react-navigation/stack';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import { createDrawerNavigator, DrawerNavigationProp } from '@react-navigation/drawer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Linking } from 'expo';
 import FlatsScreen from '../screens/Flat/FlatsScreen';
 import RootState from '../store/storeTypes';
 import User from '../models/user';
@@ -29,7 +30,7 @@ import UserTasksScreen from '../screens/Task/UserTasksScreen';
 import { readSaveShowInactive } from '../store/actions/tasks';
 import FlatDetailsScreen from '../screens/Flat/FlatDetailsScreen';
 import InviteMembersScreen from '../screens/Flat/NewFlat/InviteMembersScreen';
-import LogInScreen from '../screens/Auth/LogInScreen';
+import LogInScreen, { ExternalProvider } from '../screens/Auth/LogInScreen';
 import RegistrationScreen from '../screens/Auth/RegistrationScreen';
 import ProfileScreen from '../screens/Profile/ProfileScreen';
 import ChangePasswordScreen from '../screens/Auth/ChangePasswordScreen';
@@ -44,17 +45,28 @@ import {
 	InviteMembersScreenRouteProps,
 } from '../types/rootRoutePropTypes';
 import InvitationsScreen from '../screens/Invitations/InvitationsScreen';
-import DrawerContent from './DrawerContent';
+import DrawerContent, { RedirectTo } from './DrawerContent';
 import { setAppLoading } from '../store/actions/app';
 import InvitationDetailsScreen from '../screens/Invitations/InvitationDetailsScreen';
+import { Provider } from '../store/apiTypes';
 
 const Drawer = createDrawerNavigator<DrawerParamList>();
-const DrawerNavigator = ({ loggedUser }: { loggedUser: User }) => {
+const DrawerNavigator = ({
+	loggedUser,
+	redirectTo,
+}: {
+	loggedUser: User;
+	redirectTo: RedirectTo | null;
+}) => {
 	return (
 		<Drawer.Navigator
 			initialRouteName="RootStack"
 			drawerContent={(props) => (
-				<DrawerContent {...props} loggedUser={loggedUser} />
+				<DrawerContent
+					{...props}
+					loggedUser={loggedUser}
+					redirectTo={redirectTo}
+				/>
 			)}
 		>
 			<Drawer.Screen
@@ -328,15 +340,77 @@ const AppNavigationContainer = () => {
 	const { user: loggedUser } = useSelector((state: RootState) => state.auth);
 	const { loading } = useSelector((state: RootState) => state.app);
 	const [isLogIn, setIsLogIn] = useState(true);
+	const [redirectTo, setRedirectTo] = useState<RedirectTo | null>(null);
+	const [
+		openedByExternalProvider,
+		setOpenedByExternalProvider,
+	] = useState<null | ExternalProvider>(null);
 	const dispatch = useDispatch();
+
+	const linkHandler = useCallback((url: string | null) => {
+		if (url) {
+			let match = url.match(/\/--[\/]invitations\/[a-z0-9-]+/);
+			if (match?.index && match.index > -1) {
+				const token = match[0].substring(
+					match[0].lastIndexOf('/') + 1,
+					url.length
+				);
+
+				return setRedirectTo({
+					screen: 'InvitationsStack',
+					params: {
+						screen: 'InvitationDetails',
+						params: {
+							token,
+							openedByLink: true,
+						},
+					},
+				});
+			}
+			match = url.match(/\/--[\/]auth\/success\/(github|google)/);
+			if (match?.index && match.index > -1) {
+				const provider = match[1];
+				switch (provider) {
+					case 'github':
+						setOpenedByExternalProvider('GitHub');
+						break;
+					case 'Google':
+						setOpenedByExternalProvider('Google');
+					default:
+						break;
+				}
+				return;
+			}
+		}
+	}, []);
+
+	useEffect(() => {
+		const checkInitialUrl = async () => {
+			const initUrl = await Linking.getInitialURL();
+			console.log('initUrl', initUrl);
+			linkHandler(initUrl);
+		};
+
+		checkInitialUrl();
+
+		const urlChangeHandler = (ev: Linking.EventType) => {
+			console.log('URL CHANGED: ', ev.url);
+			linkHandler(ev.url);
+		};
+
+		Linking.addEventListener('url', urlChangeHandler);
+
+		return () => {
+			Linking.removeEventListener('url', urlChangeHandler);
+		};
+	}, [linkHandler]);
 
 	useEffect(() => {
 		if (!loggedUser) {
 			const tryRestoreSession = async () => {
 				try {
 					await dispatch(tryAuthorize());
-				} catch (err) {
-				}
+				} catch (err) {}
 				dispatch(setAppLoading(false));
 			};
 			tryRestoreSession();
@@ -354,9 +428,10 @@ const AppNavigationContainer = () => {
 			{loading ? (
 				<LoadingScreen />
 			) : loggedUser ? (
-				<DrawerNavigator loggedUser={loggedUser} />
+				<DrawerNavigator loggedUser={loggedUser} redirectTo={redirectTo} />
 			) : isLogIn ? (
 				<LogInScreen
+					externalProvider={openedByExternalProvider}
 					toggleAuthScreen={() => setIsLogIn((prevState) => !prevState)}
 				/>
 			) : (

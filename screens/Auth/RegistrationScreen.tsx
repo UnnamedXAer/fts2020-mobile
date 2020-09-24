@@ -1,4 +1,4 @@
-import React, { useState, useRef, MutableRefObject } from 'react';
+import React, { useState, useRef, MutableRefObject, useEffect } from 'react';
 import {
 	StyleSheet,
 	View,
@@ -8,12 +8,13 @@ import {
 	TouchableWithoutFeedback,
 	Keyboard,
 	StatusBar,
+	Dimensions,
 } from 'react-native';
-import { Theme, withTheme, Button } from 'react-native-paper';
+import { Theme, withTheme, Button, Paragraph } from 'react-native-paper';
+import { Linking } from 'expo';
 import Header from '../../components/UI/Header';
 import validateAuthFormField from '../../utils/validation';
 import Input from '../../components/UI/Input';
-import CustomButton from '../../components/UI/CustomButton';
 import { StateError } from '../../store/ReactTypes/customReactTypes';
 import NotificationCard from '../../components/UI/NotificationCard';
 import { useDispatch } from 'react-redux';
@@ -21,6 +22,9 @@ import { authorize } from '../../store/actions/auth';
 import { Credentials } from '../../models/auth';
 import HttpErrorParser from '../../utils/parseError';
 import useForm, { createInitialState, FormActionTypes } from '../../hooks/useForm';
+import ExternalProviders from '../../components/Auth/ExternalProviders/ExternalProviders';
+import { AuthProvider, ProviderDisplayName } from '../../types/types';
+import { APP_SERVER_URL } from '../../config/env';
 
 interface Props {
 	theme: Theme;
@@ -39,14 +43,22 @@ const initialState = createInitialState<FormFields>({
 
 const RegistrationScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 	const [loading, setLoading] = useState(false);
+	const [currentProvider, setCurrentProvider] = useState<AuthProvider>(null);
 	const [error, setError] = useState<StateError>(null);
 	const [formState, dispatchForm] = useForm<FormFields>(initialState);
-
 	const dispatch = useDispatch();
 
 	const passwordInpRef: MutableRefObject<TextInput | null> = useRef(null);
 	const confirmPasswordInpRef: MutableRefObject<TextInput | null> = useRef(null);
 	const userNameInpRef: MutableRefObject<TextInput | null> = useRef(null);
+
+	const isMounted = useRef(true);
+	useEffect(() => {
+		isMounted.current = true;
+		return () => {
+			isMounted.current = false;
+		};
+	}, []);
 
 	const fieldTextChangeHandler = (fieldName: FormFields, txt: string) => {
 		dispatchForm({
@@ -70,6 +82,9 @@ const RegistrationScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 	};
 
 	const submitHandler = async () => {
+		if (loading) {
+			return;
+		}
 		setError(null);
 		let isFormValid = true;
 		formFields.forEach((fieldName) => {
@@ -92,13 +107,14 @@ const RegistrationScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 			return;
 		}
 		setLoading(true);
+		setCurrentProvider('Local');
 
-		const credentianls = new Credentials({
+		const credentials = new Credentials({
 			...formState.values,
 		});
 
 		try {
-			await dispatch(authorize(credentianls, false));
+			await dispatch(authorize(credentials, false));
 		} catch (err) {
 			const error = new HttpErrorParser(err);
 			let msg: string = error.getMessage();
@@ -112,8 +128,38 @@ const RegistrationScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 				});
 			});
 
-			setError(msg);
+			if (isMounted.current) {
+				setError(msg);
+				setLoading(false);
+				setCurrentProvider(null);
+			}
+		}
+	};
+
+	const externalProviderPressHandler = async (provider: ProviderDisplayName) => {
+		if (loading) {
+			return;
+		}
+		setLoading(true);
+		setCurrentProvider(provider);
+
+		try {
+			const isOpened = await Linking.openURL(
+				`${APP_SERVER_URL}/auth/${provider.toLowerCase()}/login`
+			);
+			if (!isOpened) {
+				throw new Error(`Could not start ${provider} authorization process.`);
+			}
+		} catch (err) {
+			if (isMounted.current) {
+				setError(
+					`Sorry, could not start ${provider} authorization process. \nPlease try again later or use other sign method.`
+				);
+			}
+		}
+		if (isMounted.current) {
 			setLoading(false);
+			setCurrentProvider(null);
 		}
 	};
 
@@ -201,13 +247,27 @@ const RegistrationScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 						<Button onPress={toggleAuthScreen}>Switch to SIGN IN</Button>
 					</View>
 					<View>
-						<CustomButton
-							disabled={loading}
+						<Button
+							mode="contained"
+							uppercase
 							onPress={submitHandler}
-							loading={loading}
+							loading={loading && currentProvider === 'Local'}
 						>
-							Sign Up
-						</CustomButton>
+							sign up
+						</Button>
+					</View>
+					<View
+						style={{
+							marginVertical: 8,
+						}}
+					>
+						<Paragraph>Or Sign Up with</Paragraph>
+					</View>
+					<View>
+						<ExternalProviders
+							loadingProvider={currentProvider}
+							providerPressHandler={externalProviderPressHandler}
+						/>
 					</View>
 				</ScrollView>
 			</TouchableWithoutFeedback>
@@ -215,19 +275,21 @@ const RegistrationScreen: React.FC<Props> = ({ theme, toggleAuthScreen }) => {
 	);
 };
 
+const scale = Dimensions.get('window').scale;
+
 const styles = StyleSheet.create({
 	keyboardAvoidingView: {
 		flex: 1,
 		marginTop: StatusBar.currentHeight,
 	},
 	screen: {
-		paddingTop: 50,
+		paddingTop: scale > 2.5 ? 50 : 24,
 		flexDirection: 'column',
 		alignItems: 'center',
 	},
 	header: {
 		paddingTop: 16,
-		fontSize: 44,
+		fontSize: scale > 2.5 ? 44 : 32,
 	},
 	inputContainer: {
 		width: '90%',
@@ -236,7 +298,7 @@ const styles = StyleSheet.create({
 	},
 	input: {
 		fontSize: 16,
-		height: 50,
+		height: 55,
 	},
 	errorContainer: {
 		width: '90%',

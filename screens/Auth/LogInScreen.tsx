@@ -8,12 +8,12 @@ import {
 	Keyboard,
 	ScrollView,
 	StatusBar,
+	Dimensions,
 } from 'react-native';
-import { Theme, withTheme, Button } from 'react-native-paper';
+import { Theme, withTheme, Button, Paragraph } from 'react-native-paper';
 import Header from '../../components/UI/Header';
 import validateAuthFormField from '../../utils/validation';
 import Input from '../../components/UI/Input';
-import CustomButton from '../../components/UI/CustomButton';
 import { StateError } from '../../store/ReactTypes/customReactTypes';
 import NotificationCard from '../../components/UI/NotificationCard';
 import { useDispatch } from 'react-redux';
@@ -27,13 +27,13 @@ import useForm, {
 } from '../../hooks/useForm';
 import { Linking } from 'expo';
 import { APP_SERVER_URL } from '../../config/env';
-
-export type ExternalProvider = 'Google' | 'GitHub';
+import ExternalProviders from '../../components/Auth/ExternalProviders/ExternalProviders';
+import { AuthProvider, ProviderDisplayName } from '../../types/types';
 
 interface Props {
 	theme: Theme;
 	toggleAuthScreen: () => void;
-	externalProvider: ExternalProvider | null;
+	externalProvider: ProviderDisplayName | null;
 }
 
 const formFields = ['emailAddress', 'password'] as const;
@@ -47,6 +47,7 @@ const initialState: FormState<FormFields> = createInitialState<FormFields>({
 const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen, externalProvider }) => {
 	const dispatch = useDispatch();
 	const [loading, setLoading] = useState(false);
+	const [currentProvider, setCurrentProvider] = useState<AuthProvider>(null);
 	const [error, setError] = useState<StateError>(null);
 	const [formState, dispatchForm] = useForm<FormFields>(initialState);
 	const passwordInpRef: MutableRefObject<TextInput | null> = useRef(null);
@@ -61,15 +62,23 @@ const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen, externalProvide
 
 	useEffect(() => {
 		if (externalProvider) {
+			setCurrentProvider(externalProvider);
 			setLoading(true);
 			(async () => {
 				try {
 					await dispatch(fetchLoggedUser());
 				} catch (err) {
-					setError(
-						'Could not have authorize by ' + externalProvider + '.\n' + err
-					);
-					setLoading(false);
+					if (isMounted.current) {
+						setError(
+							'Could not have authorize by ' +
+								externalProvider +
+								'.\n' +
+								err
+						);
+
+						setLoading(false);
+						setCurrentProvider(null);
+					}
 				}
 			})();
 		}
@@ -97,6 +106,10 @@ const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen, externalProvide
 	};
 
 	const submitHandler = async () => {
+		if (loading) {
+			return;
+		}
+
 		setError(null);
 		let isFormValid = true;
 		formFields.forEach((fieldName) => {
@@ -119,6 +132,7 @@ const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen, externalProvide
 			return;
 		}
 		setLoading(true);
+		setCurrentProvider('Local');
 
 		const credentials = new Credentials({
 			...formState.values,
@@ -139,8 +153,38 @@ const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen, externalProvide
 				});
 			});
 
-			setError(msg);
+			if (isMounted.current) {
+				setError(msg);
+				setLoading(false);
+				setCurrentProvider(null);
+			}
+		}
+	};
+
+	const externalProviderPressHandler = async (provider: ProviderDisplayName) => {
+		if (loading) {
+			return;
+		}
+		setLoading(true);
+		setCurrentProvider(provider);
+
+		try {
+			const isOpened = await Linking.openURL(
+				`${APP_SERVER_URL}/auth/${provider.toLowerCase()}/login`
+			);
+			if (!isOpened) {
+				throw new Error(`Could not start ${provider} authorization process.`);
+			}
+		} catch (err) {
+			if (isMounted.current) {
+				setError(
+					`Sorry, could not start ${provider} authorization process. \nPlease try again later or use other sign method.`
+				);
+			}
+		}
+		if (isMounted.current) {
 			setLoading(false);
+			setCurrentProvider(null);
 		}
 	};
 
@@ -193,38 +237,27 @@ const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen, externalProvide
 						<Button onPress={toggleAuthScreen}>Switch to SIGN UP</Button>
 					</View>
 					<View>
-						<CustomButton
-							disabled={loading}
+						<Button
+							mode="contained"
+							uppercase
 							onPress={submitHandler}
-							loading={loading}
+							loading={loading && currentProvider === 'Local'}
 						>
-							SIGN IN
-						</CustomButton>
+							sign in
+						</Button>
+					</View>
+					<View
+						style={{
+							marginVertical: 8,
+						}}
+					>
+						<Paragraph>Or Sign In with</Paragraph>
 					</View>
 					<View>
-						<CustomButton
-							onPress={async () => {
-								try {
-									console.log('APP_SERVER_ULR', APP_SERVER_URL);
-									const isOpened = await Linking.openURL(
-										`${APP_SERVER_URL}/auth/github/login`
-									);
-									if (!isOpened) {
-										throw new Error(
-											'Could not start GitHub authorization process.'
-										);
-									}
-								} catch (err) {
-									if (isMounted.current) {
-										setError(
-											'Sorry, could not start GitHub authorization process. \nPlease try again later or use other sign method.'
-										);
-									}
-								}
-							}}
-						>
-							GitHub
-						</CustomButton>
+						<ExternalProviders
+							loadingProvider={currentProvider}
+							providerPressHandler={externalProviderPressHandler}
+						/>
 					</View>
 				</ScrollView>
 			</TouchableWithoutFeedback>
@@ -232,19 +265,21 @@ const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen, externalProvide
 	);
 };
 
+const scale = Dimensions.get('window').scale;
+
 const styles = StyleSheet.create({
 	keyboardAvoidingView: {
 		flex: 1,
 		marginTop: StatusBar.currentHeight,
 	},
 	screen: {
-		paddingTop: 50,
+		paddingTop: scale > 2.5 ? 50 : 24,
 		flexDirection: 'column',
 		alignItems: 'center',
 	},
 	header: {
 		paddingTop: 16,
-		fontSize: 44,
+		fontSize: scale > 2.5 ? 44 : 32,
 	},
 	inputContainer: {
 		width: '90%',
@@ -252,7 +287,8 @@ const styles = StyleSheet.create({
 		marginVertical: 8,
 	},
 	input: {
-		fontSize: 24,
+		fontSize: scale > 2.5 ? 24 : 16,
+		height: scale > 2.5 ? 64 : 55,
 	},
 	errorContainer: {
 		width: '90%',

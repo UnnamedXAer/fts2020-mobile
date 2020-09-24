@@ -10,3 +10,6 @@ export type FABAction = {
 	onPress: () => void;
 	label: string;
 };
+
+export type ProviderDisplayName = 'GitHub' | 'Google';
+export type AuthProvider = null | ProviderDisplayName | 'Local';

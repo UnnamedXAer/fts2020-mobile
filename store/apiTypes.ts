@@ -3,7 +3,7 @@ import { TaskPeriodUnit } from '../constants/task';
 import { PeriodUser } from '../models/period';
 import { InvitationStatus } from '../constants/invitation';
 
-export type Provider = 'local' | 'google';
+export type Provider = 'local' | 'google' | 'github';
 
 export type APIFlat = {
 	id: number;

@@ -1,18 +1,49 @@
 {
-  "name": "fts2020mobile",
-  "displayName": "fts2020mobile",
-  "expo": {
-    "name": "fts2020mobile",
-    "slug": "fts2020mobile",
-    "version": "1.0.0",
-    "platforms": [
-      "ios",
-      "android",
-      "web"
-    ],
-    "assetBundlePatterns": [
-      "**/*"
-	],
-	"scheme": "fts"
-  }
+	"displayName": "fts2020 Mobile",
+	"expo": {
+		"name": "fts2020 Mobile",
+		"description": "Make it easy to manage your home task.",
+		"slug": "fts2020mobile",
+		"icon": "./assets/icons/logo256_transparent.png",
+		"backgroundColor": "#ffffff",
+		"primaryColor": "#009688",
+		"splash": {
+			"backgroundColor": "#ffffff",
+			"image": "./assets/icons/logo256_transparent.png",
+			"resizeMode": "contain"
+		},
+		"version": "1.0.0",
+		"platforms": [
+			"android",
+			"ios"
+		],
+		"orientation": "default",
+		"assetBundlePatterns": [
+			"**/*"
+		],
+		"scheme": "fts2020",
+		"android": {
+			"package": "com.herokuapp.apifts2020",
+			"versionCode": 0,
+			"backgroundColor": "#ffffff",
+			"userInterfaceStyle": "light",
+			"icon": "./assets/icons/logo256_transparent.png",
+			"adaptiveIcon": {
+				"backgroundColor": "#ffffff",
+				"backgroundImage": "./assets/icons/logo256_transparent.png",
+				"foregroundImage": "./assets/icons/logo256_transparent.png"
+			},
+			"splash": {
+				"backgroundColor": "#ffffff",
+				"image": "./assets/icons/logo256_transparent.png",
+				"resizeMode": "contain"
+			}
+		},
+		"ios": {
+			"bundleIdentifier": "com.herokuapp.apifts2020",
+			"buildNumber": "1.0.0",
+			"supportsTablet": true
+		}
+	},
+	"backgroundColor": ""
 }

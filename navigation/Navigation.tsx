@@ -6,7 +6,7 @@ import { createStackNavigator, HeaderBackButton } from '@react-navigation/stack'
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import { createDrawerNavigator, DrawerNavigationProp } from '@react-navigation/drawer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Linking } from 'expo';
+import * as Linking from 'expo-linking'
 import FlatsScreen from '../screens/Flat/FlatsScreen';
 import RootState from '../store/storeTypes';
 import User from '../models/user';
@@ -30,7 +30,7 @@ import UserTasksScreen from '../screens/Task/UserTasksScreen';
 import { readSaveShowInactive } from '../store/actions/tasks';
 import FlatDetailsScreen from '../screens/Flat/FlatDetailsScreen';
 import InviteMembersScreen from '../screens/Flat/NewFlat/InviteMembersScreen';
-import LogInScreen, { ExternalProvider } from '../screens/Auth/LogInScreen';
+import LogInScreen from '../screens/Auth/LogInScreen';
 import RegistrationScreen from '../screens/Auth/RegistrationScreen';
 import ProfileScreen from '../screens/Profile/ProfileScreen';
 import ChangePasswordScreen from '../screens/Auth/ChangePasswordScreen';
@@ -48,7 +48,7 @@ import InvitationsScreen from '../screens/Invitations/InvitationsScreen';
 import DrawerContent, { RedirectTo } from './DrawerContent';
 import { setAppLoading } from '../store/actions/app';
 import InvitationDetailsScreen from '../screens/Invitations/InvitationDetailsScreen';
-import { Provider } from '../store/apiTypes';
+import { ProviderDisplayName } from '../types/types';
 
 const Drawer = createDrawerNavigator<DrawerParamList>();
 const DrawerNavigator = ({
@@ -344,7 +344,7 @@ const AppNavigationContainer = () => {
 	const [
 		openedByExternalProvider,
 		setOpenedByExternalProvider,
-	] = useState<null | ExternalProvider>(null);
+	] = useState<null | ProviderDisplayName>(null);
 	const dispatch = useDispatch();
 
 	const linkHandler = useCallback((url: string | null) => {
@@ -387,14 +387,12 @@ const AppNavigationContainer = () => {
 	useEffect(() => {
 		const checkInitialUrl = async () => {
 			const initUrl = await Linking.getInitialURL();
-			console.log('initUrl', initUrl);
 			linkHandler(initUrl);
 		};
 
 		checkInitialUrl();
 
 		const urlChangeHandler = (ev: Linking.EventType) => {
-			console.log('URL CHANGED: ', ev.url);
 			linkHandler(ev.url);
 		};
 

@@ -1,34 +1,45 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
 	Drawer as PaperDrawer,
 	Avatar,
 	TouchableRipple,
-	Paragraph,
+	Paragraph
 } from 'react-native-paper';
 import { View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import {
 	DrawerContentScrollView,
 	DrawerItem,
-	DrawerContentComponentProps,
+	DrawerContentComponentProps
 } from '@react-navigation/drawer';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import User from '../models/user';
 import { logOut } from '../store/actions/auth';
 import { setAppLoading } from '../store/actions/app';
-
-export type RedirectTo = {
-	screen: string;
-	params?: RedirectTo |& { [key: string]: any };
-};
+import RootState from '../store/storeTypes';
+import { setRedirectTo } from '../store/actions/navigation';
 
 const DrawerContent = (
 	props: DrawerContentComponentProps & {
 		loggedUser: User;
-		redirectTo: RedirectTo | null;
 	}
 ) => {
 	const dispatch = useDispatch();
+	const [rendered, setRendered] = useState(false);
+	const redirectTo = useSelector((state: RootState) => state.navigation.redirectTo);
+
+	useEffect(() => {
+		if (!rendered) {
+			setRendered(true);
+		}
+	}, []);
+
+	useEffect(() => {
+		if (rendered && redirectTo !== null) {
+			props.navigation.navigate(redirectTo.screen, redirectTo.params);
+			dispatch(setRedirectTo(null));
+		}
+	}, [redirectTo, dispatch, props.navigation, rendered]);
 
 	return (
 		<View style={{ flex: 1 }}>
@@ -40,7 +51,7 @@ const DrawerContent = (
 						<View
 							style={{
 								flexDirection: 'row',
-								margin: 16,
+								margin: 16
 							}}
 						>
 							<Avatar.Image source={{ uri: props.loggedUser.avatarUrl }} />
@@ -48,7 +59,7 @@ const DrawerContent = (
 								style={{
 									marginLeft: 16,
 									justifyContent: 'center',
-									flexShrink: 1,
+									flexShrink: 1
 								}}
 							>
 								<Paragraph style={{ fontWeight: 'bold' }}>
@@ -86,7 +97,7 @@ const DrawerContent = (
 						label="Invitations"
 						onPress={() => {
 							props.navigation.navigate('InvitationsStack', {
-								screen: 'Invitations',
+								screen: 'Invitations'
 							});
 						}}
 					/>
@@ -129,7 +140,7 @@ const DrawerContent = (
 						await dispatch(logOut());
 						props.navigation.reset({
 							index: 0,
-							routes: [{ name: 'RootStack' }],
+							routes: [{ name: 'RootStack' }]
 						});
 						dispatch(setAppLoading(false));
 					}}

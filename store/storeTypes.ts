@@ -4,6 +4,7 @@ import Flat from '../models/flat';
 import Task, { UserTask } from '../models/task';
 import { Period, CurrentPeriod } from '../models/period';
 import { InvitationPresentation } from '../models/invitation';
+import { RedirectTo } from '../types/types';
 
 export type RootState = {
 	auth: AuthState;
@@ -13,6 +14,7 @@ export type RootState = {
 	tasks: TasksState;
 	users: UsersState;
 	periods: PeriodsState;
+	navigation: NavigationState;
 };
 
 export type AuthState = {
@@ -55,6 +57,10 @@ export type PeriodsState = {
 	};
 	currentPeriods: CurrentPeriod[] | null;
 };
+
+export type NavigationState = {
+	redirectTo: RedirectTo | null;
+}
 
 export type AppReducer<TState, AType = string, APayload = any> = (
 	state: TState,

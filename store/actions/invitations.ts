@@ -29,7 +29,7 @@ export const fetchUserInvitations = (): ThunkAction<
 			const invitations = data.map((x) => new InvitationPresentation(x));
 			dispatch({
 				type: InvitationsActionTypes.SetUserInvitations,
-				payload: invitations,
+				payload: invitations
 			});
 		} catch (err) {
 			throw err;
@@ -48,7 +48,7 @@ export const fetchUserInvitation = (
 				const invitation = new InvitationPresentation(data);
 				dispatch({
 					type: InvitationsActionTypes.SetUserInvitation,
-					payload: invitation,
+					payload: invitation
 				});
 			} else {
 				throw new Error(
@@ -78,7 +78,7 @@ export const answerUserInvitations = (
 		const url = `/invitations/${id}`;
 		try {
 			const { data } = await axios.patch<APIInvitation>(url, {
-				action: action,
+				action: action
 			});
 			const state = getState();
 			const loggedUser = state.auth.user!;
@@ -88,7 +88,7 @@ export const answerUserInvitations = (
 
 			if (action === InvitationAction.ACCEPT) {
 				dispatch({
-					type: FlatsActionTypes.ClearState,
+					type: FlatsActionTypes.ClearState
 				});
 			}
 
@@ -99,8 +99,8 @@ export const answerUserInvitations = (
 						...invitation,
 						status: data.status,
 						actionBy: loggedUser,
-						actionDate: new Date(data.actionDate!),
-					},
+						actionDate: new Date(data.actionDate!)
+					}
 				});
 			}
 		} catch (err) {

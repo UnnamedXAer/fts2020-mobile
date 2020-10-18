@@ -10,6 +10,7 @@ import {
 	InvitationsActionTypes,
 	TaskPeriodsActionTypes,
 	AppActionTypes,
+	NavigationActionTypes
 } from './actionTypes';
 import RootState from '../storeTypes';
 import User from '../../models/user';
@@ -44,18 +45,18 @@ export const authorize = (
 				type: AuthActionTypes.Authorize,
 				payload: {
 					user,
-					expirationTime,
-				},
+					expirationTime
+				}
 			});
 
 			dispatch({
 				type: UsersActionTypes.SetUser,
-				payload: user,
+				payload: user
 			});
 
 			await AsyncStorage.multiSet([
 				['loggedUser', JSON.stringify(user)],
-				['expirationTime', '' + expirationTime],
+				['expirationTime', '' + expirationTime]
 			]);
 		} catch (err) {
 			throw err;
@@ -82,18 +83,18 @@ export const fetchLoggedUser = (): ThunkAction<
 				type: AuthActionTypes.Authorize,
 				payload: {
 					user,
-					expirationTime,
-				},
+					expirationTime
+				}
 			});
 
 			dispatch({
 				type: UsersActionTypes.SetUser,
-				payload: user,
+				payload: user
 			});
 
 			await AsyncStorage.multiSet([
 				['loggedUser', JSON.stringify(user)],
-				['expirationTime', '' + expirationTime],
+				['expirationTime', '' + expirationTime]
 			]);
 		} catch (err) {
 			throw err;
@@ -110,7 +111,7 @@ export const tryAuthorize = (): ThunkAction<
 	return async (dispatch) => {
 		const [[_, savedUser], [_2, savedExpirationTime]] = await AsyncStorage.multiGet([
 			'loggedUser',
-			'expirationTime',
+			'expirationTime'
 		]);
 		const expirationTime = savedExpirationTime ? +savedExpirationTime : 0;
 
@@ -125,13 +126,13 @@ export const tryAuthorize = (): ThunkAction<
 				type: AuthActionTypes.Authorize,
 				payload: {
 					user: userObj,
-					expirationTime,
-				},
+					expirationTime
+				}
 			});
 
 			dispatch({
 				type: UsersActionTypes.SetUser,
-				payload: userObj,
+				payload: userObj
 			});
 
 			const expiresIn = +expirationTime - Date.now();
@@ -150,25 +151,28 @@ export const logOut = (): ThunkAction<Promise<void>, RootState, any, AuthorizeAc
 	return async (dispatch) => {
 		const clearState = () => {
 			dispatch({
-				type: AuthActionTypes.LogOut,
+				type: AuthActionTypes.LogOut
 			});
 			dispatch({
-				type: TasksActionTypes.ClearState,
+				type: NavigationActionTypes.ClearState
 			});
 			dispatch({
-				type: FlatsActionTypes.ClearState,
+				type: TasksActionTypes.ClearState
 			});
 			dispatch({
-				type: InvitationsActionTypes.ClearState,
+				type: FlatsActionTypes.ClearState
 			});
 			dispatch({
-				type: TaskPeriodsActionTypes.ClearState,
+				type: InvitationsActionTypes.ClearState
 			});
 			dispatch({
-				type: UsersActionTypes.ClearState,
+				type: TaskPeriodsActionTypes.ClearState
 			});
 			dispatch({
-				type: AppActionTypes.ClearState,
+				type: UsersActionTypes.ClearState
+			});
+			dispatch({
+				type: AppActionTypes.ClearState
 			});
 		};
 
@@ -201,7 +205,7 @@ export const updateLoggedUser = (
 
 		dispatch({
 			type: AuthActionTypes.SetLoggedUser,
-			payload: user,
+			payload: user
 		});
 	};
 };
@@ -222,12 +226,12 @@ export const updatePassword = (
 			await axios.post(url, {
 				oldPassword,
 				newPassword,
-				confirmPassword,
+				confirmPassword
 			});
 
 			dispatch({
 				type: AuthActionTypes.UpdatePassword,
-				payload: void 0,
+				payload: void 0
 			});
 		} catch (err) {
 			throw err;

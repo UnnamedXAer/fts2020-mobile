@@ -7,6 +7,7 @@ import tasksReducer from './reducers/tasks';
 import taskPeriodsReducer from './reducers/periods';
 import usersReducer from './reducers/users';
 import invitationsReducer from './reducers/invitations';
+import navigationReducer from './reducers/navigation';
 
 const rootReducer = combineReducers({
 	auth: authReducer,
@@ -16,6 +17,7 @@ const rootReducer = combineReducers({
 	users: usersReducer,
 	periods: taskPeriodsReducer,
 	invitations: invitationsReducer,
+	navigation: navigationReducer
 });
 
 const middleware = [ReduxThunk];

@@ -6,7 +6,7 @@ import { createStackNavigator, HeaderBackButton } from '@react-navigation/stack'
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import { createDrawerNavigator, DrawerNavigationProp } from '@react-navigation/drawer';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import * as Linking from 'expo-linking'
+import * as Linking from 'expo-linking';
 import FlatsScreen from '../screens/Flat/FlatsScreen';
 import RootState from '../store/storeTypes';
 import User from '../models/user';
@@ -18,7 +18,7 @@ import {
 	DrawerParamList,
 	BottomTabParamList,
 	RootStackParamList,
-	InvitationsStackParamList,
+	InvitationsStackParamList
 } from '../types/navigationTypes';
 import TaskDetailsScreen from '../screens/Task/TaskDetailsScreen';
 import NewFlatInfoScreen from '../screens/Flat/NewFlat/NewFlatInfoScreen';
@@ -38,46 +38,37 @@ import CurrentPeriodsScreen from '../screens/CurrentPeriods/CurrentPeriodsScreen
 import AboutScreen from '../screens/About/AboutScreen';
 import {
 	NewTaskTimeScreenNavigationProp,
-	InviteMembersScreenNavigationProp,
+	InviteMembersScreenNavigationProp
 } from '../types/rootNavigationTypes';
 import {
 	NewTaskTimeScreenRouteProps,
-	InviteMembersScreenRouteProps,
+	InviteMembersScreenRouteProps
 } from '../types/rootRoutePropTypes';
 import InvitationsScreen from '../screens/Invitations/InvitationsScreen';
-import DrawerContent, { RedirectTo } from './DrawerContent';
+import DrawerContent from './DrawerContent';
 import { setAppLoading } from '../store/actions/app';
 import InvitationDetailsScreen from '../screens/Invitations/InvitationDetailsScreen';
 import { ProviderDisplayName } from '../types/types';
+import { setRedirectTo } from '../store/actions/navigation';
 
 const Drawer = createDrawerNavigator<DrawerParamList>();
-const DrawerNavigator = ({
-	loggedUser,
-	redirectTo,
-}: {
-	loggedUser: User;
-	redirectTo: RedirectTo | null;
-}) => {
+const DrawerNavigator = ({ loggedUser }: { loggedUser: User }) => {
 	return (
 		<Drawer.Navigator
 			initialRouteName="RootStack"
 			drawerContent={(props) => (
-				<DrawerContent
-					{...props}
-					loggedUser={loggedUser}
-					redirectTo={redirectTo}
-				/>
+				<DrawerContent {...props} loggedUser={loggedUser} />
 			)}
 		>
-			<Drawer.Screen
-				name="RootStack"
-				options={{ title: 'Flats & Tasks' }}
-				component={RootStackNavigator}
-			/>
 			<Drawer.Screen
 				name="InvitationsStack"
 				options={{ title: 'Invitations' }}
 				component={InvitationsStackNavigator}
+			/>
+			<Drawer.Screen
+				name="RootStack"
+				options={{ title: 'Flats & Tasks' }}
+				component={RootStackNavigator}
 			/>
 			<Drawer.Screen name="ProfileStack" options={{ title: 'Profile' }}>
 				{(props) => <ProfileStackNavigator {...props} loggedUser={loggedUser} />}
@@ -109,7 +100,7 @@ const BottomTabNavigator = () => {
 				name="CurrentPeriods"
 				options={{
 					title: 'Your Current Periods',
-					tabBarIcon: 'format-list-checks',
+					tabBarIcon: 'format-list-checks'
 				}}
 				component={CurrentPeriodsScreen}
 			/>
@@ -119,7 +110,7 @@ const BottomTabNavigator = () => {
 
 const RootStack = createStackNavigator<RootStackParamList>();
 const RootStackNavigator = ({
-	navigation,
+	navigation
 }: {
 	navigation: DrawerNavigationProp<DrawerParamList>;
 }) => {
@@ -139,7 +130,7 @@ const RootStackNavigator = ({
 										color={props.tintColor}
 										size={24}
 										style={{
-											padding: 4,
+											padding: 4
 										}}
 									/>
 								)}
@@ -148,7 +139,7 @@ const RootStackNavigator = ({
 								truncatedLabel="M"
 							/>
 						);
-					},
+					}
 				}}
 				component={BottomTabNavigator}
 			/>
@@ -171,7 +162,7 @@ const RootStackNavigator = ({
 				name="InviteMembers"
 				options={({
 					navigation,
-					route,
+					route
 				}: {
 					navigation: InviteMembersScreenNavigationProp;
 					route: InviteMembersScreenRouteProps;
@@ -185,12 +176,12 @@ const RootStackNavigator = ({
 									route.params.isNewFlat
 										? () =>
 												navigation.replace('FlatDetails', {
-													id: route.params.flatId,
+													id: route.params.flatId
 												})
 										: btnProps.onPress
 								}
 							/>
-						),
+						)
 					};
 				}}
 				component={InviteMembersScreen}
@@ -209,7 +200,7 @@ const RootStackNavigator = ({
 				name="NewTaskTime"
 				options={({
 					navigation,
-					route: { params },
+					route: { params }
 				}: {
 					navigation: NewTaskTimeScreenNavigationProp;
 					route: NewTaskTimeScreenRouteProps;
@@ -221,11 +212,11 @@ const RootStackNavigator = ({
 								{...bntProps}
 								onPress={() =>
 									navigation.replace('NewTaskName', {
-										...params,
+										...params
 									})
 								}
 							/>
-						),
+						)
 					};
 				}}
 				component={NewTaskTimeScreen}
@@ -241,12 +232,12 @@ const RootStackNavigator = ({
 								props.route.params.newTask
 									? () =>
 											props.navigation.replace('TaskDetails', {
-												id: props.route.params.id,
+												id: props.route.params.id
 											})
 									: btnProps.onPress
 							}
 						/>
-					),
+					)
 				})}
 				component={UpdateTaskMembersScreen}
 			/>
@@ -257,7 +248,7 @@ const RootStackNavigator = ({
 const ProfileStack = createStackNavigator<ProfileStackParamList>();
 const ProfileStackNavigator = ({
 	navigation,
-	loggedUser,
+	loggedUser
 }: {
 	navigation: DrawerNavigationProp<DrawerParamList>;
 	loggedUser: User;
@@ -274,14 +265,14 @@ const ProfileStackNavigator = ({
 							{...props}
 							onPress={() => navigation.goBack()}
 						/>
-					),
+					)
 				}}
 				component={ProfileScreen}
 			/>
 			<ProfileStack.Screen
 				name="ChangePassword"
 				options={{
-					title: 'Change Password',
+					title: 'Change Password'
 				}}
 				component={ChangePasswordScreen}
 			/>
@@ -291,7 +282,7 @@ const ProfileStackNavigator = ({
 
 const InvitationsStack = createStackNavigator<InvitationsStackParamList>();
 const InvitationsStackNavigator = ({
-	navigation,
+	navigation
 }: {
 	navigation: DrawerNavigationProp<DrawerParamList>;
 }) => {
@@ -306,7 +297,7 @@ const InvitationsStackNavigator = ({
 							{...props}
 							onPress={() => navigation.goBack()}
 						/>
-					),
+					)
 				}}
 				component={InvitationsScreen}
 			/>
@@ -321,13 +312,13 @@ const InvitationsStackNavigator = ({
 									{...props}
 									onPress={() =>
 										navigation.navigate('RootStack', {
-											screen: 'BottomTab',
+											screen: 'BottomTab'
 										})
 									}
 								/>
 							) : (
 								<HeaderBackButton {...props} />
-							),
+							)
 					};
 				}}
 				component={InvitationDetailsScreen}
@@ -340,14 +331,14 @@ const AppNavigationContainer = () => {
 	const { user: loggedUser } = useSelector((state: RootState) => state.auth);
 	const { loading } = useSelector((state: RootState) => state.app);
 	const [isLogIn, setIsLogIn] = useState(true);
-	const [redirectTo, setRedirectTo] = useState<RedirectTo | null>(null);
 	const [
 		openedByExternalProvider,
-		setOpenedByExternalProvider,
+		setOpenedByExternalProvider
 	] = useState<null | ProviderDisplayName>(null);
 	const dispatch = useDispatch();
 
 	const linkHandler = useCallback((url: string | null) => {
+		console.log(url);
 		if (url) {
 			let match = url.match(/\/--[\/]invitations\/[a-z0-9-]+/);
 			if (match?.index && match.index > -1) {
@@ -356,17 +347,20 @@ const AppNavigationContainer = () => {
 					url.length
 				);
 
-				return setRedirectTo({
-					screen: 'InvitationsStack',
-					params: {
-						screen: 'InvitationDetails',
+				dispatch(
+					setRedirectTo({
+						screen: 'InvitationsStack',
 						params: {
-							token,
-							openedByLink: true,
-						},
-					},
-				});
+							screen: 'InvitationDetails',
+							params: {
+								token,
+								openedByLink: true
+							}
+						}
+					})
+				);
 			}
+
 			match = url.match(/\/--[\/]auth\/success\/(github|google)/);
 			if (match?.index && match.index > -1) {
 				const provider = match[1];
@@ -426,7 +420,7 @@ const AppNavigationContainer = () => {
 			{loading ? (
 				<LoadingScreen />
 			) : loggedUser ? (
-				<DrawerNavigator loggedUser={loggedUser} redirectTo={redirectTo} />
+				<DrawerNavigator loggedUser={loggedUser} />
 			) : isLogIn ? (
 				<LogInScreen
 					externalProvider={openedByExternalProvider}

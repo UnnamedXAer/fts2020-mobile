@@ -13,3 +13,8 @@ export type FABAction = {
 
 export type ProviderDisplayName = 'GitHub' | 'Google';
 export type AuthProvider = null | ProviderDisplayName | 'Local';
+
+export type RedirectTo = {
+	screen: string;
+	params?: RedirectTo | { [key: string]: any };
+};

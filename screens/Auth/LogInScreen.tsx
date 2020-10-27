@@ -8,9 +8,10 @@ import {
 	Keyboard,
 	ScrollView,
 	StatusBar,
-	Dimensions,
+	Dimensions
 } from 'react-native';
 import { Theme, withTheme, Button, Paragraph } from 'react-native-paper';
+import * as WebBrowser from 'expo-web-browser';
 import Header from '../../components/UI/Header';
 import validateAuthFormField from '../../utils/validation';
 import Input from '../../components/UI/Input';
@@ -23,9 +24,8 @@ import HttpErrorParser from '../../utils/parseError';
 import useForm, {
 	FormActionTypes,
 	createInitialState,
-	FormState,
+	FormState
 } from '../../hooks/useForm';
-import { Linking } from 'expo';
 import { APP_SERVER_URL } from '../../config/env';
 import ExternalProviders from '../../components/Auth/ExternalProviders/ExternalProviders';
 import { AuthProvider, ProviderDisplayName } from '../../types/types';
@@ -41,7 +41,7 @@ type FormFields = typeof formFields[number];
 
 const initialState: FormState<FormFields> = createInitialState<FormFields>({
 	emailAddress: '',
-	password: '',
+	password: ''
 });
 
 const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen, externalProvider }) => {
@@ -88,20 +88,20 @@ const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen, externalProvide
 		dispatchForm({
 			fieldId: fieldName,
 			value: txt,
-			type: FormActionTypes.UpdateValue,
+			type: FormActionTypes.UpdateValue
 		});
 	};
 
 	const inputBlurHandler = (name: FormFields) => {
 		dispatchForm({
 			fieldId: name,
-			type: FormActionTypes.MarkAsTouched,
+			type: FormActionTypes.MarkAsTouched
 		});
 		const fieldError = validateAuthFormField(name, formState.values);
 		dispatchForm({
 			type: FormActionTypes.SetError,
 			error: fieldError,
-			fieldId: name,
+			fieldId: name
 		});
 	};
 
@@ -119,12 +119,12 @@ const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen, externalProvide
 			dispatchForm({
 				type: FormActionTypes.SetError,
 				error: fieldError,
-				fieldId: fieldName,
+				fieldId: fieldName
 			});
 		});
 
 		dispatchForm({
-			type: FormActionTypes.SetAllTouched,
+			type: FormActionTypes.SetAllTouched
 		});
 
 		if (!isFormValid) {
@@ -135,7 +135,7 @@ const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen, externalProvide
 		setCurrentProvider('Local');
 
 		const credentials = new Credentials({
-			...formState.values,
+			...formState.values
 		});
 
 		try {
@@ -149,7 +149,7 @@ const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen, externalProvide
 				dispatchForm({
 					type: FormActionTypes.SetError,
 					error: x.msg,
-					fieldId: x.param,
+					fieldId: x.param
 				});
 			});
 
@@ -169,10 +169,9 @@ const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen, externalProvide
 		setCurrentProvider(provider);
 
 		try {
-			const isOpened = await Linking.openURL(
-				`${APP_SERVER_URL}/auth/${provider.toLowerCase()}/login`
-			);
-			if (!isOpened) {
+			const url = `${APP_SERVER_URL}/auth/${provider.toLowerCase()}/login`;
+			const browserResults = await WebBrowser.openBrowserAsync(url);
+			if (!browserResults) {
 				throw new Error(`Could not start ${provider} authorization process.`);
 			}
 		} catch (err) {
@@ -194,7 +193,7 @@ const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen, externalProvide
 				<ScrollView
 					contentContainerStyle={[
 						styles.screen,
-						{ backgroundColor: theme.colors.surface },
+						{ backgroundColor: theme.colors.surface }
 					]}
 				>
 					<Header style={styles.header}>Sign In</Header>
@@ -248,7 +247,7 @@ const LogInScreen: React.FC<Props> = ({ theme, toggleAuthScreen, externalProvide
 					</View>
 					<View
 						style={{
-							marginVertical: 8,
+							marginVertical: 8
 						}}
 					>
 						<Paragraph>Or Sign In with</Paragraph>
@@ -270,35 +269,35 @@ const scale = Dimensions.get('window').scale;
 const styles = StyleSheet.create({
 	keyboardAvoidingView: {
 		flex: 1,
-		marginTop: StatusBar.currentHeight,
+		marginTop: StatusBar.currentHeight
 	},
 	screen: {
 		paddingTop: scale > 2.5 ? 50 : 24,
 		flexDirection: 'column',
-		alignItems: 'center',
+		alignItems: 'center'
 	},
 	header: {
 		paddingTop: 16,
-		fontSize: scale > 2.5 ? 44 : 32,
+		fontSize: scale > 2.5 ? 44 : 32
 	},
 	inputContainer: {
 		width: '90%',
 		maxWidth: 400,
-		marginVertical: 8,
+		marginVertical: 8
 	},
 	input: {
 		fontSize: scale > 2.5 ? 24 : 16,
-		height: scale > 2.5 ? 64 : 55,
+		height: scale > 2.5 ? 64 : 55
 	},
 	errorContainer: {
 		width: '90%',
-		maxWidth: 400,
+		maxWidth: 400
 	},
 	linkContainer: {
 		alignItems: 'flex-start',
 		width: '90%',
-		marginBottom: 16,
-	},
+		marginBottom: 16
+	}
 });
 
 export default withTheme(LogInScreen);

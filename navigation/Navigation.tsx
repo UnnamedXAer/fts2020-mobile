@@ -337,46 +337,48 @@ const AppNavigationContainer = () => {
 	] = useState<null | ProviderDisplayName>(null);
 	const dispatch = useDispatch();
 
-	const linkHandler = useCallback((url: string | null) => {
-		console.log(url);
-		if (url) {
-			let match = url.match(/\/--[\/]invitations\/[a-z0-9-]+/);
-			if (match?.index && match.index > -1) {
-				const token = match[0].substring(
-					match[0].lastIndexOf('/') + 1,
-					url.length
-				);
+	const linkHandler = useCallback(
+		(url: string | null) => {
+			if (url) {
+				let match = url.match(/\/--[\/]invitations\/[a-z0-9-]+/);
+				if (match?.index && match.index > -1) {
+					const token = match[0].substring(
+						match[0].lastIndexOf('/') + 1,
+						url.length
+					);
 
-				dispatch(
-					setRedirectTo({
-						screen: 'InvitationsStack',
-						params: {
-							screen: 'InvitationDetails',
+					dispatch(
+						setRedirectTo({
+							screen: 'InvitationsStack',
 							params: {
-								token,
-								openedByLink: true
+								screen: 'InvitationDetails',
+								params: {
+									token,
+									openedByLink: true
+								}
 							}
-						}
-					})
-				);
-			}
-
-			match = url.match(/\/--[\/]auth\/success\/(github|google)/);
-			if (match?.index && match.index > -1) {
-				const provider = match[1];
-				switch (provider) {
-					case 'github':
-						setOpenedByExternalProvider('GitHub');
-						break;
-					case 'Google':
-						setOpenedByExternalProvider('Google');
-					default:
-						break;
+						})
+					);
 				}
-				return;
+
+				match = url.match(/\/--[\/]auth\/success\/(github|google)/);
+				if (match?.index && match.index > -1) {
+					const provider = match[1];
+					switch (provider) {
+						case 'github':
+							setOpenedByExternalProvider('GitHub');
+							break;
+						case 'google':
+							setOpenedByExternalProvider('Google');
+						default:
+							break;
+					}
+					return;
+				}
 			}
-		}
-	}, []);
+		},
+		[dispatch]
+	);
 
 	useEffect(() => {
 		const checkInitialUrl = async () => {
@@ -411,7 +413,6 @@ const AppNavigationContainer = () => {
 			dispatch(setAppLoading(false));
 		}
 	}, [loggedUser, dispatch]);
-
 	return (
 		<NavigationContainer
 			theme={navigationContainerTheme}

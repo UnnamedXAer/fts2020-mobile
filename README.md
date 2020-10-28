@@ -1,4 +1,4 @@
-## ![alt text](https://fts2020-api.herokuapp.com/assets/screen/logo_64.png) FTS2020 Mobile
+## ![logo](https://fts2020-api.herokuapp.com/assets/screen/logo_64.png) FTS2020 Mobile
 
 #### Keep track of your flat task schedule.
 
@@ -41,10 +41,6 @@
 ---
 
 -   ![Add task screen 3](https://fts2020-api.herokuapp.com/assets/screen/add_task3_mobile.png)
-
----
-
--   ![User tasks](https://fts2020-api.herokuapp.com/assets/screen/your_tasks.png)
 
 ---
 

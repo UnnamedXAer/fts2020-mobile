@@ -10,7 +10,9 @@ import AppLoading from 'expo-app-loading';
 export default function App() {
 	const [loading, setLoading] = useState(true);
 
-	const init = async () => {};
+	const init = () => {
+		setLoading(true);
+	};
 
 	useEffect(() => {
 		init();
